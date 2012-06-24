@@ -1,0 +1,49 @@
+#!/usr/bin/perl
+
+use v5.14;
+use strict;
+use warnings;
+
+use open qw/:encoding(UTF-8) :std/;
+use warnings qw/FATAL utf8/;
+use utf8;
+
+use Getopt::Long;
+use TenorSAX::Output::Text;
+use TenorSAX::Source::Troff;
+use XML::SAX::Writer;
+
+my $options = {
+	device => 'xml',
+};
+my $p = Getopt::Long::Parser->new();
+$p->configure('no_ignore_case', 'bundling');
+$p->getoptions($options,
+	'device|T=s'
+);
+
+my $output;
+if ($options->{device} eq 'text') {
+	$output = TenorSAX::Output::Text->new();
+}
+else {
+	$output = XML::SAX::Writer->new();
+}
+my $parser = TenorSAX::Source::Troff->new(Handler => $output);
+
+my $data = "";
+if (@ARGV) {
+	foreach my $file (@ARGV) {
+		local $/;
+		open(my $fh, '<', $file) or die "Can't open file '$file': $!";
+		$data .= ".do tenorsax filename \"$file\"\n";
+		$data .= <$fh>;
+		close($fh) or die "Can't close file '$file': $!";
+	}
+}
+else {
+	local $/;
+	$data = <STDIN>;
+}
+
+$parser->parse_string($data);
