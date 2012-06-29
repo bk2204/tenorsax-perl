@@ -130,7 +130,7 @@ sub _do_request {
 	my $args = [];
 
 	# Treat the last argument specially; it consumes the entire string.
-	for (my $i = 0; $i < $request->max_args - 1; $i++) {
+	for (my $i = 0; $i < $request->max_args - 1 && $line; $i++) {
 		my $argtype = $request->arg_type->[$i] //
 			'TenorSAX::Source::Troff::Argument';
 		my $arg = $argtype->parse($request, \$line);
