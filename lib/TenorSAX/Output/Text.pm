@@ -9,6 +9,7 @@ use utf8;
 use feature qw/unicode_strings/;
 
 use Moose;
+use Scalar::Util;
 
 has '_output' => (
 	is => 'rw',
@@ -48,7 +49,7 @@ sub start_document {
 sub end_document {
 	my ($self, @args) = @_;
 
-	if ($self->_output->can('finalize')) {
+	if (blessed $self->_output && $self->_output->can('finalize')) {
 		$self->_output->finalize();
 	}
 }
