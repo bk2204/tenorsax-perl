@@ -16,6 +16,9 @@ has '_output' => (
 	default => sub { \*STDOUT },
 	init_arg => 'Output',
 );
+has '_print' => (
+	is => 'rw'
+);
 
 =head1 NAME
 
@@ -72,8 +75,9 @@ sub end_prefix_mapping {
 
 sub characters {
 	my ($self, $ref) = @_;
+	my $method = $self->_print;
 
-	$self->_do_output($ref->{Data} // '');
+	$self->$method($ref->{Data} // '');
 }
 
 sub ignorable_whitespace {
@@ -92,24 +96,50 @@ sub _setup_output {
 		open(my $fh, '>', $filename) or
 			die "Can't open $filename for writing: $!";
 		$self->_output = $fh;
+		$self->_print(\&_do_output_fh);
+	}
+	elsif (ref $self->_output eq 'ARRAY') {
+		$self->_print(\&_do_output_push);
+	}
+	elsif (ref $self->_output eq 'SCALAR') {
+		$self->_print(\&_do_output_scalar);
+	}
+	elsif ($self->_output->can('output')) {
+		$self->_print(\&_do_output_method);
+	}
+	else {
+		$self->_print(\&_do_output_print);
 	}
 }
 
-sub _do_output {
+sub _do_output_fh {
 	my ($self, $text) = @_;
 
-	if (ref $self->_output eq 'ARRAY') {
-		push $self->_output, $text;
-	}
-	elsif (ref $self->_output eq 'SCALAR') {
-		${$self->_output} .= $text;
-	}
-	elsif ($self->_output->can('output')) {
-		$self->_output->output($text);
-	}
-	else {
-		$self->_output->print($text);
-	}
+	print {$self->_output} $text;
+}
+
+sub _do_output_push {
+	my ($self, $text) = @_;
+
+	push $self->_output, $text;
+}
+
+sub _do_output_scalar {
+	my ($self, $text) = @_;
+
+	${$self->_output} .= $text;
+}
+
+sub _do_output_method {
+	my ($self, $text) = @_;
+
+	$self->_output->output($text);
+}
+
+sub _do_output_print {
+	my ($self, $text) = @_;
+
+	$self->_output->print($text);
 }
 
 =head1 AUTHOR
