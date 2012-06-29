@@ -15,6 +15,7 @@ use namespace::autoclean;
 use TenorSAX::Source::Troff::Argument;
 use TenorSAX::Source::Troff::Environment;
 use TenorSAX::Source::Troff::Request;
+use TenorSAX::Source::Troff::Request::Implementation;
 use TenorSAX::Util::FancyContentHandler;
 
 extends 'XML::SAX::Base';
@@ -109,6 +110,7 @@ sub _setup {
 			}
 		)
 	);
+	$self->_requests(TenorSAX::Source::Troff::Request::Implementation->requests());
 }
 
 sub _parse_string {
