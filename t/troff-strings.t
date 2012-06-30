@@ -1,6 +1,6 @@
 #!perl -T
 
-use Test::More tests => 4;
+use Test::More tests => 16;
 use TenorSAX::Source::Troff;
 use TenorSAX::Output::Text;
 
@@ -17,9 +17,24 @@ sub run {
 	return $text;
 }
 
+my @tests = (
+	['S', '.S', '\\*S'],
+	['ST', '.ST', '\\*(ST'],
+);
 
-is(run(".ds ST text\n.ST\n"), "text", "ds - can define and call a string");
-is(run(qq{.ds ST "text"\n.ST\n}), 'text"', "ds - handles final quote okay");
-is(run(qq{.ds ST "Have a nice day!\n.ST\n}), 'Have a nice day!',
-	"ds - handles complex text okay");
-is(run(qq{.ds ST\n.ST\n}), '', "ds - handles missing argument okay");
+foreach my $test (@tests) {
+	my ($name, $req, $esc) = @$test;
+
+	foreach my $x (qw/call eval/) {
+		my $eval = $x eq "call" ? $req : $esc;
+
+		is(run(".ds $name text\n$eval\n"), "text",
+			"ds - $name - can define and $x a string");
+		is(run(qq{.ds $name "text"\n$eval\n}), 'text"',
+			"ds - $name - handles final quote okay in $x");
+		is(run(qq{.ds $name "Have a nice day!\n$eval\n}), 'Have a nice day!',
+			"ds - $name - handles complex text okay in $x");
+		is(run(qq{.ds $name\n$eval\n}), '',
+			"ds - $name - handles missing argument okay in $x");
+	}
+}

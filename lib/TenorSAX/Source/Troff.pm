@@ -7,6 +7,7 @@ use warnings;
 use warnings qw/FATAL utf8/;
 use utf8;
 use feature qw/unicode_strings/;
+use re '/u';
 
 use Moose;
 use MooseX::NonMoose;
@@ -131,6 +132,34 @@ sub _parse_string {
 	$self->_do_parse();
 }
 
+sub _expand {
+	my $self = shift;
+	my $text = shift;
+	my $opts = shift || {};
+	my $compat = $opts->{compat};
+	my $copy = $self->_copy->{enabled}; # copy mode
+	my $args = [];
+	my $state = {parser => $self, environment => $self->_env};
+
+	$opts->{return} = 1;
+
+	# Temporarily save doubled backslashes.
+	$text =~ s/\\\\/\x{102204}/g;
+	$text =~ s/\\t/\t/g;
+	$text =~ s/\\a/\x{1}/ge;
+
+	# The more complex forms are first because \X will match a ( or [.
+	my $strpat = $compat ? qr/\\\*(\((\X{2})|(\X))/ :
+		qr/\\\*(\((\X{2})|\[(\X*?)\]|(\X))/;
+	$text =~ s{$strpat}
+		{$self->_lookup_request($2 || $3 || $4)->perform($state, $args)||''}ge;
+
+	# Turn doubled backslashes into regular ones.
+	$text =~ s/\x{102204}/\\/g;
+
+	return $text;
+}
+
 sub _do_request {
 	my $self = shift;
 	my $request = shift;
@@ -143,7 +172,7 @@ sub _do_request {
 		my $argtype = $request->arg_type->[$i] //
 			'TenorSAX::Source::Troff::Argument';
 		my $arg = $argtype->parse($request, \$line);
-		push @$args, $arg;
+		push @$args, $self->_expand($arg);
 	}
 
 	my $text = $request->perform($state, $args);
@@ -232,19 +261,18 @@ sub _parse_line {
 
 sub _do_text_line {
 	my $self = shift;
-	my $line = shift;
+	my $line = $self->_expand(shift);
 
 	if (!length $line) {
 		# FIXME: don't depend on .br not being redefined.
 		my $request = $self->_lookup_request("br");
 		my $opts = {can_break => 1};
-		return $self->_do_request($opts, $request, $line);
+		return $self->_do_request($request, $opts);
 	}
 	elsif ($self->_copy->{enabled}) {
 		$self->_copy->{data} .= "$line\n";
 	}
 	else {
-		# TODO: process this.
 		$self->_ch->characters({Data => "$line\n"});
 	}
 };
