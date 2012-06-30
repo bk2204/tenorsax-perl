@@ -23,6 +23,25 @@ sub parse {
 	return $1;
 }
 
+package TenorSAX::Source::Troff::FinalStringArgument;
+
+use Moose;
+
+extends 'TenorSAX::Source::Troff::Argument';
+
+sub parse {
+	my ($class, undef, $lineref) = @_;
+	my $arg;
+
+	if ($$lineref =~ s/^"(.*)$//u) {
+		$arg = $1;
+		$arg =~ s/""/"/g;
+		return $arg;
+	}
+	$$lineref =~ s/^(\X*?)$//u;
+	return $1;
+}
+
 package TenorSAX::Source::Troff::NumericArgument;
 
 use Moose;

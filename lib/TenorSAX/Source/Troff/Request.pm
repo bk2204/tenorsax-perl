@@ -10,26 +10,14 @@ use feature qw/unicode_strings/;
 
 use Moose;
 
-has 'max_args' => (
-	isa => 'Int',
-	is => 'rw',
-	default => 99999,
-);
-has 'code' => (
-	isa => 'CodeRef',
-	is => 'rw',
-	default => sub { sub {} },
-);
-has 'arg_type' => (
-	isa => 'ArrayRef[Str]',
-	is => 'rw',
-	default => sub { [] },
-);
-has 'disable_compat' => (
-	isa => 'Bool',
-	is => 'rw',
-	default => 0,
-);
+extends 'TenorSAX::Source::Troff::Stringy';
+
+sub perform {
+	my ($self, @args) = @_;
+	my $ref = $self->code;
+
+	$self->$ref(@args);
+}
 
 =head1 NAME
 

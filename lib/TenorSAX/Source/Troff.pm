@@ -33,7 +33,7 @@ has '_data' => (
 	init_arg => undef,
 );
 has '_requests' => (
-	isa => 'HashRef[TenorSAX::Source::Troff::Request]',
+	isa => 'HashRef[TenorSAX::Source::Troff::Stringy]',
 	is => 'rw',
 	default => sub { {} },
 	init_arg => undef,
@@ -130,14 +130,17 @@ sub _do_request {
 	my $opts = shift;
 	my $line = shift;
 	my $args = [];
+	my $state = {parser => $self};
 
-	# Treat the last argument specially; it consumes the entire string.
-	for (my $i = 0; $i < $request->max_args - 1 && $line; $i++) {
+	for (my $i = 0; $i < $request->max_args && $line; $i++) {
 		my $argtype = $request->arg_type->[$i] //
 			'TenorSAX::Source::Troff::Argument';
 		my $arg = $argtype->parse($request, \$line);
 		push @$args, $arg;
 	}
+
+	my $text = $request->perform($state, $args);
+	$self->_ch->characters({Data => $text}) if defined $text;
 }
 
 sub _lookup_request {
