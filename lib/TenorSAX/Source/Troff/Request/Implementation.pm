@@ -21,10 +21,7 @@ my $requests = [
 			my $cc = $state->{environment}->cc;
 			my $name = $args->[0] or return;
 			my $end = $args->[1] // $cc;
-
-			$state->{parser}->_copy_until(qr/^\Q$cc$end\E/);
-
-			my $text = $state->{parser}->_copy->{data};
+			my $text = $state->{parser}->_copy_until(qr/^\Q$cc$end\E/);
 
 			$state->{parser}->_requests->{$name} =
 				TenorSAX::Source::Troff::Macro->new(text => $text);
