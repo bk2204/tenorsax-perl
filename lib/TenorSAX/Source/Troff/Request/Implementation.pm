@@ -44,6 +44,17 @@ my $requests = [
 			return;
 		}
 	},
+	{
+		name => 'rm',
+		arg_types => [''],
+		code => sub {
+			my ($self, $state, $args) = @_;
+			my $name = $args->[0] or return;
+
+			delete $state->{parser}->_requests->{$name};
+			return;
+		}
+	},
 ];
 
 sub make_request {

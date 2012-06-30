@@ -1,6 +1,6 @@
 #!perl -T
 
-use Test::More tests => 4;
+use Test::More tests => 7;
 use TenorSAX::Source::Troff;
 use TenorSAX::Output::Text;
 
@@ -38,3 +38,9 @@ like(run("$aa.ds BB BB. \n.AA\n"), qr/Before.\s+BB.\s+After/ms,
 		"de - can call a string from within a macro");
 like(run(".ds BB CC\n$aa.ds BB BB. \n.AA\n"), qr/Before.\s+BB.\s+After/ms,
 		"de - calls are delayed until macro runtime");
+
+is(run("$bb.rm BB\n.BB\n"), '', "rm - can remove a macro");
+like(run("$aa$bb.rm BB\n.AA\n"), qr/Before.\s+After/ms,
+		"rm - removed macro does not persist in other macros");
+is(run("$aa$bb.rm BB\n.AA\n"), run("$aa.AA"),
+		"rm - removed macro treated like nonexistent macro");
