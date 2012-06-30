@@ -12,11 +12,6 @@ use Moose;
 
 extends 'TenorSAX::Source::Troff::Stringy';
 
-has 'text' => (
-	isa => 'Str',
-	is => 'rw',
-);
-
 sub perform {
 	my ($self, @args) = @_;
 	my $ref = $self->code;
