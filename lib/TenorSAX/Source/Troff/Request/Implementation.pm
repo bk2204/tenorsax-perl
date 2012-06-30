@@ -8,10 +8,29 @@ use warnings qw/FATAL utf8/;
 use utf8;
 
 use Moose;
+use TenorSAX::Source::Troff::Macro;
 use TenorSAX::Source::Troff::Request;
 use TenorSAX::Source::Troff::String;
 
 my $requests = [
+	{
+		name => 'de',
+		arg_types => [''],
+		code => sub {
+			my ($self, $state, $args) = @_;
+			my $cc = $state->{environment}->cc;
+			my $name = $args->[0] or return;
+			my $end = $args->[1] // $cc;
+
+			$state->{parser}->_copy_until(qr/^\Q$cc$end\E/);
+
+			my $text = $state->{parser}->_copy->{data};
+
+			$state->{parser}->_requests->{$name} =
+				TenorSAX::Source::Troff::Macro->new(text => $text);
+			return;
+		}
+	},
 	{
 		name => 'ds',
 		arg_types => ['', 'FinalString'],

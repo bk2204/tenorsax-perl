@@ -60,6 +60,13 @@ has '_env' => (
 	default => sub { TenorSAX::Source::Troff::Environment->new(); },
 	init_arg => undef,
 );
+# For copy mode.
+has '_copy' => (
+	isa => 'HashRef',
+	is => 'rw',
+	default => sub { {enabled => 0} },
+	init_arg => undef,
+);
 
 =head1 NAME
 
@@ -130,7 +137,7 @@ sub _do_request {
 	my $opts = shift;
 	my $line = shift;
 	my $args = [];
-	my $state = {parser => $self};
+	my $state = {parser => $self, environment => $self->_env};
 
 	for (my $i = 0; $i < $request->max_args && $line; $i++) {
 		my $argtype = $request->arg_type->[$i] //
@@ -154,13 +161,42 @@ sub _lookup_request {
 	return $table->{$request};
 }
 
+sub _copy_until {
+	my $self = shift;
+	my $pattern = shift;
+	my $data = "";
+
+	$self->_copy->{enabled} = 1;
+	$self->_copy->{pattern} = $pattern;
+	$self->_copy->{data} = "";
+
+	local $1;
+	while (@{$self->_data} && $self->_copy->{enabled}) {
+		my $line = shift @{$self->_data};
+
+		if ($self->_compat) {
+			$self->_parse_line_compat($line);
+		}
+		else {
+			$self->_parse_line($line);
+		}
+	}
+	return $self->_copy->{data};
+}
+
 sub _parse_line_compat {
 	my $self = shift;
 	my $line = shift;
 	my $controls = $self->_env->cc . $self->_env->c2;
 	my $opts = {compat => 1};
 
-	if ($line =~ s/^([$controls])(\X{0,2}?)([ \t]+|$)//u || 
+	if ($self->_copy->{enabled} && $line =~ $self->_copy->{pattern}) {
+		$self->_copy->{enabled} = 0;
+	}
+	elsif ($self->_copy->{enabled}) {
+		$self->_do_text_line($line);
+	}
+	elsif ($line =~ s/^([$controls])(\X{0,2}?)([ \t]+|$)//u ||
 		$line =~ s/^([$controls])(\X{2}?)(\X+|$)//u) {
 		my $request = $self->_lookup_request($2);
 		$opts->{can_break} = $1 eq $self->_env->cc;
@@ -178,7 +214,13 @@ sub _parse_line {
 	my $controls = $self->_env->cc . $self->_env->c2;
 	my $opts = {compat => 1};
 
-	if ($line =~ s/^([$controls])(\X*?)([ \t]+|$)//u) {
+	if ($self->_copy->{enabled} && $line =~ $self->_copy->{pattern}) {
+		$self->_copy->{enabled} = 0;
+	}
+	elsif ($self->_copy->{enabled}) {
+		$self->_do_text_line($line);
+	}
+	elsif ($line =~ s/^([$controls])(\X*?)([ \t]+|$)//u) {
 		my $request = $self->_lookup_request($2);
 		$opts->{can_break} = $1 eq $self->_env->cc;
 		$self->_do_request($request, $opts, $line);
@@ -198,8 +240,13 @@ sub _do_text_line {
 		my $opts = {can_break => 1};
 		return $self->_do_request($opts, $request, $line);
 	}
-	# TODO: process this.
-	$self->_ch->characters({Data => "$line\n"});
+	elsif ($self->_copy->{enabled}) {
+		$self->_copy->{data} .= "$line\n";
+	}
+	else {
+		# TODO: process this.
+		$self->_ch->characters({Data => "$line\n"});
+	}
 };
 
 sub _lookup_prefix {
