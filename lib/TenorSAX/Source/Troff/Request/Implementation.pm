@@ -15,7 +15,7 @@ use TenorSAX::Source::Troff::String;
 my $requests = [
 	{
 		name => 'de',
-		arg_types => [''],
+		arg_types => ['', ''],
 		code => sub {
 			my ($self, $state, $args) = @_;
 			my $cc = $state->{environment}->cc;
