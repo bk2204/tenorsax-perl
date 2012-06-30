@@ -168,7 +168,7 @@ sub _do_request {
 	my $args = [];
 	my $state = {parser => $self, environment => $self->_env};
 
-	for (my $i = 0; $i < $request->max_args && $line; $i++) {
+	for (my $i = 0; $i < $request->max_args && length $line; $i++) {
 		my $argtype = $request->arg_type->[$i] //
 			'TenorSAX::Source::Troff::Argument';
 		my $arg = $argtype->parse($request, \$line);

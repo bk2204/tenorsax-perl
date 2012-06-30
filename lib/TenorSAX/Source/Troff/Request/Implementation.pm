@@ -14,6 +14,19 @@ use TenorSAX::Source::Troff::String;
 
 my $requests = [
 	{
+		name => 'cp',
+		arg_types => ['Numeric'],
+		code => sub {
+			my ($self, $state, $args) = @_;
+			my $value = $args->[0];
+
+			return unless defined $value;
+
+			$state->{parser}->_compat($value);
+			return;
+		}
+	},
+	{
 		name => 'de',
 		arg_types => ['', ''],
 		code => sub {
