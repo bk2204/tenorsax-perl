@@ -45,6 +45,18 @@ my $requests = [
 		}
 	},
 	{
+		name => 'ig',
+		arg_types => [''],
+		code => sub {
+			my ($self, $state, $args) = @_;
+			my $cc = $state->{environment}->cc;
+			my $end = $args->[0] // $cc;
+
+			$state->{parser}->_copy_until(qr/^\Q$cc$end\E/);
+			return;
+		}
+	},
+	{
 		name => 'rm',
 		arg_types => [''],
 		code => sub {
