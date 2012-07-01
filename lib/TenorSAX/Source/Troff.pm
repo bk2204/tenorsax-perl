@@ -39,6 +39,12 @@ has '_requests' => (
 	default => sub { {} },
 	init_arg => undef,
 );
+has '_numbers' => (
+	isa => 'HashRef[TenorSAX::Source::Troff::Numerical]',
+	is => 'rw',
+	default => sub { {} },
+	init_arg => undef,
+);
 has '_ch' => (
 	is => 'rw',
 	init_arg => 'Handler',
@@ -149,6 +155,10 @@ sub _expand {
 	$text =~ s/\\a/\x{1}/ge;
 
 	# The more complex forms are first because \X will match a ( or [.
+	my $numpat = $compat ? qr/\\n(\((\X{2})|(\X))/ :
+		qr/\\n(\((\X{2})|\[(\X*?)\]|(\X))/;
+	$text =~ s{$numpat}{$self->_lookup_number($2 || $3 || $4)->format()}ge;
+
 	my $strpat = $compat ? qr/\\\*(\((\X{2})|(\X))/ :
 		qr/\\\*(\((\X{2})|\[(\X*?)\]|(\X))/;
 	$text =~ s{$strpat}
@@ -179,15 +189,29 @@ sub _do_request {
 	$self->_ch->characters({Data => $text}) if defined $text;
 }
 
+sub _lookup {
+	my ($self, $name, $table, $type) = @_;
+
+	if (!exists $table->{$name}) {
+		$table->{$name} = $type->new();
+	}
+	return $table->{$name};
+}
+
 sub _lookup_request {
 	my $self = shift;
-	my $request = shift;
-	my $table = $self->_requests;
+	my $name = shift;
 
-	if (!exists $table->{$request}) {
-		$table->{$request} = TenorSAX::Source::Troff::Request->new();
-	}
-	return $table->{$request};
+	return $self->_lookup($name, $self->_requests,
+		'TenorSAX::Source::Troff::Request');
+}
+
+sub _lookup_number {
+	my $self = shift;
+	my $name = shift;
+
+	return $self->_lookup($name, $self->_numbers,
+		'TenorSAX::Source::Troff::Number');
 }
 
 sub _copy_until {

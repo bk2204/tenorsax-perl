@@ -9,6 +9,7 @@ use utf8;
 
 use Moose;
 use TenorSAX::Source::Troff::Macro;
+use TenorSAX::Source::Troff::Number;
 use TenorSAX::Source::Troff::Request;
 use TenorSAX::Source::Troff::String;
 
@@ -63,6 +64,25 @@ my $requests = [
 			my $end = $args->[0] // $cc;
 
 			$state->{parser}->_copy_until(qr/^\Q$cc$end\E/);
+			return;
+		}
+	},
+	{
+		name => 'nr',
+		arg_types => ['', 'Numeric'],
+		code => sub {
+			my ($self, $state, $args) = @_;
+			my $name = $args->[0] or return;
+			my $value = $args->[1] // '';
+			my $existing = $state->{parser}->_numbers->{$name};
+
+			return if defined $existing && $existing->immutable;
+
+			eval {
+				$state->{parser}->_numbers->{$name} =
+					TenorSAX::Source::Troff::Number->new(value => $value);
+			};
+			return if $@;
 			return;
 		}
 	},
