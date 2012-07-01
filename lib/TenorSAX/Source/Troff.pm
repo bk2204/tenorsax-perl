@@ -296,7 +296,7 @@ sub _lookup_prefix {
 	return $result;
 }
 
-sub _lookup_attribute{
+sub _lookup_attribute {
 	my ($self, $qname, $value) = @_;
 	my $result = $self->_lookup_prefix($qname);
 
@@ -304,7 +304,7 @@ sub _lookup_attribute{
 	return $result;
 }
 
-sub _lookup_element{
+sub _lookup_element {
 	my $self = shift;
 	my $qname = shift;
 	my $attributes = shift // {};
