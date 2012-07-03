@@ -182,7 +182,7 @@ sub _do_request {
 		my $argtype = $request->arg_type->[$i] //
 			'TenorSAX::Source::Troff::Argument';
 		my $arg = $argtype->parse($request, \$line);
-		push @$args, $self->_expand($arg);
+		push @$args, $argtype->evaluate($request, $state, $self->_expand($arg));
 	}
 
 	my $text = $request->perform($state, $args);
