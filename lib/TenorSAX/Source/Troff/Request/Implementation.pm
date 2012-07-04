@@ -56,6 +56,18 @@ my $requests = [
 		}
 	},
 	{
+		name => 'ex',
+		arg_types => [],
+		code => sub {
+			my ($self, $state, $args) = @_;
+
+			# From the manual:
+			# Text processing is terminated exactly as if all input had ended.
+			$state->{parser}->_data([]);
+			return;
+		}
+	},
+	{
 		name => 'ig',
 		arg_types => [''],
 		code => sub {
