@@ -85,15 +85,6 @@ sub parse {
 	return $1;
 }
 
-sub _next_number {
-	my ($class, undef, $state, $ref) = @_;
-
-	if ($$ref =~ s/^([0-9]+(\.[0-9]+)?)//) {
-		return $1 + 0;
-	}
-	return $class->evaluate(undef, $state, $ref);
-}
-
 # All the escapes have already been expanded by now.
 sub evaluate {
 	my ($class, undef, $state, $arg) = @_;
