@@ -13,15 +13,6 @@ use Scalar::Util;
 
 extends 'TenorSAX::Output::LayoutEngine';
 
-has '_output' => (
-	is => 'rw',
-	default => sub { \*STDOUT },
-	init_arg => 'Output',
-);
-has '_print' => (
-	is => 'rw'
-);
-
 =head1 NAME
 
 TenorSAX::Output::Terminal - The great new TenorSAX::Source::Troff!
@@ -57,20 +48,18 @@ sub _line_length {
 sub _do_line {
 	my ($self, $chunks) = @_;
 	my $text = join('', map { $_->{text} } @$chunks) . "\n";
-	my $method = $self->_print;
 
-	$self->$method($text);
+	$self->_print($text);
 }
 
 sub end_element {
 	my ($self, $element) = @_;
-	my $method = $self->_print;
 
 	$self->SUPER::end_element($element);
 	if ($element->{NamespaceURI} eq $TROFF_NS &&
 		$element->{LocalName} eq "block") {
 
-		$self->$method("\n");
+		$self->_print("\n");
 	}
 }
 

@@ -16,7 +16,7 @@ has '_output' => (
 	default => sub { \*STDOUT },
 	init_arg => 'Output',
 );
-has '_print' => (
+has '_print_func' => (
 	is => 'rw'
 );
 has '_resolution' => (
@@ -187,6 +187,13 @@ sub processing_instruction {
 	my ($self, @args) = @_;
 }
 
+sub _print {
+	my ($self, @args) = @_;;
+	my $method = $self->_print_func;
+
+	$self->$method(@args);
+}
+
 sub _setup_output {
 	my ($self) = @_;
 
@@ -195,19 +202,19 @@ sub _setup_output {
 		open(my $fh, '>', $filename) or
 			die "Can't open $filename for writing: $!";
 		$self->_output = $fh;
-		$self->_print(\&_do_output_fh);
+		$self->_print_func(\&_do_output_fh);
 	}
 	elsif (ref $self->_output eq 'ARRAY') {
-		$self->_print(\&_do_output_push);
+		$self->_print_func(\&_do_output_push);
 	}
 	elsif (ref $self->_output eq 'SCALAR') {
-		$self->_print(\&_do_output_scalar);
+		$self->_print_func(\&_do_output_scalar);
 	}
 	elsif ($self->_output->can('output')) {
-		$self->_print(\&_do_output_method);
+		$self->_print_func(\&_do_output_method);
 	}
 	else {
-		$self->_print(\&_do_output_print);
+		$self->_print_func(\&_do_output_print);
 	}
 }
 
