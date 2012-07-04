@@ -381,6 +381,7 @@ sub _do_parse {
 		);
 	}
 	$self->_ch->start_element($self->_lookup_element('t:main'));
+	$self->_ch->start_element($self->_lookup_element('t:block'));
 
 	while (@{$self->_data}) {
 		my $line = shift @{$self->_data};
@@ -393,6 +394,7 @@ sub _do_parse {
 		}
 	}
 
+	$self->_ch->end_element($self->_lookup_element('t:block'));
 	$self->_ch->end_element($self->_lookup_element('t:main'));
 	foreach my $prefix (keys %prefixes) {
 		$self->_ch->end_prefix_mapping(
