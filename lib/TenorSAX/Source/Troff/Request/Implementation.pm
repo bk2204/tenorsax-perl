@@ -15,6 +15,21 @@ use TenorSAX::Source::Troff::String;
 
 my $requests = [
 	{
+		name => 'br',
+		arg_types => [],
+		code => sub {
+			my ($self, $state, $args) = @_;
+			my $p = $state->{parser};
+
+			if ($state->{opts}->{can_break}) {
+				$p->_ch->start_element($p->_lookup_element('t:block'));
+				$p->_ch->end_element($p->_lookup_element('t:block'));
+			}
+
+			return;
+		}
+	},
+	{
 		name => 'cp',
 		arg_types => ['Numeric'],
 		code => sub {

@@ -183,7 +183,7 @@ sub _do_request {
 	my $opts = shift;
 	my $line = shift;
 	my $args = [];
-	my $state = {parser => $self, environment => $self->_env};
+	my $state = {parser => $self, environment => $self->_env, opts => $opts};
 
 	for (my $i = 0; $i < $request->max_args && length $line; $i++) {
 		my $argtype = $request->arg_type->[$i] //
@@ -274,7 +274,7 @@ sub _parse_line_compat {
 	elsif ($line =~ s/^([$controls])(\X{0,2}?)([ \t]+|$)//u ||
 		$line =~ s/^([$controls])(\X{2}?)(\X+|$)//u) {
 		my $request = $self->_lookup_request($2);
-		$opts->{can_break} = $1 eq $self->_env->cc;
+		$opts->{can_break} = 1 eq $self->_env->cc;
 		$opts->{compat} = 0 if $request->disable_compat;
 		$self->_do_request($request, $opts, $line);
 	}
@@ -297,7 +297,7 @@ sub _parse_line {
 	}
 	elsif ($line =~ s/^([$controls])(\X*?)([ \t]+|$)//u) {
 		my $request = $self->_lookup_request($2);
-		$opts->{can_break} = $1 eq $self->_env->cc;
+		$opts->{can_break} = 1 eq $self->_env->cc;
 		$self->_do_request($request, $opts, $line);
 	}
 	else {
