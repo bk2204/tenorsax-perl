@@ -9,7 +9,6 @@ use warnings qw/FATAL utf8/;
 use utf8;
 
 use Getopt::Long;
-use TenorSAX::Output::Text;
 use TenorSAX::Source::Troff;
 use XML::SAX::Writer;
 
@@ -23,11 +22,19 @@ $p->getoptions($options,
 );
 
 my $output;
-if ($options->{device} eq 'text') {
-	$output = TenorSAX::Output::Text->new();
-}
-else {
-	$output = XML::SAX::Writer->new();
+given ($options->{device}) {
+	when (/^text$/) {
+		require TenorSAX::Output::Text;
+		$output = TenorSAX::Output::Text->new();
+	}
+	when (/^utf8/) {
+		require TenorSAX::Output::Terminal;
+		$output = TenorSAX::Output::Terminal->new();
+	}
+	default {
+		require XML::SAX::Writer;
+		$output = XML::SAX::Writer->new();
+	}
 }
 my $parser = TenorSAX::Source::Troff->new(Handler => $output);
 
