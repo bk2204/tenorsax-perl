@@ -17,7 +17,6 @@ sub run_test {
 .ie d$request implemented
 .el missing
 EOM
-	diag $code;
 	$parser->parse_string($code);
 	$text =~ s/\n\z//;
 	is($text, "implemented", "request $request is implemented");
