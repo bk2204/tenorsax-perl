@@ -67,6 +67,13 @@ has '_env' => (
 	default => sub { TenorSAX::Source::Troff::Environment->new(); },
 	init_arg => undef,
 );
+# Previous condition.
+has '_condition' => (
+	isa => 'Bool',
+	is => 'rw',
+	default => 1,
+	init_arg => undef,
+);
 # For copy mode.
 has '_copy' => (
 	isa => 'HashRef',
@@ -212,6 +219,21 @@ sub _lookup_number {
 
 	return $self->_lookup($name, $self->_numbers,
 		'TenorSAX::Source::Troff::Number');
+}
+
+sub _copy_conditional {
+	my $self = shift;
+	my $data = "";
+
+	while (@{$self->_data}) {
+		my $line = shift @{$self->_data};
+		if ($line =~ m/^(\X*)\\\}/) {
+			return "$data$1";
+		}
+
+		$data .= "$line\n";
+	}
+	return $data;
 }
 
 sub _copy_until {

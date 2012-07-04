@@ -163,5 +163,85 @@ sub _evaluate {
 	return $value;
 }
 
+package TenorSAX::Source::Troff::ConditionalArgument;
+
+use Moose;
+
+extends 'TenorSAX::Source::Troff::Argument';
+
+sub parse {
+	my ($class, undef, $lineref) = @_;
+	my $arg = "";
+
+	if ($$lineref =~ s/^!//) {
+		$arg = "!";
+	}
+
+	if ($$lineref =~ s/^([oetn])([ \t]+|$)//) {
+		return "$arg$1";
+	}
+
+	if ($$lineref =~ s/^([cdr]\X*?)([ \t]+|$)//) {
+		return "$arg$1";
+	}
+
+	if ($$lineref =~ s/^f//) {
+		$arg .= "f";
+	}
+
+	if ($$lineref =~ m/^[^0-9]/ &&
+		$$lineref =~ s/^((\X)(\X*?)\1(\X*?)\1)([ \t]+|$)//) {
+		return "$arg$1";
+	}
+
+	return $arg . TenorSAX::Source::Troff::NumericArgument->parse($class, undef,
+		$lineref);
+}
+
+sub evaluate {
+	my ($class, undef, $state, $arg) = @_;
+	my $negated = 0;
+
+	if ($arg =~ s/^!//) {
+		$negated = 1;
+	}
+
+	return (($class->_evaluate(undef, $state, $arg) > 0) xor $negated) ? 1 : 0;
+}
+
+sub _evaluate {
+	my ($class, undef, $state, $arg) = @_;
+
+	if ($arg =~ s/^[oe]//) {
+		return 0;
+	}
+
+	# FIXME: add support for troff vs. nroff when we add support for units.
+	if ($arg =~ s/^([tn])//) {
+		return $1 eq 't';
+	}
+
+	if ($arg =~ s/^([cdr])(\X*)//) {
+		my $name = $2;
+		given ($1) {
+			# FIXME: ask the layout engine to look this up for us.
+			when (/c/) {
+				return 1;
+			}
+			when (/d/) {
+				return exists $state->{parser}->_requests->{$name};
+			}
+			when (/r/) {
+				return exists $state->{parser}->_numbers->{$name};
+			}
+		}
+	}
+
+	$arg =~ s/^f//;
+
+	return TenorSAX::Source::Troff::NumericArgument->evaluate($class, undef,
+		$arg);
+}
+
 
 1;

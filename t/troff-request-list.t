@@ -1,6 +1,6 @@
 #!perl -T
 
-use Test::More;
+use Test::More tests => 193;
 use TenorSAX::Source::Troff;
 use TenorSAX::Output::Text;
 
@@ -14,18 +14,27 @@ sub run_test {
 .if ddo \\{
 .if dtenorsax .do tenorsax ext 1
 .\\}
-.de ST
-.ie d\\\\\$1 implemented
+.ie d$request implemented
 .el missing
-.br
-..
-.ST $request
 EOM
+	diag $code;
 	$parser->parse_string($code);
+	$text =~ s/\n\z//;
 	is($text, "implemented", "request $request is implemented");
 }
 
-my @implemented = ();
+my @implemented = qw/
+de
+ds
+rm
+nr
+if
+ie
+el
+ex
+ig
+cp
+/;
 my @unimplemented = qw/
 do
 xflag
@@ -95,16 +104,13 @@ in
 ti
 pshape
 
-de
 am
-ds
 as
 lds
 substring
 length
 index
 chop
-rm
 rn
 di
 da
@@ -127,7 +133,6 @@ blm
 em
 recursionlimit
 
-nr
 nrf
 lnr
 lnrf
@@ -182,8 +187,6 @@ lt
 nm
 nn
 
-if
-ie
 while
 break
 continue
@@ -192,7 +195,6 @@ ev
 evc
 
 rd
-ex
 
 so
 pso
@@ -213,7 +215,6 @@ tm
 tmc
 nop
 ab
-ig
 lf
 pm
 fl
@@ -234,7 +235,6 @@ BP
 EP
 PI
 
-cp
 mso
 
 tenorsax
@@ -242,8 +242,6 @@ namespace
 start
 end
 /;
-
-plan tests => @implemented + @unimplemented;
 
 foreach my $request (@implemented) {
 	run_test($request);

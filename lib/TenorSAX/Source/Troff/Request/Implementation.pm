@@ -56,6 +56,28 @@ my $requests = [
 		}
 	},
 	{
+		name => 'el',
+		arg_types => ['FinalString'],
+		code => sub {
+			my ($self, $state, $args) = @_;
+			my $cond = !$state->{parser}->_condition;
+			my $rest = $args->[0];
+			my $input = "";
+
+			if ($rest =~ m/\\\{(\X*)/) {
+				$input = "$1\n" . $state->{parser}->_copy_conditional();
+			}
+			else {
+				$input = $rest;
+			}
+			unshift @{$state->{parser}->_data}, split /\R/, $input if $cond;
+			# Don't allow stray .el requests.
+			$state->{parser}->_condition(1);
+
+			return;
+		}
+	},
+	{
 		name => 'ex',
 		arg_types => [],
 		code => sub {
@@ -64,6 +86,50 @@ my $requests = [
 			# From the manual:
 			# Text processing is terminated exactly as if all input had ended.
 			$state->{parser}->_data([]);
+			return;
+		}
+	},
+	{
+		name => 'ie',
+		arg_types => ['Conditional', 'FinalString'],
+		code => sub {
+			my ($self, $state, $args) = @_;
+			my $cond = $args->[0];
+			my $rest = $args->[1];
+			my $input = "";
+
+			if ($rest =~ m/\\\{(\X*)/) {
+				$input = "$1\n" . $state->{parser}->_copy_conditional();
+			}
+			else {
+				$input = $rest;
+			}
+			unshift @{$state->{parser}->_data}, split /\R/, $input if $cond;
+			$state->{parser}->_condition($cond);
+
+			return;
+		}
+	},
+	{
+		name => 'if',
+		arg_types => ['Conditional', 'FinalString'],
+		code => sub {
+			my ($self, $state, $args) = @_;
+			my $cond = $args->[0];
+			my $rest = $args->[1];
+			my $input = "";
+
+			if ($rest =~ m/\\\{(\X*)/) {
+				$input = "$1\n" . $state->{parser}->_copy_conditional();
+			}
+			else {
+				$input = $rest;
+			}
+			unshift @{$state->{parser}->_data}, split /\R/, $input if $cond;
+
+			# Don't allow stray .el requests.
+			$state->{parser}->_condition(1);
+
 			return;
 		}
 	},
