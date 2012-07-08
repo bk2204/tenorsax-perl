@@ -49,6 +49,11 @@ has '_ch' => (
 	is => 'rw',
 	init_arg => 'Handler',
 );
+has '_resolution' => (
+	is => 'rw',
+	isa => 'Int',
+	init_arg => 'Resolution',
+);
 has '_compat' => (
 	isa => 'Int',
 	is => 'rw',

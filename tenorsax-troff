@@ -22,6 +22,7 @@ $p->getoptions($options,
 );
 
 my $output;
+my $resolution = 72000;
 given ($options->{device}) {
 	when (/^text$/) {
 		require TenorSAX::Output::Text;
@@ -29,14 +30,16 @@ given ($options->{device}) {
 	}
 	when (/^utf8/) {
 		require TenorSAX::Output::Terminal;
-		$output = TenorSAX::Output::Terminal->new();
+		$resolution = 240;
+		$output = TenorSAX::Output::Terminal->new(Resolution => $resolution);
 	}
 	default {
 		require XML::SAX::Writer;
 		$output = XML::SAX::Writer->new();
 	}
 }
-my $parser = TenorSAX::Source::Troff->new(Handler => $output);
+my $parser = TenorSAX::Source::Troff->new(Handler => $output,
+	Resolution => $resolution);
 
 my $data = "";
 if (@ARGV) {
