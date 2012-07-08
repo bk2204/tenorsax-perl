@@ -9,9 +9,24 @@ use utf8;
 use feature qw/unicode_strings/;
 
 use Moose;
+use TenorSAX::Meta::Attribute::Trait::Serializable;
 
-has 'cc' => (isa => 'Str', is => 'rw', default => '.');
-has 'c2' => (isa => 'Str', is => 'rw', default => "'");
+has 'cc' => (
+	is => 'rw',
+	isa => 'Str',
+	default => '.'
+);
+has 'c2' => (
+	is => 'rw',
+	isa => 'Str',
+	default => "'"
+);
+has 'fill' => (
+	is => 'rw',
+	isa => 'Bool',
+	default => 1,
+	traits => ['Serializable'],
+);
 
 =head1 NAME
 

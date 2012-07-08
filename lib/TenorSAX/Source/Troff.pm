@@ -145,6 +145,24 @@ sub _parse_string {
 	$self->_do_parse();
 }
 
+sub _state_to_hash {
+	my $self = shift;
+	my $hr = {};
+	my $meta = $self->_env->meta;
+
+	foreach my $attr (map { $meta->get_attribute($_) }
+		$meta->get_attribute_list) {
+		if ($attr->does('TenorSAX::Meta::Attribute::Trait::Serializable')) {
+			my $name = $attr->name;
+			my $reader = $attr->get_read_method;
+
+			$name =~ tr/_/-/;
+			$hr->{"t:$name"} = $self->_env->$reader;
+		}
+	}
+	return $hr;
+}
+
 sub _expand {
 	my $self = shift;
 	my $text = shift;
@@ -359,7 +377,7 @@ sub _lookup_element {
 	$result->{Attributes} = {};
 
 	foreach my $attr (keys %$attributes) {
-		my $hr = $self->_lookup_attribute($attr);
+		my $hr = $self->_lookup_attribute($attr, $attributes->{$attr});
 		my $key = '{' . $hr->{NamespaceURI} // '' . '}' . $hr->{LocalName};
 		$result->{Attributes}->{$key} = $hr;
 	}
@@ -381,7 +399,8 @@ sub _do_parse {
 		);
 	}
 	$self->_ch->start_element($self->_lookup_element('t:main'));
-	$self->_ch->start_element($self->_lookup_element('t:block'));
+	$self->_ch->start_element($self->_lookup_element('t:block',
+			$self->_state_to_hash));
 
 	while (@{$self->_data}) {
 		my $line = shift @{$self->_data};
