@@ -124,8 +124,8 @@ sub _setup {
 	$self->_ch(TenorSAX::Util::FancyContentHandler->new(
 			{
 				Prefixes => {
-					t => 'http://ns.crustytoothpaste.net/troff',
-					tm => 'http://ns.crustytoothpaste.net/text-markup',
+					_t => 'http://ns.crustytoothpaste.net/troff',
+					_tm => 'http://ns.crustytoothpaste.net/text-markup',
 				},
 				Handler => $self->_ch,
 			}
@@ -157,7 +157,7 @@ sub _state_to_hash {
 			my $reader = $attr->get_read_method;
 
 			$name =~ tr/_/-/;
-			$hr->{"t:$name"} = $self->_env->$reader;
+			$hr->{"_t:$name"} = $self->_env->$reader;
 		}
 	}
 	return $hr;
@@ -398,8 +398,8 @@ sub _do_parse {
 			}
 		);
 	}
-	$self->_ch->start_element($self->_lookup_element('t:main'));
-	$self->_ch->start_element($self->_lookup_element('t:block',
+	$self->_ch->start_element($self->_lookup_element('_t:main'));
+	$self->_ch->start_element($self->_lookup_element('_t:block',
 			$self->_state_to_hash));
 
 	while (@{$self->_data}) {
@@ -413,8 +413,8 @@ sub _do_parse {
 		}
 	}
 
-	$self->_ch->end_element($self->_lookup_element('t:block'));
-	$self->_ch->end_element($self->_lookup_element('t:main'));
+	$self->_ch->end_element($self->_lookup_element('_t:block'));
+	$self->_ch->end_element($self->_lookup_element('_t:main'));
 	foreach my $prefix (keys %prefixes) {
 		$self->_ch->end_prefix_mapping(
 			{

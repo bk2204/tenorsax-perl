@@ -22,8 +22,8 @@ my $requests = [
 			my $p = $state->{parser};
 
 			if ($state->{opts}->{can_break}) {
-				$p->_ch->end_element($p->_lookup_element('t:block'));
-				$p->_ch->start_element($p->_lookup_element('t:block',
+				$p->_ch->end_element($p->_lookup_element('_t:block'));
+				$p->_ch->start_element($p->_lookup_element('_t:block',
 					$p->_state_to_hash));
 			}
 
