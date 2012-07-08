@@ -13,20 +13,25 @@ use TenorSAX::Source::Troff::Number;
 use TenorSAX::Source::Troff::Request;
 use TenorSAX::Source::Troff::String;
 
+sub _do_break {
+	my ($state) = @_;
+	my $p = $state->{parser};
+
+	if ($state->{opts}->{can_break}) {
+		$p->_ch->end_element($p->_lookup_element('_t:block'));
+		$p->_ch->start_element($p->_lookup_element('_t:block',
+			$p->_state_to_hash));
+	}
+}
+
 my $requests = [
 	{
 		name => 'br',
 		arg_types => [],
 		code => sub {
 			my ($self, $state, $args) = @_;
-			my $p = $state->{parser};
 
-			if ($state->{opts}->{can_break}) {
-				$p->_ch->end_element($p->_lookup_element('_t:block'));
-				$p->_ch->start_element($p->_lookup_element('_t:block',
-					$p->_state_to_hash));
-			}
-
+			_do_break($state);
 			return;
 		}
 	},
@@ -106,6 +111,17 @@ my $requests = [
 		}
 	},
 	{
+		name => 'fi',
+		arg_types => [],
+		code => sub {
+			my ($self, $state, $args) = @_;
+
+			$state->{parser}->_env->fill(1);
+			_do_break($state);
+			return;
+		}
+	},
+	{
 		name => 'ie',
 		arg_types => ['Conditional', 'FinalString'],
 		code => sub {
@@ -158,6 +174,17 @@ my $requests = [
 			my $end = $args->[0] // $cc;
 
 			$state->{parser}->_copy_until(qr/^\Q$cc$end\E/);
+			return;
+		}
+	},
+	{
+		name => 'nf',
+		arg_types => [],
+		code => sub {
+			my ($self, $state, $args) = @_;
+
+			$state->{parser}->_env->fill(0);
+			_do_break($state);
 			return;
 		}
 	},

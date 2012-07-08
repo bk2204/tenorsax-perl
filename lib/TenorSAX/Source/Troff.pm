@@ -126,6 +126,7 @@ sub _setup {
 				Prefixes => {
 					_t => 'http://ns.crustytoothpaste.net/troff',
 					_tm => 'http://ns.crustytoothpaste.net/text-markup',
+					xml => 'http://www.w3.org/XML/1998/namespace',
 				},
 				Handler => $self->_ch,
 			}
@@ -155,9 +156,12 @@ sub _state_to_hash {
 		if ($attr->does('TenorSAX::Meta::Attribute::Trait::Serializable')) {
 			my $name = $attr->name;
 			my $reader = $attr->get_read_method;
+			my $value = $self->_env->$reader;
 
 			$name =~ tr/_/-/;
-			$hr->{"_t:$name"} = $self->_env->$reader;
+			$hr->{"_t:$name"} = $value;
+			$hr->{"xml:space"} = $value ? "default" : "preserve"
+				if ($attr->name eq "fill");
 		}
 	}
 	return $hr;
@@ -292,7 +296,7 @@ sub _parse_line_compat {
 	elsif ($line =~ s/^([$controls])(\X{0,2}?)([ \t]+|$)//u ||
 		$line =~ s/^([$controls])(\X{2}?)(\X+|$)//u) {
 		my $request = $self->_lookup_request($2);
-		$opts->{can_break} = 1 eq $self->_env->cc;
+		$opts->{can_break} = $1 eq $self->_env->cc;
 		$opts->{compat} = 0 if $request->disable_compat;
 		$self->_do_request($request, $opts, $line);
 	}
@@ -315,7 +319,7 @@ sub _parse_line {
 	}
 	elsif ($line =~ s/^([$controls])(\X*?)([ \t]+|$)//u) {
 		my $request = $self->_lookup_request($2);
-		$opts->{can_break} = 1 eq $self->_env->cc;
+		$opts->{can_break} = $1 eq $self->_env->cc;
 		$self->_do_request($request, $opts, $line);
 	}
 	else {
