@@ -30,6 +30,11 @@ has '_text' => (
 	isa => 'ArrayRef[HashRef[Str]]',
 	default => sub { [] },
 );
+has '_attrs' => (
+	is => 'rw',
+	isa => 'ArrayRef[HashRef[Str]]',
+	default => sub { [{}] },
+);
 
 =head1 NAME
 
@@ -101,7 +106,7 @@ sub _format_block {
 		my $broken = 0;
 		foreach my $char (grep { $_ } split /(\X)/, $block->{text}) {
 			my $char_width = $self->_char_width($char, $block);
-			if ($width + $char_width > $line_length) {
+			if ($block->{fill} && $width + $char_width > $line_length) {
 				$broken = 1;
 				if ("$sofar$char" =~ m/\A(\X+)\s(\S*)\z/) {
 					$self->_do_line([@output, {%{$block}, text => $1}]);
@@ -120,6 +125,13 @@ sub _format_block {
 					$sofar = $char;
 					$width = $char_width;
 				}
+			}
+			elsif (!$block->{fill} && $char =~ m/\R/) {
+				$broken = 1;
+				$self->_do_line([@output, {%{$block}, text => $sofar}]);
+				@output = ();
+				$sofar = "";
+				$width = 0;
 			}
 			else {
 				$sofar .= $char;
@@ -152,6 +164,23 @@ sub end_document {
 
 sub start_element {
 	my ($self, $element) = @_;
+
+	return unless $element->{NamespaceURI} eq $TROFF_NS;
+	if ($element->{LocalName} =~ m/^(?:block|inline)$/) {
+		# Inherit any attributes that aren't specified.  At the moment, we pass
+		# all the attributes every time, but we may change that in the future.
+		#
+		# The hash contains unprefixed names for items in the troff namespace
+		# and prefixed otherwise; this is only for xml:space and the like, since
+		# prefixes are not otherwise guaranteed.
+		my %attrs = map {
+			($element->{Attributes}{$_}{NamespaceURI} eq $TROFF_NS ?
+				$element->{Attributes}{$_}{LocalName} :
+				$element->{Attributes}{$_}{Name}) =>
+			$element->{Attributes}{$_}{Value}
+		} keys $element->{Attributes};
+		push $self->_attrs, {%{$self->_attrs->[-1]}, %attrs};
+	}
 }
 
 sub start_prefix_mapping {
@@ -164,6 +193,10 @@ sub end_element {
 	return unless $element->{NamespaceURI} eq $TROFF_NS;
 	if ($element->{LocalName} eq "block") {
 		$self->_format_block();
+		pop $self->_attrs;
+	}
+	elsif ($element->{LocalName} eq "inline") {
+		pop $self->_attrs;
 	}
 }
 
@@ -174,9 +207,10 @@ sub end_prefix_mapping {
 sub characters {
 	my ($self, $ref) = @_;
 	my $text = $ref->{Data} // '';
+	my %attrs = %{$self->_attrs->[-1]};
 
-	$text =~ s/\R/ /g;
-	push $self->_text, {fill => 1, text => $text};
+	$text =~ s/\R/ /g if $attrs{'xml:space'} ne "preserve";
+	push $self->_text, {%attrs, text => $text};
 }
 
 sub ignorable_whitespace {
