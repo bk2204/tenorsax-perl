@@ -216,7 +216,9 @@ sub _do_request {
 		my $argtype = $request->arg_type->[$i] //
 			'TenorSAX::Source::Troff::Argument';
 		my $arg = $argtype->parse($request, \$line);
-		push @$args, $argtype->evaluate($request, $state, $self->_expand($arg));
+		push @$args, $argtype->evaluate($request, $state, $self->_expand($arg,
+				$opts));
+		$request->modify($state, $args);
 	}
 
 	my $text = $request->perform($state, $args);
@@ -229,7 +231,7 @@ sub _lookup {
 	if (!exists $table->{$name}) {
 		$table->{$name} = $type->new();
 	}
-	return $table->{$name};
+	return $table->{$name}->clone;
 }
 
 sub _lookup_request {
@@ -296,7 +298,7 @@ sub _parse_line_compat {
 		$self->_copy->{enabled} = 0;
 	}
 	elsif ($self->_copy->{enabled}) {
-		$self->_do_text_line($line);
+		$self->_do_text_line($line, $opts);
 	}
 	elsif ($line =~ s/^([$controls])(\X{0,2}?)([ \t]+|$)//u ||
 		$line =~ s/^([$controls])(\X{2}?)(\X+|$)//u) {
@@ -306,7 +308,7 @@ sub _parse_line_compat {
 		$self->_do_request($request, $opts, $line);
 	}
 	else {
-		$self->_do_text_line($line);
+		$self->_do_text_line($line, $opts);
 	}
 }
 
@@ -314,13 +316,13 @@ sub _parse_line {
 	my $self = shift;
 	my $line = shift;
 	my $controls = $self->_env->cc . $self->_env->c2;
-	my $opts = {compat => 1};
+	my $opts = {compat => 0};
 
 	if ($self->_copy->{enabled} && $line =~ $self->_copy->{pattern}) {
 		$self->_copy->{enabled} = 0;
 	}
 	elsif ($self->_copy->{enabled}) {
-		$self->_do_text_line($line);
+		$self->_do_text_line($line, $opts);
 	}
 	elsif ($line =~ s/^([$controls])(\X*?)([ \t]+|$)//u) {
 		my $request = $self->_lookup_request($2);
@@ -328,13 +330,16 @@ sub _parse_line {
 		$self->_do_request($request, $opts, $line);
 	}
 	else {
-		$self->_do_text_line($line);
+		$self->_do_text_line($line, $opts);
 	}
 }
 
 sub _do_text_line {
 	my $self = shift;
-	my $line = $self->_expand(shift);
+	my $line = shift;
+	my $opts = shift;
+
+	$line = $self->_expand($line, $opts);
 
 	if (!length $line) {
 		# FIXME: don't depend on .br not being redefined.

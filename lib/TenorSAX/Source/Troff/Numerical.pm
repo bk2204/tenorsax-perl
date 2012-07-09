@@ -10,6 +10,8 @@ use feature qw/unicode_strings/;
 
 use Moose;
 
+with 'MooseX::Clone';
+
 sub format {
 	...
 }

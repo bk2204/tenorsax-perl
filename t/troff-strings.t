@@ -1,6 +1,6 @@
 #!perl -T
 
-use Test::More tests => 56;
+use Test::More tests => 98;
 use TenorSAX::Source::Troff;
 use TenorSAX::Output::Text;
 
@@ -32,15 +32,36 @@ foreach my $test (@tests) {
 
 	foreach my $x (qw/call eval/) {
 		my $eval = $x eq "call" ? $req : $esc;
+		my $type = $cpval;
 		my $cp = ".cp $cpval\n";
+		my @prefixes = $cpval ? (".cp 1\n.") : (".cp 0\n.", ".do ");
 
 		is(run("$cp.ds $name text\n$eval\n"), "text",
-			"ds - $name ($cpval) - can define and $x a string");
+			"ds - $name ($type) - can define and $x a string");
 		is(run(qq{$cp.ds $name "text"\n$eval\n}), 'text"',
-			"ds - $name ($cpval) - handles final quote okay in $x");
+			"ds - $name ($type) - handles final quote okay in $x");
 		is(run(qq{$cp.ds $name "Have a nice day!\n$eval\n}), 'Have a nice day!',
-			"ds - $name ($cpval) - handles complex text okay in $x");
+			"ds - $name ($type) - handles complex text okay in $x");
 		is(run(qq{$cp.ds $name\n$eval\n}), '',
-			"ds - $name ($cpval) - handles missing argument okay in $x");
+			"ds - $name ($type) - handles missing argument okay in $x");
+
+		if ($cpval == 0) {
+			is(run(".do ds $name text\n.cp 0\n$eval\n"), "text",
+				"ds - $name (2) - can define and $x a string");
+			is(run(qq{.do ds $name "text"\n.cp 0\n$eval\n}), 'text"',
+				"ds - $name (2) - handles final quote okay in $x");
+			is(run(qq{.do ds $name "Have a nice day!\n.cp 0\n$eval\n}), 'Have a nice day!',
+				"ds - $name (2) - handles complex text okay in $x");
+			is(run(qq{.do ds $name\n.cp 0\n$eval\n}), '',
+				"ds - $name (2) - handles missing argument okay in $x");
+		}
 	}
 }
+
+my $aa = <<EOM;
+.ds [ compat
+.ds ST regular
+EOM
+
+is(run("$aa\\*[ST]\n"), 'compatST]', "ds - eval bracket string in compat mode");
+is(run("$aa\\*(ST\n"), 'regular', "ds - eval paren string in compat mode");

@@ -10,6 +10,8 @@ use feature qw/unicode_strings/;
 
 use Moose;
 
+with 'MooseX::Clone';
+
 has 'text' => (
 	isa => 'Str',
 	is => 'rw',
@@ -24,6 +26,10 @@ has 'code' => (
 	isa => 'CodeRef',
 	is => 'rw',
 	default => sub { sub {} },
+);
+has 'substitute' => (
+	is => 'rw',
+	default => undef,
 );
 has 'arg_type' => (
 	isa => 'ArrayRef[Str]',
@@ -45,6 +51,14 @@ TenorSAX::Source::Troff::Stringy - The great new TenorSAX::Source::Troff!
 Version 2.00
 
 =cut
+
+sub modify {
+	my ($self, $state, $args) = @_;
+	my $method = $self->substitute;
+
+	return unless defined $method;
+	$_[0] = $self->$method($state, $args);
+}
 
 =head1 SYNOPSIS
 

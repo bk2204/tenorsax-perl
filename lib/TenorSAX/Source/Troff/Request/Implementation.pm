@@ -64,6 +64,28 @@ my $requests = [
 		}
 	},
 	{
+		name => 'do',
+		max_args => 99999,
+		arg_types => [],
+		disable_compat => 1,
+		substitute => sub {
+			my ($self, $state, $args) = @_;
+
+			if (scalar @$args == 1) {
+				my $p = $state->{parser};
+				my $request = $p->_lookup_request($args->[0]);
+				$request->max_args($request->max_args+1);
+				shift @$args;
+				unshift @{$request->arg_type},
+					"TenorSAX::Source::Troff::Argument";
+				return $request;
+			}
+		},
+		code => sub {
+			...
+		}
+	},
+	{
 		name => 'ds',
 		arg_types => ['', 'FinalString'],
 		code => sub {
@@ -226,10 +248,11 @@ sub make_request {
 		"TenorSAX::Source::Troff::${_}Argument"
 	} @{$data->{arg_types}};
 	my $req = TenorSAX::Source::Troff::Request->new(
-		max_args => scalar @{$data->{arg_types}},
+		max_args => $data->{max_args} // scalar @{$data->{arg_types}},
 		arg_type => [@arg_types],
 		disable_compat => $data->{disable_compat} || 0,
 		code => $data->{code},
+		substitute => $data->{substitute},
 	);
 	return $req;
 }
