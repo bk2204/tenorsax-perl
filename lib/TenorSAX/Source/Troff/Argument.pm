@@ -163,6 +163,32 @@ sub _evaluate {
 	return $value;
 }
 
+package TenorSAX::Source::Troff::OffsetNumericArgument;
+
+use Moose;
+
+extends 'TenorSAX::Source::Troff::NumericArgument';
+
+sub parse {
+	my ($class, undef, $lineref) = @_;
+
+	if ($$lineref =~ s/^([+-])//) {
+		return $1 . $class->SUPER::parse(undef, $lineref);
+	}
+	return $class->SUPER::parse(undef, $lineref);
+}
+
+sub evaluate {
+	my ($class, undef, $state, $arg) = @_;
+
+	my $offset = "";
+
+	$arg =~ s/[ \t]+//g;
+	$offset = $1 if ($arg =~ s/^([+-])//);
+
+	return $offset . $class->_evaluate(undef, $state, \$arg);
+}
+
 package TenorSAX::Source::Troff::ConditionalArgument;
 
 use Moose;

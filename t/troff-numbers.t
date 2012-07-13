@@ -1,6 +1,6 @@
 #!perl -T
 
-use Test::More tests => 61;
+use Test::More tests => 165;
 use TenorSAX::Source::Troff;
 use TenorSAX::Output::Text;
 
@@ -91,4 +91,8 @@ my @tests = (
 foreach my $test (@tests) {
 	is(run(".nr A $test->[0]\n\\nA\n"), $test->[1],
 		"nr - expression $test->[0] produces $test->[1]");
+	is(run(".nr A 5\n.nr A +$test->[0]\n\\nA\n"), 5 + $test->[1],
+		"nr - expression $test->[0] produces " . (5 + $test->[1]));
+	is(run(".nr A 5\n.nr A -$test->[0]\n\\nA\n"), 5 - $test->[1],
+		"nr - expression $test->[0] produces " . (5 - $test->[1]));
 }

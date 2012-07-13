@@ -212,18 +212,35 @@ my $requests = [
 	},
 	{
 		name => 'nr',
-		arg_types => ['', 'Numeric'],
+		arg_types => ['', 'OffsetNumeric', 'Numeric'],
 		code => sub {
 			my ($self, $state, $args) = @_;
 			my $name = $args->[0] or return;
-			my $value = $args->[1] // '';
+			my $value = $args->[1] || 0;
+			my $increment = $args->[2] || 0;
 			my $existing = $state->{parser}->_numbers->{$name};
 
 			return if defined $existing && $existing->immutable;
 
+			if ($value =~ s/^([+-])//) {
+				$value ||= 0;
+
+				my $cur = 0;
+				if (exists $state->{parser}->_numbers->{$name}) {
+					$cur = $state->{parser}->_numbers->{$name}->value;
+				}
+				if ($1 eq "+") {
+					$value = $cur + $value;
+				}
+				else {
+					$value = $cur - $value;
+				}
+			}
+
 			eval {
 				$state->{parser}->_numbers->{$name} =
-					TenorSAX::Source::Troff::Number->new(value => $value);
+					TenorSAX::Source::Troff::Number->new(value => $value,
+						inc_value => $increment);
 			};
 			return if $@;
 			return;
