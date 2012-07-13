@@ -23,19 +23,22 @@ EOM
 }
 
 my @implemented = qw/
+br
+cp
 de
+do
 ds
-rm
-nr
-if
-ie
 el
 ex
+ie
+if
 ig
-cp
+fi
+nf
+nr
+rm
 /;
 my @unimplemented = qw/
-do
 xflag
 
 lc_ctype
@@ -66,10 +69,7 @@ ne
 mk
 rt
 
-br
 brp
-fi
-nf
 ad
 na
 padj
