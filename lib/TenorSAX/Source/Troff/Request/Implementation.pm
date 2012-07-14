@@ -268,6 +268,20 @@ my $requests = [
 			return;
 		}
 	},
+	{
+		name => 'rn',
+		arg_types => ['', ''],
+		code => sub {
+			my ($self, $state, $args) = @_;
+			my $old = $args->[0] or return;
+			my $new = $args->[1] or return;
+			my $requests = $state->{parser}->_requests;
+
+			$requests->{$new} = $requests->{$old};
+			delete $requests->{$old};
+			return;
+		}
+	},
 ];
 
 sub make_request {

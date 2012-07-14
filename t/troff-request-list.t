@@ -38,6 +38,7 @@ nf
 nop
 nr
 rm
+rn
 /;
 my @unimplemented = qw/
 xflag
@@ -111,7 +112,6 @@ substring
 length
 index
 chop
-rn
 di
 da
 box
