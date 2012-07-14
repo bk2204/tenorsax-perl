@@ -26,6 +26,19 @@ sub _do_break {
 
 my $requests = [
 	{
+		name => 'als',
+		arg_types => ['', ''],
+		code => sub {
+			my ($self, $state, $args) = @_;
+			my $new = $args->[0] or return;
+			my $old = $args->[1] or return;
+			my $requests = $state->{parser}->_requests;
+
+			$requests->{$new} = $requests->{$old};
+			return;
+		}
+	},
+	{
 		name => 'br',
 		arg_types => [],
 		code => sub {

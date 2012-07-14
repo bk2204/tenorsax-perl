@@ -23,6 +23,7 @@ EOM
 }
 
 my @implemented = qw/
+als
 br
 cp
 de
@@ -128,7 +129,6 @@ it
 itc
 return
 shift
-als
 blm
 em
 recursionlimit

@@ -1,6 +1,6 @@
 #!perl -T
 
-use Test::More tests => 30;
+use Test::More tests => 36;
 use TenorSAX::Source::Troff;
 use TenorSAX::Output::Text;
 
@@ -78,4 +78,9 @@ foreach my $aa ($aas, $aaa) {
 	like(run("$aa$dd.rn DD BB\n.AA\n"), qr/Before.\s+DD.\s+After/ms,
 			"rn - can rename a macro over another one");
 
+	is(run(".cp 0\n$bb.als XX BB\n.XX\n"), 'BB.', "als - can alias a macro");
+	like(run(".cp 0\n$aa$dd.als BB DD\n.AA\n"), qr/Before.\s+DD.\s+After/ms,
+			"als - alias works when called from macro");
+	is(run(".cp 0\n$bb.als XX BB\n.rn BB\n.XX\n"), 'BB.',
+		"als - alias works even after original is removed");
 }
