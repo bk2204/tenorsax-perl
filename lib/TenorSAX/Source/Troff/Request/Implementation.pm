@@ -211,6 +211,17 @@ my $requests = [
 		}
 	},
 	{
+		name => 'nop',
+		arg_types => ['Final'],
+		code => sub {
+			my ($self, $state, $args) = @_;
+			my $text = $args->[0] // '';
+
+			unshift @{$state->{parser}->_data}, split /\R/, $text;
+			return;
+		}
+	},
+	{
 		name => 'nr',
 		arg_types => ['', 'OffsetNumeric', 'Numeric'],
 		code => sub {

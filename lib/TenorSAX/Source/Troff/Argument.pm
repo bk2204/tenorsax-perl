@@ -30,6 +30,21 @@ sub evaluate {
 	return $arg;
 }
 
+package TenorSAX::Source::Troff::FinalArgument;
+
+use Moose;
+
+extends 'TenorSAX::Source::Troff::Argument';
+
+sub parse {
+	my ($class, undef, $lineref) = @_;
+	my $arg;
+
+	$$lineref =~ s/^(.*)$//;
+	return $1;
+}
+
+
 package TenorSAX::Source::Troff::FinalStringArgument;
 
 use Moose;

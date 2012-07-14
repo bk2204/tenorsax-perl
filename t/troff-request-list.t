@@ -35,6 +35,7 @@ if
 ig
 fi
 nf
+nop
 nr
 rm
 /;
@@ -212,7 +213,6 @@ mc
 lpfx
 tm
 tmc
-nop
 ab
 lf
 pm
