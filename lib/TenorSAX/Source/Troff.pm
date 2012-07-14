@@ -49,6 +49,12 @@ has '_ch' => (
 	is => 'rw',
 	init_arg => 'Handler',
 );
+has '_macrodirs' => (
+	is => 'rw',
+	isa => 'ArrayRef[Str]',
+	init_arg => 'MacroDirs',
+	default => sub { [] },
+);
 has '_resolution' => (
 	is => 'rw',
 	isa => 'Int',

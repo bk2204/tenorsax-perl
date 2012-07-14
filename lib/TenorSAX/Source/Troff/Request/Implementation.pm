@@ -295,6 +295,36 @@ my $requests = [
 			return;
 		}
 	},
+	{
+		name => 'tenorsax',
+		arg_types => ['', ''],
+		code => sub {
+			my ($self, $state, $args) = @_;
+			my $cmd = $args->[0] or return;
+			my $arg = $args->[1] or return;
+
+			given ($cmd) {
+				when (/^ext$/) {
+					$state->{parser}->_compat($arg ? 0 : 1);
+				}
+				when (/^macrodir$/) {
+					push $state->{parser}->_macrodirs, $arg;
+				}
+				when (/^get-implementation$/) {
+					$state->{parser}->_numbers->{$arg} =
+						TenorSAX::Source::Troff::Number->new(value =>
+							0x01626d63);
+				}
+				when (/^get-ext$/) {
+					$state->{parser}->_numbers->{$arg} =
+						TenorSAX::Source::Troff::Number->new(value =>
+							$state->{parser}->_compat ? 0 : 1);
+				}
+			}
+
+			return;
+		}
+	},
 ];
 
 sub make_request {

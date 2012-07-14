@@ -40,6 +40,7 @@ nop
 nr
 rm
 rn
+tenorsax
 /;
 my @unimplemented = qw/
 xflag
@@ -236,7 +237,6 @@ PI
 
 mso
 
-tenorsax
 namespace
 start
 end
