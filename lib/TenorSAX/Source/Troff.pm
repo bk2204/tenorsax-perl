@@ -59,6 +59,7 @@ has '_resolution' => (
 	is => 'rw',
 	isa => 'Int',
 	init_arg => 'Resolution',
+	default => 72000,
 );
 has '_compat' => (
 	isa => 'Int',
