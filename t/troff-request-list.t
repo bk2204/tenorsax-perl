@@ -30,18 +30,21 @@ de
 do
 ds
 el
+end
 ex
 ie
 if
 ig
 fi
 mso
+namespace
 nf
 nop
 nr
 rm
 rn
 so
+start
 tenorsax
 /;
 my @unimplemented = qw/
@@ -235,10 +238,6 @@ psbb
 BP
 EP
 PI
-
-namespace
-start
-end
 /;
 
 foreach my $request (@implemented) {

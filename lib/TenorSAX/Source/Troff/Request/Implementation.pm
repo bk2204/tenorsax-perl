@@ -152,6 +152,19 @@ my $requests = [
 		}
 	},
 	{
+		name => 'end',
+		arg_types => [''],
+		code => sub {
+			my ($self, $state, $args) = @_;
+			my $tag = $args->[0] or return;
+			my $parser = $state->{parser};
+
+			$parser->_ch->end_element($parser->_lookup_element($tag));
+
+			return;
+		}
+	},
+	{
 		name => 'ex',
 		arg_types => [],
 		code => sub {
@@ -254,6 +267,19 @@ my $requests = [
 		}
 	},
 	{
+		name => 'namespace',
+		arg_types => ['', ''],
+		code => sub {
+			my ($self, $state, $args) = @_;
+			my $prefix = $args->[0] or return;
+			my $uri = $args->[1] or return;
+
+			$state->{parser}->_ch->prefixes->{$prefix} = $uri;
+
+			return;
+		}
+	},
+	{
 		name => 'nf',
 		arg_types => [],
 		code => sub {
@@ -349,6 +375,26 @@ my $requests = [
 			}
 
 			_load_file($filename, $state->{parser});
+			return;
+		}
+	},
+	{
+		name => 'start',
+		max_args => 99999,
+		arg_types => ['', ''],
+		code => sub {
+			my ($self, $state, $args) = @_;
+			my $tag = shift @$args or return;
+			my $parser = $state->{parser};
+			my $attrs = {};
+
+			foreach my $arg (@$args) {
+				my ($name, $value) = split /=/, $arg, 2;
+
+				$attrs->{$name} = $value;
+			}
+			$parser->_ch->start_element($parser->_lookup_element($tag, $attrs));
+
 			return;
 		}
 	},

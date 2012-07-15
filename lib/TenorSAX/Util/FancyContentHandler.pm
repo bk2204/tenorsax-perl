@@ -88,7 +88,7 @@ sub start_element {
 	my $item = {type => 'element', value => \%{$element}};
 
 	my @prefixes = keys %{$self->prefixes};
-	my %needed = map { $_ => 1 } ($element->{Prefix} // (),
+	my %needed = map { $_ => 1 } grep { $_ } ($element->{Prefix} // (),
 		map { $element->{Attributes}->{$_}->{Prefix}  }
 		(defined $element->{Attributes} ? keys %{$element->{Attributes}} : ()));
 	my %defined = map { $_->{value}->{Prefix} => 1 }
