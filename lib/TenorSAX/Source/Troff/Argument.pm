@@ -30,6 +30,9 @@ sub evaluate {
 	return $arg;
 }
 
+no Moose;
+__PACKAGE__->meta->make_immutable;
+
 package TenorSAX::Source::Troff::FinalArgument;
 
 use Moose;
@@ -44,6 +47,8 @@ sub parse {
 	return $1;
 }
 
+no Moose;
+__PACKAGE__->meta->make_immutable;
 
 package TenorSAX::Source::Troff::FinalStringArgument;
 
@@ -63,6 +68,9 @@ sub parse {
 	$$lineref =~ s/^(\X*?)$//u;
 	return $1;
 }
+
+no Moose;
+__PACKAGE__->meta->make_immutable;
 
 package TenorSAX::Source::Troff::NumericArgument;
 
@@ -231,6 +239,9 @@ sub _evaluate {
 	return $value;
 }
 
+no Moose;
+__PACKAGE__->meta->make_immutable;
+
 package TenorSAX::Source::Troff::OffsetNumericArgument;
 
 use Moose;
@@ -256,6 +267,9 @@ sub evaluate {
 
 	return $offset . $class->_evaluate($request, $state, \$arg);
 }
+
+no Moose;
+__PACKAGE__->meta->make_immutable;
 
 package TenorSAX::Source::Troff::ConditionalArgument;
 
@@ -337,5 +351,7 @@ sub _evaluate {
 		$arg);
 }
 
+no Moose;
+__PACKAGE__->meta->make_immutable;
 
 1;

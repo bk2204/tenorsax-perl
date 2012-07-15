@@ -73,4 +73,7 @@ See http://dev.perl.org/licenses/ for more information.
 
 =cut
 
+no Moose;
+__PACKAGE__->meta->make_immutable;
+
 1;
