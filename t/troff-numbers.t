@@ -1,6 +1,6 @@
 #!perl -T
 
-use Test::More tests => 165;
+use Test::More tests => 183;
 use TenorSAX::Source::Troff;
 use TenorSAX::Output::Text;
 
@@ -86,6 +86,12 @@ my @tests = (
 	['0:1', 1],
 	['1:0', 1],
 	['1:1', 1],
+	['(1020+80)/2', 550],
+	['(1020 + 80)/2', 550],
+	['2*(1020+80)', 2200],
+	['2*(1020 + 80)', 2200],
+	['2*(1020+80)/2', 1100],
+	['2*(1020 + 80)/2', 1100],
 );
 
 foreach my $test (@tests) {

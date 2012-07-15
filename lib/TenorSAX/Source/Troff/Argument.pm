@@ -70,6 +70,29 @@ use Moose;
 
 extends 'TenorSAX::Source::Troff::Argument';
 
+sub _parse_unparenthesized {
+	my ($class, $arg, $lineref) = @_;
+
+	my $level = 0;
+
+	while (!$level && $$lineref =~ s/^(\X)//u) {
+		my $char = $1;
+
+		if ($char eq "(") {
+			$arg .= $char;
+			$level++;
+		}
+		elsif ($char =~ m/[ \t]/) {
+			$$lineref =~ s/([ \t]+|$)//;
+			last;
+		}
+		else {
+			$arg .= $char;
+		}
+	}
+	return ($level, $arg);
+}
+
 sub parse {
 	my ($class, undef, $lineref) = @_;
 
@@ -77,9 +100,8 @@ sub parse {
 	if ($$lineref =~ s/^("(([^"]*|"")*)")([ \t]+|$)//u) {
 		return $1;
 	}
-	elsif ($$lineref =~ s/^\(//u) {
-		my $level = 1;
-		my $arg = "(";
+	elsif ($$lineref =~ m/\(/) {
+		my ($level, $arg) = $class->_parse_unparenthesized("", $lineref);
 
 		while ($level) {
 			$$lineref =~ s/^(\X)//;
@@ -93,6 +115,8 @@ sub parse {
 			}
 			$arg .= $char;
 		}
+
+		($level, $arg) = $class->_parse_unparenthesized($arg, $lineref);
 		$$lineref =~ s/^([ \t]+|$)//;
 		return $arg;
 	}
@@ -129,6 +153,7 @@ sub _evaluate {
 					push @vals, $class->_evaluate(undef, $state, $ref);
 				}
 				when ($_ eq ")") {
+					$level--;
 					last;
 				}
 				when (/^([-+*\/%])/) {
