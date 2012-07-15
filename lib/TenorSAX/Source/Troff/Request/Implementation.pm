@@ -8,6 +8,7 @@ use warnings qw/FATAL utf8/;
 use utf8;
 
 use File::Spec;
+use File::Path::Expand ();
 use Moose;
 use TenorSAX::Source::Troff::Macro;
 use TenorSAX::Source::Troff::Number;
@@ -23,6 +24,22 @@ sub _do_break {
 		$p->_ch->start_element($p->_lookup_element('_t:block',
 			$p->_state_to_hash));
 	}
+}
+
+sub _load_file {
+	my ($filename, $parser) = @_;
+
+	local $/;
+	open(my $fh, '<', $filename) or die "Can't source '$filename': $!";
+	my $data = <$fh>;
+	close($fh);
+
+	chomp $data;
+
+	$data = join("\n", ".do tenorsax filename \"$filename\"", $data,
+		".do tenorsax filename \"" . $parser->_filename .
+		"\"\n");
+	unshift @{$parser->_data}, split /\R/, $data;
 }
 
 my $requests = [
@@ -214,6 +231,29 @@ my $requests = [
 		}
 	},
 	{
+		name => 'mso',
+		arg_types => [''],
+		code => sub {
+			my ($self, $state, $args) = @_;
+			my $name = $args->[0] or return;
+
+			foreach my $dir (@{$state->{parser}->_macrodirs}) {
+				$dir = File::Path::Expand::expand_filename($dir);
+				for my $suffix ("", ".tmac") {
+					eval {
+						my $filename = File::Spec->catfile($dir,
+							"$name$suffix");
+						_load_file($filename, $state->{parser});
+					};
+					return unless $@;
+				}
+			}
+
+			die "Can't find macro package '$name': $!";
+			return;
+		}
+	},
+	{
 		name => 'nf',
 		arg_types => [],
 		code => sub {
@@ -308,17 +348,7 @@ my $requests = [
 				$filename = File::Spec->catpath(@pieces[0, 1], $filename);
 			}
 
-			local $/;
-			open(my $fh, '<', $filename) or die "Can't source '$filename': $!";
-			my $data = <$fh>;
-			close($fh);
-
-			chomp $data;
-
-			$data = join("\n", ".do tenorsax filename \"$filename\"", $data,
-				".do tenorsax filename \"" . $state->{parser}->_filename .
-				"\"\n");
-			unshift @{$state->{parser}->_data}, split /\R/, $data;
+			_load_file($filename, $state->{parser});
 			return;
 		}
 	},
