@@ -41,7 +41,21 @@ given ($options->{device}) {
 my $parser = TenorSAX::Source::Troff->new(Handler => $output,
 	Resolution => $resolution);
 
+my @init_files = (
+	"/usr/share/tenorsax/tmac/init.tmac",
+	"/usr/local/share/tenorsax/tmac/init.tmac",
+	"/etc/tenorsax/tmac/init.tmac",
+	"$ENV{HOME}/.config/tenorsax/tmac/init.tmac"
+);
+
 my $data = "";
+foreach my $file (@init_files) {
+	local $/;
+	open(my $fh, '<', $file) or next;
+	$data .= ".do tenorsax filename \"$file\"\n";
+	$data .= <$fh>;
+	close($fh);
+}
 if (@ARGV) {
 	foreach my $file (@ARGV) {
 		local $/;
@@ -53,7 +67,7 @@ if (@ARGV) {
 }
 else {
 	local $/;
-	$data = <STDIN>;
+	$data .= <STDIN>;
 }
 
 $parser->parse_string($data);
