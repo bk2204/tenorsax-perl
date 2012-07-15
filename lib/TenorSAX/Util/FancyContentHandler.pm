@@ -26,6 +26,14 @@ has '_stack' => (
 	default => sub { [] },
 	init_arg => undef
 );
+# This function is called on the first characters call if no start_element call
+# has occurred before it.  This allows the caller to ensure that some element
+# exists before outputting characters.
+has 'element_trap' => (
+	isa => 'CodeRef',
+	is => 'rw',
+	default => sub { sub {} },
+);
 
 =head1 NAME
 
@@ -102,6 +110,7 @@ sub start_element {
 		$self->start_prefix_mapping({Prefix => $prefix, NamespaceURI =>
 				$self->prefixes->{$prefix}});
 	}
+	$self->element_trap(sub {});
 
 	push @{$self->_stack}, $item;
 	$self->handler->start_element($element);
@@ -156,6 +165,10 @@ sub end_prefix_mapping {
 
 sub characters {
 	my ($self, @args) = @_;
+	my $trap = $self->element_trap;
+
+	$self->$trap();
+	$self->element_trap(sub {});
 	$self->handler->characters(@args);
 }
 

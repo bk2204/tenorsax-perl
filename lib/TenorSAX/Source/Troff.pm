@@ -424,9 +424,14 @@ sub _do_parse {
 			}
 		);
 	}
-	$self->_ch->start_element($self->_lookup_element('_t:main'));
-	$self->_ch->start_element($self->_lookup_element('_t:block',
-			$self->_state_to_hash));
+	$self->_ch->element_trap(sub {
+			my $ch = shift;
+			$ch->start_element($self->_lookup_element('_t:main'));
+			$ch->start_element($self->_lookup_element('_t:block',
+					$self->_state_to_hash));
+			return;
+		}
+	);
 
 	while (@{$self->_data}) {
 		my $line = shift @{$self->_data};
