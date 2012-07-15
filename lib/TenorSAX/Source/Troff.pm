@@ -55,6 +55,11 @@ has '_macrodirs' => (
 	init_arg => 'MacroDirs',
 	default => sub { [] },
 );
+has '_filename' => (
+	is => 'rw',
+	isa => 'Str',
+	default => '',
+);
 has '_resolution' => (
 	is => 'rw',
 	isa => 'Int',

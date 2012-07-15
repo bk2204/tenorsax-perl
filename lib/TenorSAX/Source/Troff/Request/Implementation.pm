@@ -7,6 +7,7 @@ use warnings;
 use warnings qw/FATAL utf8/;
 use utf8;
 
+use File::Spec;
 use Moose;
 use TenorSAX::Source::Troff::Macro;
 use TenorSAX::Source::Troff::Number;
@@ -292,6 +293,32 @@ my $requests = [
 
 			$requests->{$new} = $requests->{$old};
 			delete $requests->{$old};
+			return;
+		}
+	},
+	{
+		name => 'so',
+		arg_types => [''],
+		code => sub {
+			my ($self, $state, $args) = @_;
+			my $filename = $args->[0] or return;
+
+			if ($filename !~ m{^/}) {
+				my @pieces = File::Spec->splitpath($state->{parser}->_filename);
+				$filename = File::Spec->catpath(@pieces[0, 1], $filename);
+			}
+
+			local $/;
+			open(my $fh, '<', $filename) or die "Can't source '$filename': $!";
+			my $data = <$fh>;
+			close($fh);
+
+			chomp $data;
+
+			$data = join("\n", ".do tenorsax filename \"$filename\"", $data,
+				".do tenorsax filename \"" . $state->{parser}->_filename .
+				"\"\n");
+			unshift @{$state->{parser}->_data}, split /\R/, $data;
 			return;
 		}
 	},
