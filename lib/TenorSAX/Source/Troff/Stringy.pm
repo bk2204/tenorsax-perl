@@ -41,6 +41,11 @@ has 'disable_compat' => (
 	is => 'rw',
 	default => 0,
 );
+has 'default_unit' => (
+	isa => 'Str',
+	is => 'ro',
+	default => 'u',
+);
 
 =head1 NAME
 

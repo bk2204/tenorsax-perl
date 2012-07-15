@@ -1,6 +1,6 @@
 #!perl -T
 
-use Test::More tests => 183;
+use Test::More tests => (71 * 3) + 9;
 use TenorSAX::Source::Troff;
 use TenorSAX::Output::Text;
 
@@ -8,7 +8,8 @@ sub run {
 	my $input = shift;
 	my $text = "";
 	my $output = TenorSAX::Output::Text->new(Output => \$text);
-	my $parser = TenorSAX::Source::Troff->new(Handler => $output);
+	my $parser = TenorSAX::Source::Troff->new(Handler => $output,
+		Resolution => 240);
 
 	$input .= "\n" if $input !~ /\n\z/ms;
 
@@ -92,13 +93,26 @@ my @tests = (
 	['2*(1020 + 80)', 2200],
 	['2*(1020+80)/2', 1100],
 	['2*(1020 + 80)/2', 1100],
+	['1', 1],
+	['1u', 1],
+	['1s', 1],
+	['1i', 240],
+	['1c', 240 * 50 / 127],
+	['1P', 240 / 6],
+	['1p', 240 / 72],
+	['1z', 240 / 72],
+	['1t', 240 * 100 / 7227],
+	['1T', 240 * 400 / 2409],
+	['1D', 240 * 24 / 1621],
+	['1C', 240 * 288 / 1621],
+	['(4.25i+2P)/2u', 550],
 );
 
 foreach my $test (@tests) {
-	is(run(".nr A $test->[0]\n\\nA\n"), $test->[1],
+	is(run(".nr A $test->[0]\n\\nA\n"), int($test->[1]),
 		"nr - expression $test->[0] produces $test->[1]");
-	is(run(".nr A 5\n.nr A +$test->[0]\n\\nA\n"), 5 + $test->[1],
-		"nr - expression $test->[0] produces " . (5 + $test->[1]));
-	is(run(".nr A 5\n.nr A -$test->[0]\n\\nA\n"), 5 - $test->[1],
-		"nr - expression $test->[0] produces " . (5 - $test->[1]));
+	is(run(".nr A 5\n.nr A +$test->[0]\n\\nA\n"), 5 + int($test->[1]),
+		"nr - expression $test->[0] produces " . (5 + int($test->[1])));
+	is(run(".nr A 5\n.nr A -$test->[0]\n\\nA\n"), 5 - int($test->[1]),
+		"nr - expression $test->[0] produces " . (5 - int($test->[1])));
 }

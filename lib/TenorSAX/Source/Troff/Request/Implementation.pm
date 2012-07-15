@@ -247,7 +247,7 @@ my $requests = [
 			return if defined $existing && $existing->immutable;
 
 			if ($value =~ s/^([+-])//) {
-				$value ||= 0;
+				$value = int($value || 0);
 
 				my $cur = 0;
 				if (exists $state->{parser}->_numbers->{$name}) {
@@ -263,8 +263,8 @@ my $requests = [
 
 			eval {
 				$state->{parser}->_numbers->{$name} =
-					TenorSAX::Source::Troff::Number->new(value => $value,
-						inc_value => $increment);
+					TenorSAX::Source::Troff::Number->new(value => int($value),
+						inc_value => int($increment));
 			};
 			return if $@;
 			return;
@@ -338,6 +338,7 @@ sub make_request {
 		disable_compat => $data->{disable_compat} || 0,
 		code => $data->{code},
 		substitute => $data->{substitute},
+		default_unit => $data->{default_unit} // 'u',
 	);
 	return $req;
 }

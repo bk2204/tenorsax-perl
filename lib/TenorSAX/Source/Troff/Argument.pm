@@ -126,23 +126,51 @@ sub parse {
 
 # All the escapes have already been expanded by now.
 sub evaluate {
-	my ($class, undef, $state, $arg) = @_;
+	my ($class, $request, $state, $arg) = @_;
 
 	$arg =~ s/[ \t]+//g;
 
-	return $class->_evaluate(undef, $state, \$arg);
+	return $class->_evaluate($request, $state, \$arg);
+}
+
+sub _compute_unit {
+	my ($class, $res, $value, $unit) = @_;
+
+	given ($unit) {
+		return $value when /^[us]$/;
+		return $value * $res when 'i';
+		return $value * $res * 50 / 127 when 'c';
+		return $value * $res / 6 when 'P';
+		return $value * $res / 72 when /^[pz]/;
+		return $value * $res * 100 / 7227 when 't';
+		return $value * $res * 400 / 2409 when 'T';
+		return $value * $res * 24 / 1621 when 'D';
+		return $value * $res * 288 / 1621 when 'C';
+		default { return $value; }
+		# TODO: implement [mnMv].
+	}
+}
+
+sub _map_units {
+	my ($class, $request, $state, $value, $unit) = @_;
+	my $parser = $state->{parser};
+	my $res = $parser->_resolution;
+
+	$unit ||= $request->default_unit || 'u';
+
+	return $class->_compute_unit($res, $value, $unit);
 }
 
 sub _evaluate {
-	my ($class, undef, $state, $ref) = @_;
+	my ($class, $request, $state, $ref) = @_;
 
 	my $level = 1;
 	my @vals;
 	my @ops;
 
 	while ($level) {
-		if ($$ref =~ s/^([0-9]+(\.[0-9]+)?)//) {
-			push @vals, $1 + 0;
+		if ($$ref =~ s/^([0-9]+(?:\.[0-9]+)?)([icPmnMpzustTDCv]?)//) {
+			push @vals, $class->_map_units($request, $state, $1 + 0, $2);
 		}
 		else {
 			last unless $$ref =~ s/^(\X)//;
@@ -150,7 +178,7 @@ sub _evaluate {
 			given ($1) {
 				when ($_ eq "(") {
 					$level++;
-					push @vals, $class->_evaluate(undef, $state, $ref);
+					push @vals, $class->_evaluate($request, $state, $ref);
 				}
 				when ($_ eq ")") {
 					$level--;
@@ -219,14 +247,14 @@ sub parse {
 }
 
 sub evaluate {
-	my ($class, undef, $state, $arg) = @_;
+	my ($class, $request, $state, $arg) = @_;
 
 	my $offset = "";
 
 	$arg =~ s/[ \t]+//g;
 	$offset = $1 if ($arg =~ s/^([+-])//);
 
-	return $offset . $class->_evaluate(undef, $state, \$arg);
+	return $offset . $class->_evaluate($request, $state, \$arg);
 }
 
 package TenorSAX::Source::Troff::ConditionalArgument;
@@ -265,18 +293,18 @@ sub parse {
 }
 
 sub evaluate {
-	my ($class, undef, $state, $arg) = @_;
+	my ($class, $request, $state, $arg) = @_;
 	my $negated = 0;
 
 	if ($arg =~ s/^!//) {
 		$negated = 1;
 	}
 
-	return (($class->_evaluate(undef, $state, $arg) > 0) xor $negated) ? 1 : 0;
+	return (($class->_evaluate($request, $state, $arg) > 0) xor $negated) ? 1 : 0;
 }
 
 sub _evaluate {
-	my ($class, undef, $state, $arg) = @_;
+	my ($class, $request, $state, $arg) = @_;
 
 	if ($arg =~ s/^[oe]//) {
 		return 0;
@@ -305,7 +333,7 @@ sub _evaluate {
 
 	$arg =~ s/^f//;
 
-	return TenorSAX::Source::Troff::NumericArgument->evaluate($class, undef,
+	return TenorSAX::Source::Troff::NumericArgument->evaluate($class, $request,
 		$arg);
 }
 
