@@ -35,11 +35,13 @@ ie
 if
 ig
 fi
+mso
 nf
 nop
 nr
 rm
 rn
+so
 tenorsax
 /;
 my @unimplemented = qw/
@@ -197,7 +199,6 @@ evc
 
 rd
 
-so
 pso
 nx
 sy
@@ -234,8 +235,6 @@ psbb
 BP
 EP
 PI
-
-mso
 
 namespace
 start
