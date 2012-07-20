@@ -1,6 +1,6 @@
 #!perl -T
 
-use Test::More tests => 33;
+use Test::More tests => 49;
 use TenorSAX::Source::Troff;
 use TenorSAX::Output::Text;
 
@@ -29,6 +29,10 @@ my @tests = (
 	['rNO', 0, 1, '.nr NO 2'],
 	['rNO', 1, 0],
 	['rNO', 1, 1, '.nr NO 2'],
+	['"a"a"', 0, 1],
+	['"a"a"', 1, 1],
+	['"ab"a"', 0, 0],
+	['"ab"a"', 1, 0],
 );
 
 foreach my $test (@tests) {

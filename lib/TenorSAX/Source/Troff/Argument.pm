@@ -297,8 +297,8 @@ sub parse {
 		$arg .= "f";
 	}
 
-	if ($$lineref =~ m/^[^0-9]/ &&
-		$$lineref =~ s/^((\X)(\X*?)\1(\X*?)\1)([ \t]+|$)//) {
+	if ($$lineref =~ m/^[^0-9(]/ &&
+		$$lineref =~ s/^((\X)(\X*?)\2(\X*?)\2)([ \t]+|$)//) {
 		return "$arg$1";
 	}
 
@@ -343,6 +343,11 @@ sub _evaluate {
 				return exists $state->{parser}->_numbers->{$name};
 			}
 		}
+	}
+
+	if ($arg =~ m/^[^0-9(]/ &&
+		$arg =~ m/^((\X)(\X*?)\2(\X*?)\2)[ \t]*$/) {
+		return $3 eq $4 ? 1 : 0;
 	}
 
 	$arg =~ s/^f//;

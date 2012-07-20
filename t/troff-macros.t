@@ -1,6 +1,6 @@
 #!perl -T
 
-use Test::More tests => 40;
+use Test::More tests => 42;
 use TenorSAX::Source::Troff;
 use TenorSAX::Output::Text;
 
@@ -46,6 +46,7 @@ EOM
 my $ee = <<EOM;
 .de EE
 \\\\\$1.
+.if !"\\\\\$2"" \\\\\$2.
 ..
 EOM
 
@@ -71,8 +72,10 @@ foreach my $aa ($aas, $aaa) {
 			"de - calls are delayed until macro runtime");
 	like(run("$ee.EE A\n"), qr/A\./ms,
 			"de - arguments are interpolated");
+	like(run("$ee.EE A B\n"), qr/A\..*B\./ms,
+			"de - multiple arguments are interpolated");
 	like(run("$ff.FF A\n"), qr/FF\./ms,
-			"de - arguments are interpolated");
+			"de - argument 0 works");
 
 	is(run("$bb.rm BB\n.BB\n"), '', "rm - can remove a macro");
 	like(run("$aa$bb.rm BB\n.AA\n"), qr/Before.\s+After/ms,
