@@ -15,7 +15,10 @@ extends 'TenorSAX::Source::Troff::Stringy';
 sub perform {
 	my ($self, $state, $args) = @_;
 
-	unshift @{$state->{parser}->_data}, split /\R/, $self->text;
+	my @args = ($self->name, @$args);
+	unshift @{$state->{parser}->_data}, map {
+		$state->{parser}->_substitute_args($_, \@args, $state->{opts});
+	} split /\R/, $self->text;
 	return;
 }
 

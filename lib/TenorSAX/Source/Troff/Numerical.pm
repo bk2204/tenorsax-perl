@@ -12,6 +12,12 @@ use Moose;
 
 with 'MooseX::Clone';
 
+has 'name' => (
+	isa => 'Str',
+	is => 'rw',
+	default => '',
+);
+
 sub format {
 	...
 }

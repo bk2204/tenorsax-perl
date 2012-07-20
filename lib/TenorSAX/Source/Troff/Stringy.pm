@@ -12,6 +12,11 @@ use Moose;
 
 with 'MooseX::Clone';
 
+has 'name' => (
+	isa => 'Str',
+	is => 'rw',
+	default => '',
+);
 has 'text' => (
 	isa => 'Str',
 	is => 'rw',

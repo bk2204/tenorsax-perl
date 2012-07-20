@@ -184,6 +184,23 @@ sub _state_to_hash {
 	return $hr;
 }
 
+# Note that args in this function includes the macro name as element 0.
+sub _substitute_args {
+	my $self = shift;
+	my $text = shift;
+	my $args = shift;
+	my $opts = shift || {};
+	my $compat = $opts->{compat};
+
+	$text =~ s/\\\\/\x{102204}/g;
+	my $argpat = $compat ? qr/\\\$(\(([0-9]{2})|([0-9]))/ :
+		qr/\\\$(\(([0-9]{2})|\[([0-9]*?)\]|([0-9]))/;
+	$text =~ s{$argpat}{$args->[int($2 // $3 // $4)] // ''}ge;
+	$text =~ s/\x{102204}/\\\\/g;
+
+	return $text;
+}
+
 sub _expand {
 	my $self = shift;
 	my $text = shift;
@@ -220,7 +237,7 @@ sub _do_request {
 	my $self = shift;
 	my $request = shift;
 	my $opts = shift;
-	my $line = shift;
+	my $line = shift // '';
 	my $args = [];
 	my $state = {parser => $self, environment => $self->_env, opts => $opts};
 
@@ -243,7 +260,9 @@ sub _lookup {
 	if (!exists $table->{$name}) {
 		$table->{$name} = $type->new();
 	}
-	return $table->{$name}->clone;
+	my $clone = $table->{$name}->clone;
+	$clone->name($name);
+	return $clone;
 }
 
 sub _lookup_request {

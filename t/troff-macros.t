@@ -1,6 +1,6 @@
 #!perl -T
 
-use Test::More tests => 36;
+use Test::More tests => 40;
 use TenorSAX::Source::Troff;
 use TenorSAX::Output::Text;
 
@@ -43,6 +43,17 @@ DD.
 ..
 EOM
 
+my $ee = <<EOM;
+.de EE
+\\\\\$1.
+..
+EOM
+
+my $ff = <<EOM;
+.de FF
+\\\\\$0.
+..
+EOM
 
 my $aaa = $aas =~ s/^/.nop /msgr;
 $aaa =~ s/^/.cp 0\n/;
@@ -58,6 +69,10 @@ foreach my $aa ($aas, $aaa) {
 			"de - can call a string from within a macro");
 	like(run(".ds BB CC\n$aa.ds BB BB. \n.AA\n"), qr/Before.\s+BB.\s+After/ms,
 			"de - calls are delayed until macro runtime");
+	like(run("$ee.EE A\n"), qr/A\./ms,
+			"de - arguments are interpolated");
+	like(run("$ff.FF A\n"), qr/FF\./ms,
+			"de - arguments are interpolated");
 
 	is(run("$bb.rm BB\n.BB\n"), '', "rm - can remove a macro");
 	like(run("$aa$bb.rm BB\n.AA\n"), qr/Before.\s+After/ms,
