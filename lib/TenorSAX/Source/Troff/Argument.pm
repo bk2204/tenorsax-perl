@@ -112,7 +112,7 @@ sub parse {
 		my ($level, $arg) = $class->_parse_unparenthesized("", $lineref);
 
 		while ($level) {
-			$$lineref =~ s/^(\X)//;
+			last unless $$lineref =~ s/^(\X)//;
 			my $char = $1;
 
 			if ($char eq "(") {
