@@ -14,11 +14,13 @@ use XML::SAX::Writer;
 
 my $options = {
 	device => 'xml',
+	macro => [],
 };
 my $p = Getopt::Long::Parser->new();
 $p->configure('no_ignore_case', 'bundling');
 $p->getoptions($options,
-	'device|T=s'
+	'device|T=s',
+	'macro|m=s@',
 );
 
 my $output;
@@ -55,6 +57,9 @@ foreach my $file (@init_files) {
 	$data .= ".do tenorsax filename \"$file\"\n";
 	$data .= <$fh>;
 	close($fh);
+}
+foreach my $macro (@{$options->{macro}}) {
+	$data .= ".do mso \"$macro\"\n";
 }
 if (@ARGV) {
 	foreach my $file (@ARGV) {
