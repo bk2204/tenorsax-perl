@@ -423,7 +423,7 @@ sub _lookup_element {
 
 	foreach my $attr (keys %$attributes) {
 		my $hr = $self->_lookup_attribute($attr, $attributes->{$attr});
-		my $key = '{' . $hr->{NamespaceURI} // '' . '}' . $hr->{LocalName};
+		my $key = '{' . ($hr->{NamespaceURI} // '') . '}' . $hr->{LocalName};
 		$result->{Attributes}->{$key} = $hr;
 	}
 	return $result;

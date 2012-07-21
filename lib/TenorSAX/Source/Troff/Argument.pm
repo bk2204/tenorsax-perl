@@ -302,7 +302,7 @@ sub parse {
 		return "$arg$1";
 	}
 
-	return $arg . TenorSAX::Source::Troff::NumericArgument->parse($class, undef,
+	return $arg . TenorSAX::Source::Troff::NumericArgument->parse(undef,
 		$lineref);
 }
 
@@ -352,7 +352,7 @@ sub _evaluate {
 
 	$arg =~ s/^f//;
 
-	return TenorSAX::Source::Troff::NumericArgument->evaluate($class, $request,
+	return TenorSAX::Source::Troff::NumericArgument->evaluate($request, $state,
 		$arg);
 }
 
