@@ -70,6 +70,19 @@ sub end_document {
 	$self->handler->end_document(@args);
 }
 
+sub _is_space_preserving {
+	my ($self) = @_;
+
+	foreach my $item (reverse @{$self->_stack}) {
+		next unless $item->{type} eq 'element';
+		my $value = $item->{value};
+		my $avalue =
+			$value->{Attributes}{'{http://www.w3.org/XML/1998/namespace}space'};
+		return $avalue eq "preserve" if defined $avalue;
+	}
+	return;
+}
+
 # Counts the number of parent elements that have the attributes specified by
 # args.
 sub in_element {
@@ -143,6 +156,10 @@ sub end_element {
 		elsif ($item->{type} eq 'prefix') {
 			$self->handler->end_prefix_mapping($self, $item->{value});
 		}
+		elsif ($item->{type} eq 'characters') {
+			$self->handler->characters($item->{value})
+				if $self->_is_space_preserving;
+		}
 	}
 	return $ret;
 }
@@ -153,7 +170,7 @@ sub end_prefix_mapping {
 	my $ret;
 	while (@{$self->_stack}) {
 		my $item = pop @{$self->_stack};
-		if ($item->{type} eq 'element') {
+		if ($item->{type} =~ m/element|characters/) {
 			push @{$self->_stack}, $item;
 			last;
 		}
@@ -164,12 +181,29 @@ sub end_prefix_mapping {
 }
 
 sub characters {
-	my ($self, @args) = @_;
+	my ($self, $data) = @_;
 	my $trap = $self->element_trap;
 
 	$self->$trap();
 	$self->element_trap(sub {});
-	$self->handler->characters(@args);
+
+	while (@{$self->_stack}) {
+		my $item = pop @{$self->_stack};
+		if ($item->{type} eq 'characters') {
+			$self->handler->characters($item->{value});
+		}
+		else {
+			push @{$self->_stack}, $item;
+			last;
+		}
+	}
+	if ($data->{Data} =~ s/\n\z//ms) {
+		$self->handler->characters($data);
+		push @{$self->_stack}, {type => 'characters', value => {Data => "\n"}};
+	}
+	else {
+		$self->handler->characters($data);
+	}
 }
 
 sub ignorable_whitespace {
