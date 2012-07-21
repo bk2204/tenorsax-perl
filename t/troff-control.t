@@ -1,6 +1,6 @@
 #!perl -T
 
-use Test::More tests => 49;
+use Test::More tests => 50;
 use TenorSAX::Source::Troff;
 use TenorSAX::Output::Text;
 
@@ -78,3 +78,6 @@ foreach my $test (@tests) {
 			($result ? "false" : "true"));
 	}
 }
+
+is(run(".nr pa 1\n.if \\n(pa message\n"), 'message',
+	"if - line is parsed correctly");

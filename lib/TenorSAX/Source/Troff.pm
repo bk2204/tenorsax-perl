@@ -241,12 +241,13 @@ sub _do_request {
 	my $args = [];
 	my $state = {parser => $self, environment => $self->_env, opts => $opts};
 
+	$line = $self->_expand($line, $opts);
+
 	for (my $i = 0; $i < $request->max_args && length $line; $i++) {
 		my $argtype = $request->arg_type->[$i] //
 			'TenorSAX::Source::Troff::Argument';
 		my $arg = $argtype->parse($request, \$line);
-		push @$args, $argtype->evaluate($request, $state, $self->_expand($arg,
-				$opts));
+		push @$args, $argtype->evaluate($request, $state, $arg);
 		$request->modify($state, $args);
 	}
 
