@@ -123,7 +123,9 @@ sub start_element {
 		$self->start_prefix_mapping({Prefix => $prefix, NamespaceURI =>
 				$self->prefixes->{$prefix}});
 	}
+	my $trap = $self->element_trap;
 	$self->element_trap(sub {});
+	$self->$trap($element);
 
 	push @{$self->_stack}, $item;
 	$self->handler->start_element($element);
@@ -184,8 +186,8 @@ sub characters {
 	my ($self, $data) = @_;
 	my $trap = $self->element_trap;
 
-	$self->$trap();
 	$self->element_trap(sub {});
+	$self->$trap(undef);
 
 	while (@{$self->_stack}) {
 		my $item = pop @{$self->_stack};

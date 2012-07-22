@@ -446,6 +446,8 @@ sub _do_parse {
 	}
 	$self->_ch->element_trap(sub {
 			my $ch = shift;
+			my $element = shift;
+			return if !$element || $element->{NamespaceURI} ne $prefixes{_t};
 			$ch->start_element($self->_lookup_element('_t:main'));
 			$ch->start_element($self->_lookup_element('_t:block',
 					$self->_state_to_hash));
