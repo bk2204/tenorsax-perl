@@ -1,4 +1,4 @@
-package TenorSAX::Source::Troff::Environment;
+package TenorSAX::Util::Font::Family;
 
 use v5.14;
 use strict;
@@ -6,63 +6,22 @@ use warnings;
 
 use warnings qw/FATAL utf8/;
 use utf8;
-use feature qw/unicode_strings/;
 
 use Moose;
-use TenorSAX::Meta::Attribute::Trait::Serializable;
+use TenorSAX::Util::Font;
 
-has 'cc' => (
+has 'name' => (
 	is => 'rw',
 	isa => 'Str',
-	default => '.'
 );
-has 'c2' => (
+has 'variants' => (
 	is => 'rw',
-	isa => 'Str',
-	default => "'"
-);
-has 'fill' => (
-	is => 'rw',
-	isa => 'Bool',
-	default => 1,
-	traits => ['Serializable'],
-);
-has 'prev_font' => (
-	is => 'rw',
-	isa => 'Int',
-	default => 1,
-);
-has 'font' => (
-	is => 'rw',
-	isa => 'Int',
-	default => 1,
-	traits => ['Serializable'],
-	serializer => sub {
-		my ($self, $obj, $state) = @_;
-
-		my $reader = $self->get_read_method;
-		my $number = $obj->$reader;
-		my $keys = $state->{state}->font_number->[$number];
-		$keys ||= ['T', 'R'];
-		my $group = $state->{state}->fonts->{$keys->[0]};
-		my $fontinfo = $group->variants->{$keys->[1]};
-
-		return {
-			'font-family' => $group->name,
-			'font-weight' => $fontinfo->weight,
-			'font-variant' => $fontinfo->variant,
-		};
-	},
-);
-has 'font_family' => (
-	is => 'rw',
-	isa => 'Str',
-	default => 'T',
+	isa => 'HashRef[TenorSAX::Util::Font]',
 );
 
 =head1 NAME
 
-TenorSAX::Source::Troff::Environment - The great new TenorSAX::Source::Troff!
+TenorSAX::Util::Font::Family - The great new TenorSAX::Source::Troff!
 
 =head1 VERSION
 
@@ -96,7 +55,7 @@ automatically be notified of progress on your bug as I make changes.
 
 You can find documentation for this module with the perldoc command.
 
-    perldoc TenorSAX::Source::Troff::Environment
+    perldoc TenorSAX::Util::Font::Family
 
 =head1 ACKNOWLEDGEMENTS
 

@@ -1,4 +1,4 @@
-package TenorSAX::Source::Troff::Environment;
+package TenorSAX::Source::Troff::State;
 
 use v5.14;
 use strict;
@@ -10,59 +10,48 @@ use feature qw/unicode_strings/;
 
 use Moose;
 use TenorSAX::Meta::Attribute::Trait::Serializable;
+use TenorSAX::Util::Font;
+use TenorSAX::Util::Font::Family;
 
-has 'cc' => (
+has 'font_number' => (
 	is => 'rw',
-	isa => 'Str',
-	default => '.'
-);
-has 'c2' => (
-	is => 'rw',
-	isa => 'Str',
-	default => "'"
-);
-has 'fill' => (
-	is => 'rw',
-	isa => 'Bool',
-	default => 1,
-	traits => ['Serializable'],
-);
-has 'prev_font' => (
-	is => 'rw',
-	isa => 'Int',
-	default => 1,
-);
-has 'font' => (
-	is => 'rw',
-	isa => 'Int',
-	default => 1,
-	traits => ['Serializable'],
-	serializer => sub {
-		my ($self, $obj, $state) = @_;
-
-		my $reader = $self->get_read_method;
-		my $number = $obj->$reader;
-		my $keys = $state->{state}->font_number->[$number];
-		$keys ||= ['T', 'R'];
-		my $group = $state->{state}->fonts->{$keys->[0]};
-		my $fontinfo = $group->variants->{$keys->[1]};
-
-		return {
-			'font-family' => $group->name,
-			'font-weight' => $fontinfo->weight,
-			'font-variant' => $fontinfo->variant,
-		};
+	isa => 'ArrayRef',
+	default => sub {
+		[undef, ['T', 'R'], ['T', 'I'], ['T', 'B'], ['T', 'BI']]
 	},
 );
-has 'font_family' => (
+has 'fonts' => (
 	is => 'rw',
-	isa => 'Str',
-	default => 'T',
+	isa => 'HashRef[TenorSAX::Util::Font::Family]',
+	default => sub {
+		{
+			'T' => TenorSAX::Util::Font::Family->new(name => 'Times',
+				variants => {
+					'R' => TenorSAX::Util::Font->new(name => 'Times',
+						weight => 'normal',
+						variant => 'normal',
+						type => 'postscript-builtin'),
+					'B' => TenorSAX::Util::Font->new(name => 'Times-Bold',
+						weight => 'bold',
+						variant => 'normal',
+						type => 'postscript-builtin'),
+					'I' => TenorSAX::Util::Font->new(name => 'Times-Italic',
+						weight => 'normal',
+						variant => 'italic',
+						type => 'postscript-builtin'),
+					'BI' => TenorSAX::Util::Font->new(name => 'Times-BoldItalic',
+						weight => 'bold',
+						variant => 'italic',
+						type => 'postscript-builtin'),
+				},
+			),
+		}
+	},
 );
 
 =head1 NAME
 
-TenorSAX::Source::Troff::Environment - The great new TenorSAX::Source::Troff!
+TenorSAX::Source::Troff::State - The great new TenorSAX::Source::Troff!
 
 =head1 VERSION
 
@@ -96,7 +85,7 @@ automatically be notified of progress on your bug as I make changes.
 
 You can find documentation for this module with the perldoc command.
 
-    perldoc TenorSAX::Source::Troff::Environment
+    perldoc TenorSAX::Source::Troff::State
 
 =head1 ACKNOWLEDGEMENTS
 

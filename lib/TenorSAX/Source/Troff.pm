@@ -17,6 +17,7 @@ use TenorSAX::Source::Troff::Argument;
 use TenorSAX::Source::Troff::Environment;
 use TenorSAX::Source::Troff::Request;
 use TenorSAX::Source::Troff::Request::Implementation;
+use TenorSAX::Source::Troff::State;
 use TenorSAX::Util::FancyContentHandler;
 
 extends 'XML::SAX::Base';
@@ -73,9 +74,9 @@ has '_compat' => (
 	init_arg => undef,
 );
 has '_state' => (
-	isa => 'Int',
+	isa => 'TenorSAX::Source::Troff::State',
 	is => 'rw',
-	default => 0,
+	default => sub { TenorSAX::Source::Troff::State->new(); },
 	init_arg => undef,
 );
 has '_env' => (
@@ -165,20 +166,24 @@ sub _parse_string {
 
 sub _state_to_hash {
 	my $self = shift;
+	my $initial = shift;
 	my $hr = {};
 	my $meta = $self->_env->meta;
+	my $state = {parser => $self, environment => $self->_env, state =>
+		$self->_state};
 
 	foreach my $attr (map { $meta->get_attribute($_) }
 		$meta->get_attribute_list) {
 		if ($attr->does('TenorSAX::Meta::Attribute::Trait::Serializable')) {
 			my $name = $attr->name;
-			my $reader = $attr->get_read_method;
-			my $value = $self->_env->$reader;
+			my $values = $attr->serialize($self->_env, $state);
 
-			$name =~ tr/_/-/;
-			$hr->{"_t:$name"} = $value;
-			$hr->{"xml:space"} = $value ? "default" : "preserve"
-				if ($attr->name eq "fill");
+			foreach my $key (keys $values) {
+				$key =~ tr/_/-/;
+				$hr->{"_t:$key"} = $values->{$key};
+				$hr->{"xml:space"} = $values->{$key} ? "default" : "preserve"
+					if ($key eq "fill" && !$initial);
+			}
 		}
 	}
 	return $hr;
@@ -450,7 +455,7 @@ sub _do_parse {
 			return if !$element || $element->{NamespaceURI} ne $prefixes{_t};
 			$ch->start_element($self->_lookup_element('_t:main'));
 			$ch->start_element($self->_lookup_element('_t:block',
-					$self->_state_to_hash));
+					$self->_state_to_hash(1)));
 			return;
 		}
 	);
