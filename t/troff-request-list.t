@@ -32,10 +32,11 @@ ds
 el
 end
 ex
+fi
+ft
 ie
 if
 ig
-fi
 mso
 namespace
 nf
@@ -56,7 +57,6 @@ fzoom
 ss
 cs
 bd
-ft
 fp
 fps
 feature

@@ -188,6 +188,62 @@ my $requests = [
 		}
 	},
 	{
+		name => 'ft',
+		arg_types => [''],
+		code => sub {
+			my ($self, $state, $args) = @_;
+			my $font = $args->[0] || 'P';
+			my $env = $state->{environment};
+			my $prev = $env->prev_font;
+			my $family = $env->font_family;
+			my $p = $state->{parser};
+			my $fonts = $state->{state}->fonts;
+
+			if ($font eq "P") {
+				$env->prev_font($env->font);
+				$env->font($prev);
+			}
+			elsif ($font =~ /^[0-9]+$/) {
+				$env->prev_font($env->font);
+				$env->font(int($font));
+			}
+			elsif (exists $fonts->{$family}) {
+				my $ffamily = $fonts->{$family};
+				my $choice;
+				my $s = $state->{state};
+				if (exists $ffamily->variants->{$font}) {
+					# Look up the font number for this font.
+					foreach my $idx (keys $s->font_number) {
+						next unless ref $s->font_number->[$idx] eq 'ARRAY';
+						my @curpair = @{$s->font_number->[$idx]};
+
+						if ($curpair[0] eq $family && $curpair[1] eq $font) {
+							$choice = $idx;
+							last;
+						}
+					}
+				}
+				else {
+					foreach my $idx (keys $s->font_number) {
+						if (ref $s->font_number->[$idx] eq 'ARRAY' &&
+							join('', @{$s->font_number->[$idx]}) eq $font) {
+
+							$choice = $idx;
+							last;
+						}
+					}
+
+				}
+				$env->prev_font($env->font);
+				$env->font($choice) if defined $choice;
+			}
+			$p->_ch->characters({Data => "\n"}) if $state->{opts}->{as_request};
+			$p->_ch->start_element($p->_lookup_element('_t:inline', $p->_state_to_hash));
+
+			return;
+		}
+	},
+	{
 		name => 'ie',
 		arg_types => ['Conditional', 'FinalString'],
 		code => sub {

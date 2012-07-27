@@ -213,7 +213,8 @@ sub _expand {
 	my $compat = $opts->{compat};
 	my $copy = $self->_copy->{enabled}; # copy mode
 	my $args = [];
-	my $state = {parser => $self, environment => $self->_env};
+	my $state = {parser => $self, environment => $self->_env, state =>
+		$self->_state};
 
 	$opts->{return} = 1;
 
@@ -244,7 +245,8 @@ sub _do_request {
 	my $opts = shift;
 	my $line = shift // '';
 	my $args = [];
-	my $state = {parser => $self, environment => $self->_env, opts => $opts};
+	my $state = {parser => $self, environment => $self->_env, opts => $opts,
+		state => $self->_state};
 
 	$line = $self->_expand($line, $opts);
 
@@ -342,6 +344,7 @@ sub _parse_line_compat {
 		my $request = $self->_lookup_request($2);
 		$opts->{can_break} = $1 eq $self->_env->cc;
 		$opts->{compat} = 0 if $request->disable_compat;
+		$opts->{as_request} = 1;
 		$self->_do_request($request, $opts, $line);
 	}
 	else {
@@ -364,6 +367,7 @@ sub _parse_line {
 	elsif ($line =~ s/^([$controls])(\X*?)([ \t]+|$)//u) {
 		my $request = $self->_lookup_request($2);
 		$opts->{can_break} = $1 eq $self->_env->cc;
+		$opts->{as_request} = 1;
 		$self->_do_request($request, $opts, $line);
 	}
 	else {
