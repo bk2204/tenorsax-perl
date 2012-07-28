@@ -239,6 +239,10 @@ sub _expand {
 	$text =~ s{$strpat}
 		{$self->_lookup_request($2 || $3 || $4)->perform($state, $args)||''}ge;
 
+	if (!$copy) {
+		$text =~ s{\Q$ec\EU'([A-Fa-f0-9]+)'}{chr(hex($1))}ge;
+	}
+
 	# Turn doubled backslashes into regular ones.
 	$text =~ s/\x{102204}/$ec/g;
 
