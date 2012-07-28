@@ -159,6 +159,10 @@ sub _parse_string {
 
 	$self->_setup($options);
 
+	my $forbidden = '[' . join('', map { chr(0x102200+$_) } (0..15)) . ']';
+	die "TenorSAX::Source::Troff: text contains forbidden private-use characters"
+		if $str =~ /$forbidden/;
+
 	push @{$self->_data}, split /\R/, $str;
 	$self->_do_parse();
 }
