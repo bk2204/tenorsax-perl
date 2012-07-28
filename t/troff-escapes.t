@@ -1,6 +1,6 @@
 #!perl -T
 
-use Test::More tests => 12;
+use Test::More tests => 14;
 use TenorSAX::Source::Troff;
 use TenorSAX::Output::Text;
 
@@ -50,3 +50,6 @@ is(run("$cc.ec\n\\*(ST\n"), 'regular', "ec - restore escapes (compat)");
 
 is(run("\\U'200b'\n"), "\x{200b}", "\\U - prints ZWSP");
 is(run("\\U'1F4A9'\n"), "\x{1f4a9}", "\\U - prints PILE OF POO");
+
+is(run("ABC\\\nDEF\n"), "ABCDEF", "\\\\n - swallows newline");
+is(run("ABC \\\nDEF\n"), "ABC DEF", "\\\\n - swallows newline but not space");
