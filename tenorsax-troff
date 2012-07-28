@@ -11,7 +11,9 @@ use utf8;
 use FindBin;
 use lib "$FindBin::Bin/lib";
 
+use File::Path::Expand;
 use Getopt::Long;
+use TenorSAX;
 use TenorSAX::Source::Troff;
 use XML::SAX::Writer;
 
@@ -46,12 +48,8 @@ given ($options->{device}) {
 my $parser = TenorSAX::Source::Troff->new(Handler => $output,
 	Resolution => $resolution);
 
-my @init_files = (
-	"/usr/share/tenorsax/tmac/init.tmac",
-	"/usr/local/share/tenorsax/tmac/init.tmac",
-	"/etc/tenorsax/tmac/init.tmac",
-	"$ENV{HOME}/.config/tenorsax/tmac/init.tmac"
-);
+my @init_files = map { File::Path::Expand::expand_filename($_) }
+	@{$TenorSAX::Config->{troff}->{init_tmac}};
 
 my $data = "";
 foreach my $file (@init_files) {

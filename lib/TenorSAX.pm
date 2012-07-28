@@ -16,6 +16,16 @@ Version 0.01
 
 our $VERSION = '0.01';
 
+our $Config = {
+	'troff' => {
+		init_tmac => [
+			"/usr/share/tenorsax/tmac/init.tmac",
+			"/usr/local/share/tenorsax/tmac/init.tmac",
+			"/etc/tenorsax/tmac/init.tmac",
+			"~/.config/tenorsax/tmac/init.tmac"
+		],
+	}
+};
 
 =head1 SYNOPSIS
 
