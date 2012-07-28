@@ -32,6 +32,7 @@ ds
 ec
 el
 end
+eo
 ex
 fi
 ft
@@ -153,7 +154,6 @@ tc
 lc
 fc
 
-eo
 ecs
 ecr
 lg

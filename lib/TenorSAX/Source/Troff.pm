@@ -23,7 +23,6 @@ use TenorSAX::Util::FancyContentHandler;
 extends 'XML::SAX::Base';
 
 has '_ec' => (
-	isa => 'Str',
 	is => 'rw',
 	default => "\\",
 	init_arg => undef,
@@ -198,6 +197,8 @@ sub _substitute_args {
 	my $compat = $opts->{compat};
 	my $ec = $self->_ec;
 
+	return $text unless defined $ec;
+
 	$text =~ s/\Q$ec$ec\E/\x{102204}/g;
 	my $argpat = $compat ? qr/\Q$ec\E\$(\(([0-9]{2})|([0-9]))/ :
 		qr/\Q$ec\E\$(\(([0-9]{2})|\[([0-9]*?)\]|([0-9]))/;
@@ -219,6 +220,8 @@ sub _expand {
 	my $ec = $self->_ec;
 
 	$opts->{return} = 1;
+
+	return $text unless defined $ec;
 
 	# Temporarily save doubled backslashes.
 	$text =~ s/\Q$ec$ec\E/\x{102204}/g;
@@ -298,7 +301,7 @@ sub _copy_conditional {
 
 	while (@{$self->_data}) {
 		my $line = shift @{$self->_data};
-		if ($line =~ m/^(\X*)\Q$ec\E\}/) {
+		if (defined $ec && $line =~ m/^(\X*)\Q$ec\E\}/) {
 			return "$data$1";
 		}
 

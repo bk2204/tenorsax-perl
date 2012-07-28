@@ -176,6 +176,16 @@ my $requests = [
 		}
 	},
 	{
+		name => 'eo',
+		arg_types => [],
+		code => sub {
+			my ($self, $state, $args) = @_;
+			$state->{parser}->_ec(undef);
+
+			return;
+		}
+	},
+	{
 		name => 'ex',
 		arg_types => [],
 		code => sub {
