@@ -240,6 +240,8 @@ sub _expand {
 		{$self->_lookup_request($2 || $3 || $4)->perform($state, $args)||''}ge;
 
 	$text =~ s{\Q$ec\E$}{shift $self->_data}ge;
+	$text =~ s{\Q$ec\E#.*$}{shift $self->_data}ge;
+	$text =~ s{\Q$ec\E".*$}{}g;
 
 	if (!$copy) {
 		$text =~ s{\Q$ec\EU'([A-Fa-f0-9]+)'}{chr(hex($1))}ge;
