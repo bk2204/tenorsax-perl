@@ -1,6 +1,6 @@
 #!perl -T
 
-use Test::More tests => 6;
+use Test::More tests => 10;
 use TenorSAX::Source::Troff;
 use TenorSAX::Output::Text;
 
@@ -35,6 +35,12 @@ EOM
 is(run("$bb!*[ST]\n"), 'compatST]',
 	"ec - change escape character works (long)");
 is(run("$bb!*(ST\n"), 'regular', "ec - change escape character works (compat)");
+
+is(run("$aa\\e*[ST]\n"), '\\*[ST]', "\\e - emits escape character (long)");
+is(run("$aa\\e*(ST\n"), '\\*(ST', "\\e - emits escape character (compat)");
+
+is(run("$bb!e*[ST]\n"), '!*[ST]', "ec - emits escape character (long)");
+is(run("$bb!e*(ST\n"), '!*(ST', "ec - emits escape character (compat)");
 
 is(run("$cc\\*[ST]\n"), '\\*[ST]', "eo - escapes off (long)");
 is(run("$cc\\*(ST\n"), '\\*(ST', "eo - escapes off (compat)");
