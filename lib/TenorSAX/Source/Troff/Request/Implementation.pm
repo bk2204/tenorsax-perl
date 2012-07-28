@@ -291,7 +291,7 @@ my $requests = [
 		code => sub {
 			my ($self, $state, $args) = @_;
 			my $cond = $args->[0];
-			my $rest = $args->[1];
+			my $rest = $args->[1] || '';
 			my $input = "";
 
 			if ($rest =~ m/\\\{(\X*)/) {

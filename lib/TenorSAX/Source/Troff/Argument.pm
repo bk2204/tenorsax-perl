@@ -236,7 +236,7 @@ sub _evaluate {
 		}
 	}
 
-	return $value;
+	return $value || 0;
 }
 
 no Moose;
@@ -326,7 +326,7 @@ sub _evaluate {
 
 	# FIXME: add support for troff vs. nroff when we add support for units.
 	if ($arg =~ s/^([tn])//) {
-		return $1 eq 't';
+		return $1 eq 't' ? 1 : 0;
 	}
 
 	if ($arg =~ s/^([cdr])(\X*)//) {
@@ -337,10 +337,10 @@ sub _evaluate {
 				return 1;
 			}
 			when (/d/) {
-				return exists $state->{parser}->_requests->{$name};
+				return exists $state->{parser}->_requests->{$name} ? 1 : 0;
 			}
 			when (/r/) {
-				return exists $state->{parser}->_numbers->{$name};
+				return exists $state->{parser}->_numbers->{$name} ? 1 : 0;
 			}
 		}
 	}
