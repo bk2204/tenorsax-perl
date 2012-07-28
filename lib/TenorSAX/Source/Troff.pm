@@ -196,12 +196,13 @@ sub _substitute_args {
 	my $args = shift;
 	my $opts = shift || {};
 	my $compat = $opts->{compat};
+	my $ec = $self->_ec;
 
-	$text =~ s/\\\\/\x{102204}/g;
-	my $argpat = $compat ? qr/\\\$(\(([0-9]{2})|([0-9]))/ :
-		qr/\\\$(\(([0-9]{2})|\[([0-9]*?)\]|([0-9]))/;
+	$text =~ s/\Q$ec$ec\E/\x{102204}/g;
+	my $argpat = $compat ? qr/\Q$ec\E\$(\(([0-9]{2})|([0-9]))/ :
+		qr/\Q$ec\E\$(\(([0-9]{2})|\[([0-9]*?)\]|([0-9]))/;
 	$text =~ s{$argpat}{$args->[int($2 // $3 // $4)] // ''}ge;
-	$text =~ s/\x{102204}/\\\\/g;
+	$text =~ s/\x{102204}/$ec$ec/g;
 
 	return $text;
 }
@@ -215,26 +216,27 @@ sub _expand {
 	my $args = [];
 	my $state = {parser => $self, environment => $self->_env, state =>
 		$self->_state};
+	my $ec = $self->_ec;
 
 	$opts->{return} = 1;
 
 	# Temporarily save doubled backslashes.
-	$text =~ s/\\\\/\x{102204}/g;
-	$text =~ s/\\t/\t/g;
-	$text =~ s/\\a/\x{1}/ge;
+	$text =~ s/\Q$ec$ec\E/\x{102204}/g;
+	$text =~ s/\Q$ec\Et/\t/g;
+	$text =~ s/\Q$ec\Ea/\x{1}/ge;
 
 	# The more complex forms are first because \X will match a ( or [.
-	my $numpat = $compat ? qr/\\n(\((\X{2})|(\X))/ :
-		qr/\\n(\((\X{2})|\[(\X*?)\]|(\X))/;
+	my $numpat = $compat ? qr/\Q$ec\En(\((\X{2})|(\X))/ :
+		qr/\Q$ec\E\\n(\((\X{2})|\[(\X*?)\]|(\X))/;
 	$text =~ s{$numpat}{$self->_lookup_number($2 || $3 || $4)->format()}ge;
 
-	my $strpat = $compat ? qr/\\\*(\((\X{2})|(\X))/ :
-		qr/\\\*(\((\X{2})|\[(\X*?)\]|(\X))/;
+	my $strpat = $compat ? qr/\Q$ec\E\*(\((\X{2})|(\X))/ :
+		qr/\Q$ec\E\*(\((\X{2})|\[(\X*?)\]|(\X))/;
 	$text =~ s{$strpat}
 		{$self->_lookup_request($2 || $3 || $4)->perform($state, $args)||''}ge;
 
 	# Turn doubled backslashes into regular ones.
-	$text =~ s/\x{102204}/\\/g;
+	$text =~ s/\x{102204}/$ec/g;
 
 	return $text;
 }
@@ -292,10 +294,11 @@ sub _lookup_number {
 sub _copy_conditional {
 	my $self = shift;
 	my $data = "";
+	my $ec = $self->_ec;
 
 	while (@{$self->_data}) {
 		my $line = shift @{$self->_data};
-		if ($line =~ m/^(\X*)\\\}/) {
+		if ($line =~ m/^(\X*)\Q$ec\E\}/) {
 			return "$data$1";
 		}
 

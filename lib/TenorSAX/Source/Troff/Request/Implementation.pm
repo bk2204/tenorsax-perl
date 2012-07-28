@@ -130,6 +130,17 @@ my $requests = [
 		}
 	},
 	{
+		name => 'ec',
+		arg_types => [''],
+		code => sub {
+			my ($self, $state, $args) = @_;
+			my $char = $args->[0] || "\\";
+			$state->{parser}->_ec($char);
+
+			return;
+		}
+	},
+	{
 		name => 'el',
 		arg_types => ['FinalString'],
 		code => sub {

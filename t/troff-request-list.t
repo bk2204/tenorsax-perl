@@ -29,6 +29,7 @@ cp
 de
 do
 ds
+ec
 el
 end
 ex
@@ -152,7 +153,6 @@ tc
 lc
 fc
 
-ec
 eo
 ecs
 ecr
