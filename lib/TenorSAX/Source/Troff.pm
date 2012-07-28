@@ -235,7 +235,7 @@ sub _expand {
 
 	# The more complex forms are first because \X will match a ( or [.
 	my $numpat = $compat ? qr/\Q$ec\En(\((\X{2})|(\X))/ :
-		qr/\Q$ec\E\\n(\((\X{2})|\[(\X*?)\]|(\X))/;
+		qr/\Q$ec\En(\((\X{2})|\[(\X*?)\]|(\X))/;
 	$text =~ s{$numpat}{$self->_lookup_number($2 || $3 || $4)->format()}ge;
 
 	my $strpat = $compat ? qr/\Q$ec\E\*(\((\X{2})|(\X))/ :

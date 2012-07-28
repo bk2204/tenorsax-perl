@@ -1,6 +1,6 @@
 #!perl -T
 
-use Test::More tests => 50;
+use Test::More tests => 51;
 use TenorSAX::Source::Troff;
 use TenorSAX::Output::Text;
 
@@ -81,3 +81,26 @@ foreach my $test (@tests) {
 
 is(run(".nr pa 1\n.if \\n(pa message\n"), 'message',
 	"if - line is parsed correctly");
+
+my $test1 = <<EOM;
+.cp 0
+.de AA
+R:\\\\\$1
+..
+.de pp
+.ep
+.AA start
+.nr pa 1
+..
+.de ep
+.if \\\\n(pa .AA end
+.nr pa 0
+..
+.pp
+Text.
+.pp
+More text.
+EOM
+
+is(run($test1), "R:start\nText.\nR:end\nR:start\nMore text.",
+	"bug - parsing if correctly");
