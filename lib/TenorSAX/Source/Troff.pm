@@ -245,12 +245,42 @@ sub _expand {
 
 	if (!$copy) {
 		$text =~ s{\Q$ec\EU'([A-Fa-f0-9]+)'}{chr(hex($1))}ge;
+
+		my $fontpat = $compat ? qr/\Q$ec\Ef(\((\X{2})|(\X))/ :
+			qr/\Q$ec\Ef(\((\X{2})|\[(\X*?)\]|(\X))/;
+		$text =~ s{$fontpat}
+			{"\x{102200}xft\x{102201}" . ($2 || $3 || $4) . "\x{102202}"}ge;
 	}
 
 	# Turn doubled backslashes into regular ones.
 	$text =~ s/\x{102204}/$ec/g;
 
 	return $text;
+}
+
+sub _emit_characters {
+	my $self = shift;
+	my $text = shift;
+	my $suffix = shift;
+	my $state = {parser => $self, environment => $self->_env, opts => {},
+		state => $self->_state};
+
+	my @items = split /(\x{102200}\X*?\x{102202})/, $text;
+	foreach my $item (@items) {
+		if ($item =~ /\x{102200}(\X)(\X*)\x{102202}/) {
+			my $cmd = $1;
+			next unless $cmd eq "x";
+			my @pieces = split /\x{102201}/, $2;
+			my $name = shift @pieces;
+			my $request = $self->_lookup_request($name);
+			my $res = $request->perform($state, \@pieces);
+			$self->_emit_characters($res) if defined $res;
+		}
+		else {
+			$self->_ch->characters({Data => $item});
+		}
+	}
+	$self->_ch->characters({Data => $suffix}) if $suffix;
 }
 
 sub _do_request {
@@ -273,7 +303,7 @@ sub _do_request {
 	}
 
 	my $text = $request->perform($state, $args);
-	$self->_ch->characters({Data => $text}) if defined $text;
+	$self->_emit_characters($text) if defined $text;
 }
 
 sub _lookup {
@@ -407,7 +437,7 @@ sub _do_text_line {
 		$self->_copy->{data} .= "$line\n";
 	}
 	else {
-		$self->_ch->characters({Data => "$line\n"});
+		$self->_emit_characters($line, "\n");
 	}
 };
 
