@@ -190,9 +190,10 @@ sub _extract_attributes {
 			my $values = $attr->serialize($obj, $state);
 
 			foreach my $key (keys $values) {
+				my $value = $values->{$key};
 				$key =~ tr/_/-/;
-				$hr{"_t:$key"} = $values->{$key};
-				$hr{"xml:space"} = $values->{$key} ? "default" : "preserve"
+				$hr{"_t:$key"} = $value;
+				$hr{"xml:space"} = $value ? "default" : "preserve"
 					if ($key eq "fill" && !$initial);
 			}
 		}

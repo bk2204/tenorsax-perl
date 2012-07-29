@@ -36,6 +36,12 @@ has 'page_length' => (
 		};
 	},
 );
+has 'paper_size' => (
+	is => 'rw',
+	isa => 'Str',
+	default => 'letter',
+	traits => ['Serializable'],
+);
 has 'fonts' => (
 	is => 'rw',
 	isa => 'HashRef[TenorSAX::Util::Font::Family]',

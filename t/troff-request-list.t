@@ -44,6 +44,7 @@ namespace
 nf
 nop
 nr
+papersize
 pl
 ps
 rm
@@ -68,7 +69,6 @@ hidechar
 spacewidth
 fspacewidth
 
-papersize
 mediasize
 cropat
 trimat

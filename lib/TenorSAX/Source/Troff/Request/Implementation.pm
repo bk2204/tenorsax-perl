@@ -418,6 +418,17 @@ my $requests = [
 		}
 	},
 	{
+		name => 'papersize',
+		arg_types => [''],
+		code => sub {
+			my ($self, $state, $args) = @_;
+			my $value = $args->[0] or return;
+
+			$state->{state}->paper_size($value);
+			return;
+		}
+	},
+	{
 		name => 'pl',
 		arg_types => ['OffsetNumeric'],
 		default_unit => 'v',
