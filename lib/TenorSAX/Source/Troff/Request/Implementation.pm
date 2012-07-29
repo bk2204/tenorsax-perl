@@ -20,7 +20,8 @@ sub _do_break {
 	my $p = $state->{parser};
 
 	if ($state->{opts}->{can_break}) {
-		$p->_ch->end_element($p->_lookup_element('_t:block'));
+		$p->_ch->end_element($p->_lookup_element('_t:block'))
+			if $p->_ch->in_element({Name => '_t:block'});
 		$p->_ch->start_element($p->_lookup_element('_t:block',
 			$p->_state_to_hash));
 	}
@@ -259,6 +260,8 @@ my $requests = [
 				$env->font($choice) if defined $choice;
 			}
 			$p->_ch->characters({Data => "\n"}) if $state->{opts}->{as_request};
+			$p->_ch->end_element($p->_lookup_element('_t:inline'))
+				if $p->_ch->in_element({Name => '_t:inline'});
 			$p->_ch->start_element($p->_lookup_element('_t:inline', $p->_state_to_hash));
 
 			return;
