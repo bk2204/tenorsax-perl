@@ -227,11 +227,20 @@ sub _expand {
 
 	return $text unless defined $ec;
 
+	my $charmap = {
+		e => "\x{102204}",
+		t => "\t",
+		a => "\x{1}",
+		'&' => "\x{200b}",
+		';' => "\x{200b}",
+	};
+
 	# Temporarily save doubled backslashes.
 	$text =~ s/\Q$ec$ec\E/\x{102204}/g;
-	$text =~ s/\Q$ec\Ee/\x{102204}/g;
-	$text =~ s/\Q$ec\Et/\t/g;
-	$text =~ s/\Q$ec\Ea/\x{1}/g;
+
+	# FIXME: handle the case where one of these letters is followed by a
+	# combining mark.
+	$text =~ s/\Q$ec\E([eta&;])/$charmap->{$1}/ge;
 
 	# The more complex forms are first because \X will match a ( or [.
 	my $numpat = $compat ? qr/\Q$ec\En(\((\X{2})|(\X))/ :
