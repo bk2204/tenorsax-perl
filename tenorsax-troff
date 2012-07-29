@@ -31,18 +31,36 @@ $p->getoptions($options,
 my $output;
 my $resolution = 72000;
 given ($options->{device}) {
-	when (/^text$/) {
+	when ("text") {
 		require TenorSAX::Output::Text;
 		$output = TenorSAX::Output::Text->new();
 	}
-	when (/^utf8/) {
+	when ("utf8") {
 		require TenorSAX::Output::Terminal;
 		$resolution = 240;
 		$output = TenorSAX::Output::Terminal->new(Resolution => $resolution);
 	}
-	default {
+	when ("xml") {
 		require XML::SAX::Writer;
 		$output = XML::SAX::Writer->new();
+	}
+	default {
+		my $stylesheet;
+		my @xslt_dirs = map { File::Path::Expand::expand_filename($_) }
+			@{$TenorSAX::Config->{troff}->{xslt}};
+		foreach my $dir (reverse @xslt_dirs) {
+			$stylesheet = "$dir/format-$options->{device}.xsl";
+			last if -r $stylesheet;
+			$stylesheet = undef;
+		}
+		die "Can't load stylesheet for device $options->{device}"
+			unless $stylesheet;
+
+		require XML::SAX::Writer;
+		require XML::Filter::XSLT;
+		my $final = XML::SAX::Writer->new();
+		$output = XML::Filter::XSLT->new(Handler => $final);
+		$output->set_stylesheet_uri($stylesheet);
 	}
 }
 my $parser = TenorSAX::Source::Troff->new(Handler => $output,

@@ -24,6 +24,12 @@ our $Config = {
 			"/etc/tenorsax/tmac/init.tmac",
 			"~/.config/tenorsax/tmac/init.tmac"
 		],
+		xslt => [
+			"/usr/share/tenorsax/xslt/",
+			"/usr/local/share/tenorsax/xslt/",
+			"/etc/tenorsax/xslt/",
+			"~/.config/tenorsax/xslt/"
+		],
 	}
 };
 
