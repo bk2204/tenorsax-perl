@@ -226,6 +226,7 @@ sub _evaluate {
 	while (@vals) {
 		my $second = shift @vals;
 		my $op = shift @ops;
+
 		if ($op eq "<?") {
 			$value = $second if $second < $value;
 		}

@@ -418,6 +418,30 @@ my $requests = [
 		}
 	},
 	{
+		name => 'pl',
+		arg_types => ['OffsetNumeric'],
+		default_unit => 'v',
+		code => sub {
+			my ($self, $state, $args) = @_;
+			my $value = $args->[0] or return;
+
+			if ($value =~ s/^([+-])//) {
+				$value ||= 0;
+
+				my $cur = $state->{state}->page_length;
+				if ($1 eq "+") {
+					$value = $cur + $value;
+				}
+				else {
+					$value = $cur - $value;
+				}
+			}
+
+			$state->{state}->page_length($value);
+			return;
+		}
+	},
+	{
 		name => 'ps',
 		arg_types => ['OffsetNumeric'],
 		default_unit => 'p',

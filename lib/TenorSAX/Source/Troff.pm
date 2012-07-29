@@ -156,6 +156,7 @@ sub _setup {
 	my $state = {parser => $self, environment => $self->_env, state =>
 		$self->_state};
 	$self->_env->setup($state);
+	$self->_state->setup($state);
 }
 
 sub _parse_string {
@@ -173,29 +174,41 @@ sub _parse_string {
 	$self->_do_parse();
 }
 
-sub _state_to_hash {
+sub _extract_attributes {
 	my $self = shift;
+	my $obj = shift;
 	my $initial = shift;
-	my $hr = {};
-	my $meta = $self->_env->meta;
+	my %hr;
 	my $state = {parser => $self, environment => $self->_env, state =>
 		$self->_state};
+	my $meta = $obj->meta;
 
 	foreach my $attr (map { $meta->get_attribute($_) }
 		$meta->get_attribute_list) {
 		if ($attr->does('TenorSAX::Meta::Attribute::Trait::Serializable')) {
 			my $name = $attr->name;
-			my $values = $attr->serialize($self->_env, $state);
+			my $values = $attr->serialize($obj, $state);
 
 			foreach my $key (keys $values) {
 				$key =~ tr/_/-/;
-				$hr->{"_t:$key"} = $values->{$key};
-				$hr->{"xml:space"} = $values->{$key} ? "default" : "preserve"
+				$hr{"_t:$key"} = $values->{$key};
+				$hr{"xml:space"} = $values->{$key} ? "default" : "preserve"
 					if ($key eq "fill" && !$initial);
 			}
 		}
 	}
-	return $hr;
+	return %hr;
+}
+
+sub _state_to_hash {
+	my $self = shift;
+	my $initial = shift;
+	my $hr = {};
+
+	return {
+		$self->_extract_attributes($self->_env, $initial),
+		$self->_extract_attributes($self->_state, $initial),
+	};
 }
 
 # Note that args in this function includes the macro name as element 0.

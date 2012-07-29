@@ -20,6 +20,22 @@ has 'font_number' => (
 		[undef, ['T', 'R'], ['T', 'I'], ['T', 'B'], ['T', 'BI']]
 	},
 );
+has 'page_length' => (
+	is => 'rw',
+	isa => 'Num',
+	traits => ['Serializable'],
+	serializer => sub {
+		my ($self, $obj, $state) = @_;
+
+		my $reader = $self->get_read_method;
+		my $number = $obj->$reader;
+		$number = $number / $state->{parser}->_resolution;
+
+		return {
+			'page-length' => "${number}in",
+		};
+	},
+);
 has 'fonts' => (
 	is => 'rw',
 	isa => 'HashRef[TenorSAX::Util::Font::Family]',
@@ -48,6 +64,12 @@ has 'fonts' => (
 		}
 	},
 );
+
+sub setup {
+	my ($self, $state) = @_;
+
+	$self->page_length(11 * $state->{parser}->_resolution);
+}
 
 =head1 NAME
 

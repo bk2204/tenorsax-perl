@@ -22,6 +22,14 @@ my $registers = [
 		}
 	},
 	{
+		name => '.p',
+		code => sub {
+			my ($self, $state) = @_;
+
+			return $state->{state}->page_length;
+		}
+	},
+	{
 		name => '.ps',
 		code => sub {
 			my ($self, $state) = @_;

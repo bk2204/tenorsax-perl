@@ -44,6 +44,7 @@ namespace
 nf
 nop
 nr
+pl
 ps
 rm
 rn
@@ -67,7 +68,6 @@ hidechar
 spacewidth
 fspacewidth
 
-pl
 papersize
 mediasize
 cropat
