@@ -67,6 +67,20 @@ sub start_document {
 
 sub end_document {
 	my ($self, @args) = @_;
+
+	while (@{$self->_stack}) {
+		my $item = pop @{$self->_stack};
+		if ($item->{type} eq 'element') {
+			$self->handler->end_element($item->{value});
+		}
+		elsif ($item->{type} eq 'prefix') {
+			$self->handler->end_prefix_mapping($self, $item->{value});
+		}
+		elsif ($item->{type} eq 'characters') {
+			$self->handler->characters($item->{value})
+				if $self->_is_space_preserving;
+		}
+	}
 	$self->handler->end_document(@args);
 }
 
