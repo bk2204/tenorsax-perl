@@ -37,7 +37,7 @@ has 'font_size' => (
 
 		my $reader = $self->get_read_method;
 		my $number = $obj->$reader;
-		$number = $number * $state->{parser}->_resolution / 72;
+		$number = $number * 72 / $state->{parser}->_resolution;
 
 		return {
 			'font-size' => "${number}pt",
