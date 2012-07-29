@@ -311,9 +311,10 @@ sub _do_request {
 }
 
 sub _lookup {
-	my ($self, $name, $table, $type) = @_;
+	my ($self, $name, $table, $type, $undef_ok) = @_;
 
 	if (!exists $table->{$name}) {
+		return if $undef_ok;
 		$table->{$name} = $type->new();
 	}
 	my $clone = $table->{$name}->clone;
@@ -324,17 +325,19 @@ sub _lookup {
 sub _lookup_request {
 	my $self = shift;
 	my $name = shift;
+	my $undef_ok = shift;
 
 	return $self->_lookup($name, $self->_requests,
-		'TenorSAX::Source::Troff::Request');
+		'TenorSAX::Source::Troff::Request', $undef_ok);
 }
 
 sub _lookup_number {
 	my $self = shift;
 	my $name = shift;
+	my $undef_ok = shift;
 
 	return $self->_lookup($name, $self->_numbers,
-		'TenorSAX::Source::Troff::Number');
+		'TenorSAX::Source::Troff::Number', $undef_ok);
 }
 
 sub _copy_conditional {
@@ -432,10 +435,16 @@ sub _do_text_line {
 	$line = $self->_expand($line, $opts);
 
 	if (!length $line) {
-		# FIXME: don't depend on .br not being redefined.
-		my $request = $self->_lookup_request("br");
-		my $opts = {can_break => 1};
-		return $self->_do_request($request, $opts);
+		# Most XML-based formats will undefine .br to avoid adding unwanted
+		# block elements, so simply emit a newline in that case.
+		my $request = $self->_lookup_request("br", 1);
+		if ($request) {
+			my $opts = {can_break => 1};
+			return $self->_do_request($request, $opts);
+		}
+		else {
+			$self->_emit_characters("\n");
+		}
 	}
 	elsif ($self->_copy->{enabled}) {
 		$self->_copy->{data} .= "$line\n";
