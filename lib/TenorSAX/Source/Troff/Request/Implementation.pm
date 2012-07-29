@@ -418,6 +418,30 @@ my $requests = [
 		}
 	},
 	{
+		name => 'ps',
+		arg_types => ['OffsetNumeric'],
+		default_unit => 'p',
+		code => sub {
+			my ($self, $state, $args) = @_;
+			my $value = $args->[0] or return;
+
+			if ($value =~ s/^([+-])//) {
+				$value ||= 0;
+
+				my $cur = $state->{environment}->font_size;
+				if ($1 eq "+") {
+					$value = $cur + $value;
+				}
+				else {
+					$value = $cur - $value;
+				}
+			}
+
+			$state->{environment}->font_size($value);
+			return;
+		}
+	},
+	{
 		name => 'rm',
 		arg_types => [''],
 		code => sub {

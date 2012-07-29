@@ -15,6 +15,7 @@ use namespace::autoclean;
 
 use TenorSAX::Source::Troff::Argument;
 use TenorSAX::Source::Troff::Environment;
+use TenorSAX::Source::Troff::Numerical::Implementation;
 use TenorSAX::Source::Troff::Request;
 use TenorSAX::Source::Troff::Request::Implementation;
 use TenorSAX::Source::Troff::State;
@@ -150,6 +151,11 @@ sub _setup {
 		)
 	);
 	$self->_requests(TenorSAX::Source::Troff::Request::Implementation->requests());
+	$self->_numbers(TenorSAX::Source::Troff::Numerical::Implementation->numbers());
+
+	my $state = {parser => $self, environment => $self->_env, state =>
+		$self->_state};
+	$self->_env->setup($state);
 }
 
 sub _parse_string {
@@ -245,7 +251,7 @@ sub _expand {
 	# The more complex forms are first because \X will match a ( or [.
 	my $numpat = $compat ? qr/\Q$ec\En(\((\X{2})|(\X))/ :
 		qr/\Q$ec\En(\((\X{2})|\[(\X*?)\]|(\X))/;
-	$text =~ s{$numpat}{$self->_lookup_number($2 || $3 || $4)->format()}ge;
+	$text =~ s{$numpat}{$self->_lookup_number($2 || $3 || $4)->format($state)}ge;
 
 	my $strpat = $compat ? qr/\Q$ec\E\*(\((\X{2})|(\X))/ :
 		qr/\Q$ec\E\*(\((\X{2})|\[(\X*?)\]|(\X))/;

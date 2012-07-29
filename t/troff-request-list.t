@@ -44,6 +44,7 @@ namespace
 nf
 nop
 nr
+ps
 rm
 rn
 so
@@ -54,7 +55,6 @@ my @unimplemented = qw/
 xflag
 
 lc_ctype
-ps
 fzoom
 ss
 cs

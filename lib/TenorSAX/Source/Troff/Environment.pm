@@ -27,6 +27,23 @@ has 'fill' => (
 	default => 1,
 	traits => ['Serializable'],
 );
+has 'font_size' => (
+	is => 'rw',
+	isa => 'Num',
+	default => 10,
+	traits => ['Serializable'],
+	serializer => sub {
+		my ($self, $obj, $state) = @_;
+
+		my $reader = $self->get_read_method;
+		my $number = $obj->$reader;
+		$number = $number * $state->{parser}->_resolution / 72;
+
+		return {
+			'font-size' => "${number}pt",
+		};
+	},
+);
 has 'prev_font' => (
 	is => 'rw',
 	isa => 'Int',
@@ -59,6 +76,13 @@ has 'font_family' => (
 	isa => 'Str',
 	default => 'T',
 );
+
+sub setup {
+	my ($self, $state) = @_;
+	my $value = $self->font_size;
+
+	$self->font_size($value * $state->{parser}->_resolution / 72);
+}
 
 =head1 NAME
 
