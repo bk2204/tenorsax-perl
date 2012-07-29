@@ -22,6 +22,14 @@ my $registers = [
 		}
 	},
 	{
+		name => '.o',
+		code => sub {
+			my ($self, $state) = @_;
+
+			return $state->{state}->page_offset;
+		}
+	},
+	{
 		name => '.p',
 		code => sub {
 			my ($self, $state) = @_;

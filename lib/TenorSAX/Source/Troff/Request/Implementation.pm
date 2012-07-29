@@ -43,6 +43,22 @@ sub _load_file {
 	unshift @{$parser->_data}, split /\R/, $data;
 }
 
+sub _do_offset {
+	my ($cur, $value) = @_;
+
+	if ($value =~ s/^([+-])//) {
+		$value ||= 0;
+
+		if ($1 eq "+") {
+			$value = $cur + $value;
+		}
+		else {
+			$value = $cur - $value;
+		}
+	}
+	return $value;
+}
+
 my $requests = [
 	{
 		name => 'als',
@@ -435,20 +451,22 @@ my $requests = [
 		code => sub {
 			my ($self, $state, $args) = @_;
 			my $value = $args->[0] or return;
+			my $cur = $state->{state}->page_length;
 
-			if ($value =~ s/^([+-])//) {
-				$value ||= 0;
+			$state->{state}->page_length(_do_offset($cur, $value));
+			return;
+		}
+	},
+	{
+		name => 'po',
+		arg_types => ['OffsetNumeric'],
+		default_unit => 'v',
+		code => sub {
+			my ($self, $state, $args) = @_;
+			my $value = $args->[0] or return;
+			my $cur = $state->{state}->page_offset;
 
-				my $cur = $state->{state}->page_length;
-				if ($1 eq "+") {
-					$value = $cur + $value;
-				}
-				else {
-					$value = $cur - $value;
-				}
-			}
-
-			$state->{state}->page_length($value);
+			$state->{state}->page_offset(_do_offset($cur, $value));
 			return;
 		}
 	},
@@ -459,20 +477,9 @@ my $requests = [
 		code => sub {
 			my ($self, $state, $args) = @_;
 			my $value = $args->[0] or return;
+			my $cur = $state->{environment}->font_size;
 
-			if ($value =~ s/^([+-])//) {
-				$value ||= 0;
-
-				my $cur = $state->{environment}->font_size;
-				if ($1 eq "+") {
-					$value = $cur + $value;
-				}
-				else {
-					$value = $cur - $value;
-				}
-			}
-
-			$state->{environment}->font_size($value);
+			$state->{environment}->font_size(_do_offset($cur, $value));
 			return;
 		}
 	},

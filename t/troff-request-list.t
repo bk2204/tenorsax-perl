@@ -46,6 +46,7 @@ nop
 nr
 papersize
 pl
+po
 ps
 rm
 rn
@@ -75,7 +76,6 @@ trimat
 bleedat
 bp
 pn
-po
 ne
 mk
 rt

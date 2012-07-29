@@ -36,6 +36,22 @@ has 'page_length' => (
 		};
 	},
 );
+has 'page_offset' => (
+	is => 'rw',
+	isa => 'Num',
+	traits => ['Serializable'],
+	serializer => sub {
+		my ($self, $obj, $state) = @_;
+
+		my $reader = $self->get_read_method;
+		my $number = $obj->$reader;
+		$number = $number / $state->{parser}->_resolution;
+
+		return {
+			'page-offset' => "${number}in",
+		};
+	},
+);
 has 'paper_size' => (
 	is => 'rw',
 	isa => 'Str',
@@ -75,6 +91,7 @@ sub setup {
 	my ($self, $state) = @_;
 
 	$self->page_length(11 * $state->{parser}->_resolution);
+	$self->page_offset($state->{parser}->_resolution);
 }
 
 =head1 NAME
