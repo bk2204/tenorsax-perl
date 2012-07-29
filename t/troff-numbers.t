@@ -1,6 +1,6 @@
 #!perl -T
 
-use Test::More tests => (71 * 3) + 9;
+use Test::More tests => (71 * 3) + 10;
 use TenorSAX::Source::Troff;
 use TenorSAX::Output::Text;
 
@@ -33,6 +33,8 @@ is(run(".nr A (5*4-3)\n\\nA\n"), "17",
 	"nr - uses left-to-right evaluation inside parentheses");
 is(run(".nr A (5-4*3)\n\\nA\n"), "3",
 	"nr - ignores order of operations inside parentheses");
+is(run(".nr .s 1000000\n\\n(.s\n"), "10",
+	"nr - can't set read-only registers");
 
 my @tests = (
 	['((5*4)-3)', 17],

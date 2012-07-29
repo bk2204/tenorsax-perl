@@ -25,11 +25,6 @@ has 'format_type' => (
 	is => 'rw',
 	default => '1',
 );
-has 'immutable' => (
-	isa => 'Bool',
-	is => 'ro',
-	default => '0',
-);
 
 extends 'TenorSAX::Source::Troff::Numerical';
 

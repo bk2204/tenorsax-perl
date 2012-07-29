@@ -36,6 +36,7 @@ sub make_number {
 	my ($class, $data) = @_;
 	my $num = TenorSAX::Source::Troff::SpecialNumber->new(
 		code => $data->{code},
+		immutable => 1,
 	);
 	return $num;
 }

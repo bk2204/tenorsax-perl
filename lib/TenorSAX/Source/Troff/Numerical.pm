@@ -17,6 +17,11 @@ has 'name' => (
 	is => 'rw',
 	default => '',
 );
+has 'immutable' => (
+	isa => 'Bool',
+	is => 'ro',
+	default => '0',
+);
 
 sub format {
 	...
