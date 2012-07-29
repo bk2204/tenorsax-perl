@@ -20,29 +20,33 @@ use XML::SAX::Writer;
 my $options = {
 	device => 'xml',
 	macro => [],
+	output => undef,
 };
 my $p = Getopt::Long::Parser->new();
 $p->configure('no_ignore_case', 'bundling');
 $p->getoptions($options,
 	'device|T=s',
 	'macro|m=s@',
+	'output|o=s',
 );
 
+my %attr = ($options->{output} ? (Output => $options->{output}) : ());
 my $output;
 my $resolution = 72000;
 given ($options->{device}) {
 	when ("text") {
 		require TenorSAX::Output::Text;
-		$output = TenorSAX::Output::Text->new();
+		$output = TenorSAX::Output::Text->new(%attr);
 	}
 	when ("utf8") {
 		require TenorSAX::Output::Terminal;
 		$resolution = 240;
-		$output = TenorSAX::Output::Terminal->new(Resolution => $resolution);
+		$output = TenorSAX::Output::Terminal->new(Resolution => $resolution,
+			%attr);
 	}
 	when ("xml") {
 		require XML::SAX::Writer;
-		$output = XML::SAX::Writer->new();
+		$output = XML::SAX::Writer->new(%attr);
 	}
 	default {
 		my $stylesheet;
@@ -58,7 +62,7 @@ given ($options->{device}) {
 
 		require XML::SAX::Writer;
 		require XML::Filter::XSLT;
-		my $final = XML::SAX::Writer->new();
+		my $final = XML::SAX::Writer->new(%attr);
 		$output = XML::Filter::XSLT->new(Handler => $final);
 		$output->set_stylesheet_uri($stylesheet);
 	}
