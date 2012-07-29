@@ -9,7 +9,7 @@ use warnings qw/FATAL utf8/;
 use utf8;
 
 use FindBin;
-use lib "$FindBin::Bin/lib";
+use lib "$FindBin::RealBin/lib";
 
 use File::Path::Expand;
 use Getopt::Long;
