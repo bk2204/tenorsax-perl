@@ -1,6 +1,6 @@
 #!perl -T
 
-use Test::More tests => (71 * 3) + 10;
+use Test::More tests => (72 * 3) + 10;
 use TenorSAX::Source::Troff;
 use TenorSAX::Output::Text;
 
@@ -108,6 +108,7 @@ my @tests = (
 	['1D', 240 * 24 / 1621],
 	['1C', 240 * 288 / 1621],
 	['(4.25i+2P)/2u', 550],
+	['\\n($$', $$],
 );
 
 foreach my $test (@tests) {

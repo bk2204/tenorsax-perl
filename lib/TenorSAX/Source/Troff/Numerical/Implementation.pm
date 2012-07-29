@@ -14,6 +14,14 @@ use TenorSAX::Source::Troff::SpecialNumber;
 
 my $registers = [
 	{
+		name => '$$',
+		code => sub {
+			my ($self, $state) = @_;
+
+			return $$;
+		}
+	},
+	{
 		name => '.ps',
 		code => sub {
 			my ($self, $state) = @_;
