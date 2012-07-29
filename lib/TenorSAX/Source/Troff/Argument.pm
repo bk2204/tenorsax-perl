@@ -142,7 +142,7 @@ sub evaluate {
 }
 
 sub _compute_unit {
-	my ($class, $res, $value, $unit) = @_;
+	my ($class, $res, $value, $unit, $ptsize) = @_;
 
 	given ($unit) {
 		return $value when /^[us]$/;
@@ -154,8 +154,11 @@ sub _compute_unit {
 		return $value * $res * 400 / 2409 when 'T';
 		return $value * $res * 24 / 1621 when 'D';
 		return $value * $res * 288 / 1621 when 'C';
+		return $value * $ptsize when 'm';
+		return $value * $ptsize / 2 when 'n';
+		return $value * $ptsize / 100 when 'M';
 		default { return $value; }
-		# TODO: implement [mnMv].
+		# TODO: implement v.
 	}
 }
 
@@ -163,10 +166,11 @@ sub _map_units {
 	my ($class, $request, $state, $value, $unit) = @_;
 	my $parser = $state->{parser};
 	my $res = $parser->_resolution;
+	my $ptsize = $state->{environment}->font_size;
 
 	$unit ||= $request->default_unit || 'u';
 
-	return $class->_compute_unit($res, $value, $unit);
+	return $class->_compute_unit($res, $value, $unit, $ptsize);
 }
 
 sub _evaluate {
