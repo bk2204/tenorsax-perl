@@ -340,6 +340,19 @@ my $requests = [
 		}
 	},
 	{
+		name => 'll',
+		arg_types => ['OffsetNumeric'],
+		default_unit => 'm',
+		code => sub {
+			my ($self, $state, $args) = @_;
+			my $value = $args->[0] or return;
+			my $cur = $state->{environment}->line_length;
+
+			$state->{environment}->line_length(_do_offset($cur, $value));
+			return;
+		}
+	},
+	{
 		name => 'mso',
 		arg_types => [''],
 		code => sub {

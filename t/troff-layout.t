@@ -1,6 +1,6 @@
 #!perl -T
 
-use Test::More tests => 16;
+use Test::More tests => 20;
 use TenorSAX::Source::Troff;
 use TenorSAX::Output::Text;
 
@@ -38,3 +38,8 @@ is(run("\\n(.o\n"), "72000", "po - default is 1 inch");
 is(run(".po 5i\n\\n(.o\n"), "360000", "po - affects .o register");
 is(run(".po +1i\n\\n(.o\n"), "144000", "po - increment affects .o register");
 is(run(".po -1i\n\\n(.o\n"), "0", "po - decrement affects .o register");
+
+is(run("\\n(.l\n"), "468000", "ll - default is 6.5 inches");
+is(run(".ll 5i\n\\n(.l\n"), "360000", "ll - affects .l register");
+is(run(".ll +1i\n\\n(.l\n"), "540000", "ll - increment affects .o register");
+is(run(".ll -1i\n\\n(.l\n"), "396000", "ll - decrement affects .o register");

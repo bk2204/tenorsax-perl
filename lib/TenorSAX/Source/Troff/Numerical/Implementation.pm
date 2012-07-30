@@ -22,6 +22,14 @@ my $registers = [
 		}
 	},
 	{
+		name => '.l',
+		code => sub {
+			my ($self, $state) = @_;
+
+			return $state->{environment}->line_length;
+		}
+	},
+	{
 		name => '.o',
 		code => sub {
 			my ($self, $state) = @_;

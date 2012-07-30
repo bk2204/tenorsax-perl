@@ -44,6 +44,22 @@ has 'font_size' => (
 		};
 	},
 );
+has 'line_length' => (
+	is => 'rw',
+	isa => 'Num',
+	traits => ['Serializable'],
+	serializer => sub {
+		my ($self, $obj, $state) = @_;
+
+		my $reader = $self->get_read_method;
+		my $number = $obj->$reader;
+		$number = $number / $state->{parser}->_resolution;
+
+		return {
+			'line-length' => "${number}in",
+		};
+	},
+);
 has 'prev_font' => (
 	is => 'rw',
 	isa => 'Int',
@@ -82,6 +98,7 @@ sub setup {
 	my $value = $self->font_size;
 
 	$self->font_size($value * $state->{parser}->_resolution / 72);
+	$self->line_length(6.5 * $state->{parser}->_resolution);
 }
 
 =head1 NAME
