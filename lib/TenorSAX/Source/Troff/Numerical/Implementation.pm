@@ -62,6 +62,14 @@ my $registers = [
 				$state->{parser}->_resolution;
 		}
 	},
+	{
+		name => '.v',
+		code => sub {
+			my ($self, $state) = @_;
+
+			return $state->{environment}->vertical_space;
+		}
+	},
 ];
 
 sub make_number {

@@ -54,6 +54,7 @@ rn
 so
 start
 tenorsax
+vs
 /;
 my @unimplemented = qw/
 xflag
@@ -102,7 +103,6 @@ kernbefore
 lhang
 rhang
 
-vs
 ls
 sp
 sv

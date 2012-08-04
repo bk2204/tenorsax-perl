@@ -92,6 +92,23 @@ has 'font_family' => (
 	isa => 'Str',
 	default => 'T',
 );
+has 'vertical_space' => (
+	is => 'rw',
+	isa => 'Num',
+	traits => ['Serializable'],
+	serializer => sub {
+		my ($self, $obj, $state) = @_;
+
+		my $reader = $self->get_read_method;
+		my $number = $obj->$reader;
+		$number = $number / $state->{parser}->_resolution;
+
+		# FIXME: change to pts for nroff.
+		return {
+			'vertical-space' => "${number}in",
+		};
+	},
+);
 
 sub setup {
 	my ($self, $state) = @_;
@@ -99,6 +116,7 @@ sub setup {
 
 	$self->font_size($value * $state->{parser}->_resolution / 72);
 	$self->line_length(6.5 * $state->{parser}->_resolution);
+	$self->vertical_space($state->{parser}->_resolution / 6);
 }
 
 =head1 NAME

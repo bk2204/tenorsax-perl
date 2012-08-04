@@ -587,6 +587,18 @@ my $requests = [
 			return;
 		}
 	},
+	{
+		name => 'vs',
+		arg_types => ['Numeric'],
+		default_unit => 'p',
+		code => sub {
+			my ($self, $state, $args) = @_;
+			my $value = $args->[0] or return;
+
+			$state->{environment}->vertical_space($value);
+			return;
+		}
+	},
 ];
 
 sub make_request {
