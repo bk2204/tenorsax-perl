@@ -35,6 +35,12 @@ has '_attrs' => (
 	isa => 'ArrayRef[HashRef[Str]]',
 	default => sub { [{}] },
 );
+# Is the output format binary?
+has '_binary_output' => (
+	is => 'ro',
+	isa => 'Bool',
+	default => 0,
+);
 
 =head1 NAME
 
@@ -78,16 +84,28 @@ sub _do_line {
 	...
 }
 
+sub _new_page {
+	my $self = shift;
+
+	...
+}
+
+sub _move_to {
+	my ($self, $x, $y) = @_;
+
+	...
+}
+
 sub _format_block {
 	my $self = shift;
-	my @blocks = ({fill => 1, text => ''});
+	my @blocks;
 
 	# First, coalesce like blocks together...
 	foreach my $block (@{$self->_text}) {
 		next unless $block->{text};
 		# ... unless they're no-fill.
 		my $prev = $blocks[$#blocks];
-		if ($block->{fill} && keys %$prev == grep {
+		if ($block->{fill} && @blocks && keys %$prev == grep {
 			$_ eq "text" ||
 				(exists $block->{$_} && $prev->{$_} eq $block->{$_}) } %$prev) {
 				$blocks[-1]->{text} .= $block->{text};
@@ -235,6 +253,7 @@ sub _setup_output {
 		my $filename = $self->_output;
 		open(my $fh, '>', $filename) or
 			die "Can't open $filename for writing: $!";
+		binmode $fh if $self->_binary_output;
 		$self->_output = $fh;
 		$self->_print_func(\&_do_output_fh);
 	}
@@ -248,6 +267,16 @@ sub _setup_output {
 		$self->_print_func(\&_do_output_method);
 	}
 	else {
+		# We don't know if either of these will work; if they don't, we'll get
+		# some pretty broken PDFs.
+		if ($self->_binary_output) {
+			eval {
+				$self->_output->binmode();
+			};
+			eval {
+				binmode $self->_output;
+			};
+		}
 		$self->_print_func(\&_do_output_print);
 	}
 }

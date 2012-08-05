@@ -48,6 +48,10 @@ given ($options->{device}) {
 		require XML::SAX::Writer;
 		$output = XML::SAX::Writer->new(%attr);
 	}
+	when ("pdf") {
+		require TenorSAX::Output::PDF;
+		$output = TenorSAX::Output::PDF->new();
+	}
 	default {
 		my $stylesheet;
 		my @xslt_dirs = map { File::Path::Expand::expand_filename($_) }
