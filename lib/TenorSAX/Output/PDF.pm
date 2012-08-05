@@ -71,7 +71,15 @@ sub _lookup_font {
 	my $cache = $self->_font_cache;
 
 	return $cache->{$name} if exists $cache->{$name};
-	return $cache->{$name} = $self->_pdf->corefont($name, -encoding => 'UTF-8');
+	my $font;
+	eval {
+		$font = $self->_pdf->corefont($name, -dokern => 1, -encoding => 'UTF-8');
+	} or eval {
+		$font = $self->_pdf->ttfont($name, -dokern => 1, -encoding => 'UTF-8');
+	} or eval {
+		$font = $self->_pdf->psfont($name, -dokern => 1, -encoding => 'UTF-8');
+	};
+	return $cache->{$name} = $font;
 }
 
 sub _char_width {
