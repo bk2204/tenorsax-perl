@@ -44,6 +44,31 @@ has 'font_size' => (
 		};
 	},
 );
+has 'adjust' => (
+	is => 'rw',
+	isa => 'Str',
+	traits => ['Serializable'],
+	default => 'b',
+	serializer => sub {
+		my ($self, $obj, $state) = @_;
+
+		my $reader = $self->get_read_method;
+		my $value = $obj->$reader;
+
+		return { adjust => 'none' } if $value =~ /^n/;
+
+		my $table = {
+			l => 'left',
+			r => 'right',
+			c => 'center',
+			b => 'both',
+		};
+
+		return {
+			'adjust' => $table->{$value}
+		};
+	},
+);
 has 'line_length' => (
 	is => 'rw',
 	isa => 'Num',

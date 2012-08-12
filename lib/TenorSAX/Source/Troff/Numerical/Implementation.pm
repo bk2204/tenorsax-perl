@@ -22,6 +22,15 @@ my $registers = [
 		}
 	},
 	{
+		name => '.j',
+		code => sub {
+			my ($self, $state) = @_;
+			my $value = $state->{environment}->adjust;
+
+			return $value =~ s/^n//r;
+		}
+	},
+	{
 		name => '.l',
 		code => sub {
 			my ($self, $state) = @_;

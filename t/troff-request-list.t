@@ -23,6 +23,7 @@ EOM
 }
 
 my @implemented = qw/
+ad
 als
 br
 cp
@@ -41,6 +42,7 @@ if
 ig
 ll
 mso
+na
 namespace
 nf
 nop
@@ -83,8 +85,6 @@ mk
 rt
 
 brp
-ad
-na
 padj
 ce
 rj

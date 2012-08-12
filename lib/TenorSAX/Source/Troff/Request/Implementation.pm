@@ -61,6 +61,33 @@ sub _do_offset {
 
 my $requests = [
 	{
+		name => 'ad',
+		arg_types => [''],
+		code => sub {
+			my ($self, $state, $args) = @_;
+			my $value = $args->[0];
+			my $current = $state->{environment}->adjust;
+			my $table = {
+				l => 'l',
+				r => 'r',
+				c => 'c',
+				b => 'b',
+				n => 'b',
+			};
+			$current =~ s/^n//;
+
+			if ($value) {
+				$value = $table->{$value} || $current;
+			}
+			else {
+				$value = $current;
+			}
+
+			$state->{environment}->adjust($value);
+			return;
+		}
+	},
+	{
 		name => 'als',
 		arg_types => ['', ''],
 		code => sub {
@@ -372,6 +399,18 @@ my $requests = [
 			}
 
 			die "Can't find macro package '$name': $!";
+			return;
+		}
+	},
+	{
+		name => 'na',
+		arg_types => [''],
+		code => sub {
+			my ($self, $state, $args) = @_;
+			my $current = $state->{environment}->adjust;
+			$current =~ s/^n?/n/;
+
+			$state->{environment}->adjust($current);
 			return;
 		}
 	},
