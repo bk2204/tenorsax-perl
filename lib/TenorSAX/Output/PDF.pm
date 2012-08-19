@@ -180,6 +180,7 @@ sub _do_line {
 	# Delay initialization of the first page until here so we can get the
 	# appropriate parameters.
 	unless ($self->_pdf->pages()) {
+		return unless @chunks;
 		$self->_last_chunk($chunks[0]);
 		$self->_new_page();
 	}
