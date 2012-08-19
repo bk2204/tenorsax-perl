@@ -140,6 +140,40 @@ sub _move_to {
 	$self->_y($y);
 }
 
+sub _adjust_line {
+	my ($self, $chunks) = @_;
+	my @results;
+	my $spaces = 0;
+	my $length = 0;
+
+	return $chunks unless $chunks->[0]{adjust} eq "both";
+
+	# Split out spaces into their own chunks.
+	my @chunks = map {
+		my $item = $_;
+		map { {%$item, text => $_} } split m/( +)/, $item->{text};
+	} @$chunks;
+
+	foreach my $chunk (@chunks) {
+		$length += $self->_char_width($chunk->{text}, $chunk);
+		$spaces += !!($chunk->{text} =~ tr/ //);
+	}
+
+	my $diff = $self->_line_length - $length;
+
+	return \@chunks unless $spaces && $diff > 0;
+
+	my $each_gap = $diff / $spaces;
+
+	foreach my $chunk (@chunks) {
+		$chunk->{'space-before'} = $self->_units($each_gap) . "pt"
+			if $chunk->{text} =~ m/ /;
+	}
+
+	return \@chunks;
+}
+
+
 sub _do_line {
 	my ($self, $chunks) = @_;
 
@@ -155,9 +189,16 @@ sub _do_line {
 
 	$obj->translate($self->_units($x), $self->_units($y));
 
+	my $offset = $self->_units($x);
 	foreach my $chunk (@$chunks) {
 		my $font = $self->_lookup_font($chunk->{'font-family'});
 		my $text = $chunk->{text};
+
+		$offset += $self->_units($self->_char_width($chunk->{text}, $chunk));
+		if ($chunk->{'space-before'}) {
+			$offset += $self->_units($chunk->{'space-before'});
+			$obj->translate($offset, $self->_units($y));
+		}
 
 		$obj->font($font, $self->_units($chunk->{'font-size'}));
 		$obj->fillcolor('black');

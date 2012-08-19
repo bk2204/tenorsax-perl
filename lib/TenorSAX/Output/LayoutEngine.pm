@@ -127,7 +127,9 @@ sub _format_block {
 			if ($block->{fill} && $width + $char_width > $line_length) {
 				$broken = 1;
 				if ("$sofar$char" =~ m/\A(\X+)\s(\S*)\z/) {
-					$self->_do_line([@output, {%{$block}, text => $1}]);
+					my $data = $self->_adjust_line([@output, {%{$block},
+								text => $1}]);
+					$self->_do_line($data);
 					@output = ();
 					$sofar = $2;
 					$width = 0;
@@ -138,7 +140,9 @@ sub _format_block {
 				else {
 					# Non-Latin script, probably.  Japanese, maybe?
 					# TODO: handle this better.
-					$self->_do_line([@output, {%{$block}, text => $sofar}]);
+					my $data = $self->_adjust_line([@output, {%{$block},
+								text => $sofar}]);
+					$self->_do_line($data);
 					@output = ();
 					$sofar = $char;
 					$width = $char_width;

@@ -38,11 +38,70 @@ Perhaps a little code snippet.
 
 our $TROFF_NS = $TenorSAX::Output::LayoutEngine::TROFF_NS;
 
+sub _columns {
+	return $ENV{COLUMNS} || 80;
+}
+
 sub _line_length {
 	my $self = shift;
-	my $columns = $ENV{COLUMNS} || 80;
+	my $columns = $self->_columns;
 
 	return $self->_char_width * $columns;
+}
+
+sub _adjust_line {
+	my ($self, $chunks) = @_;
+	my $spaces = 0;
+	my $chars = 0;
+	my $columns = $self->_columns;
+	my @results;
+
+	return $chunks unless $chunks->[0]{adjust} eq "both";
+
+	foreach my $chunk (@$chunks) {
+		$spaces += $chunk->{text} =~ tr/ //;
+		$chars += length($chunk->{text});
+	}
+
+	my $each = int(($columns - $chars) / $spaces);
+	my $extra = ($columns - $chars) % $spaces;
+	my $each_space = " " x $each;
+
+	# Insert the minimum number of spaces into each chunk.
+	my @chunks = map {
+		my $chunk = {%$_};
+
+		$chunk->{text} =~ s/ / $each_space/g;
+
+		$chunk;
+	} @$chunks;
+
+	# Split out spaces into their own chunks.
+	@chunks = map {
+		my $item = $_;
+		map { {%$item, text => $_} } split m/([.?!]? +)/, $item->{text};
+	} @chunks;
+
+	# Insert spaces after punctuation.
+	@chunks = map {
+		$extra-- if $extra && $_->{text} =~ s/(. +)/$1 /;
+		$_;
+	} @chunks;
+
+	# If there are any spaces left over, insert them between words.
+	if ($extra > 0) {
+		my $items = scalar @chunks;
+
+		for (my $i = 0; $i < $items && $extra > 0; $i++) {
+			my $item = $chunks[$i];
+			$extra-- if $extra && $item->{text} =~ s/( +)/$1 /;
+
+			$item = $chunks[$items-$i-1];
+			$extra-- if $extra && $item->{text} =~ s/( +)/$1 /;
+		}
+	}
+
+	return \@chunks;
 }
 
 sub _do_line {
