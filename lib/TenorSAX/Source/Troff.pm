@@ -464,12 +464,12 @@ sub _do_text_line {
 	$line = $self->_expand($line, $opts);
 
 	if (!length $line) {
-		# Most XML-based formats will undefine .br to avoid adding unwanted
+		# Most XML-based formats will undefine .sp to avoid adding unwanted
 		# block elements, so simply emit a newline in that case.
-		my $request = $self->_lookup_request("br", 1);
+		my $request = $self->_lookup_request("sp", 1);
 		if ($request) {
 			my $opts = {can_break => 1};
-			return $self->_do_request($request, $opts);
+			return $self->_do_request($request, $opts, "1");
 		}
 		else {
 			$self->_emit_characters("\n");
