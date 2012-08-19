@@ -141,18 +141,18 @@ sub _move_to {
 }
 
 sub _adjust_line {
-	my ($self, $chunks) = @_;
+	my ($self, @chunks) = @_;
 	my @results;
 	my $spaces = 0;
 	my $length = 0;
 
-	return $chunks unless $chunks->[0]{adjust} eq "both";
+	return @chunks unless $chunks[0]{adjust} eq "both";
 
 	# Split out spaces into their own chunks.
-	my @chunks = map {
+	@chunks = map {
 		my $item = $_;
 		map { {%$item, text => $_} } split m/( +)/, $item->{text};
-	} @$chunks;
+	} @chunks;
 
 	foreach my $chunk (@chunks) {
 		$length += $self->_char_width($chunk->{text}, $chunk);
@@ -161,7 +161,7 @@ sub _adjust_line {
 
 	my $diff = $self->_line_length - $length;
 
-	return \@chunks unless $spaces && $diff > 0;
+	return @chunks unless $spaces && $diff > 0;
 
 	my $each_gap = $diff / $spaces;
 
@@ -170,17 +170,17 @@ sub _adjust_line {
 			if $chunk->{text} =~ m/ /;
 	}
 
-	return \@chunks;
+	return @chunks;
 }
 
 
 sub _do_line {
-	my ($self, $chunks) = @_;
+	my ($self, @chunks) = @_;
 
 	# Delay initialization of the first page until here so we can get the
 	# appropriate parameters.
 	unless ($self->_pdf->pages()) {
-		$self->_last_chunk($chunks->[0]);
+		$self->_last_chunk($chunks[0]);
 		$self->_new_page();
 	}
 	my $page = $self->_pdf->openpage(-1);
@@ -190,7 +190,7 @@ sub _do_line {
 	$obj->translate($self->_units($x), $self->_units($y));
 
 	my $offset = $self->_units($x);
-	foreach my $chunk (@$chunks) {
+	foreach my $chunk (@chunks) {
 		my $font = $self->_lookup_font($chunk->{'font-family'});
 		my $text = $chunk->{text};
 

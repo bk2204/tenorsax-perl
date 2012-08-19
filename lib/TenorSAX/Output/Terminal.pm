@@ -50,15 +50,15 @@ sub _line_length {
 }
 
 sub _adjust_line {
-	my ($self, $chunks) = @_;
+	my ($self, @chunks) = @_;
 	my $spaces = 0;
 	my $chars = 0;
 	my $columns = $self->_columns;
 	my @results;
 
-	return $chunks unless $chunks->[0]{adjust} eq "both";
+	return @chunks unless $chunks[0]{adjust} eq "both";
 
-	foreach my $chunk (@$chunks) {
+	foreach my $chunk (@chunks) {
 		$spaces += $chunk->{text} =~ tr/ //;
 		$chars += length($chunk->{text});
 	}
@@ -68,13 +68,13 @@ sub _adjust_line {
 	my $each_space = " " x $each;
 
 	# Insert the minimum number of spaces into each chunk.
-	my @chunks = map {
+	@chunks = map {
 		my $chunk = {%$_};
 
 		$chunk->{text} =~ s/ / $each_space/g;
 
 		$chunk;
-	} @$chunks;
+	} @chunks;
 
 	# Split out spaces into their own chunks.
 	@chunks = map {
@@ -101,12 +101,12 @@ sub _adjust_line {
 		}
 	}
 
-	return \@chunks;
+	return @chunks;
 }
 
 sub _do_line {
-	my ($self, $chunks) = @_;
-	my $text = join('', map { $_->{text} } @$chunks) . "\n";
+	my ($self, @chunks) = @_;
+	my $text = join('', map { $_->{text} } @chunks) . "\n";
 
 	$self->_print($text);
 }
