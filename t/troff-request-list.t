@@ -51,6 +51,7 @@ papersize
 pl
 po
 ps
+sp
 rm
 rn
 so
@@ -104,7 +105,6 @@ lhang
 rhang
 
 ls
-sp
 sv
 os
 ns

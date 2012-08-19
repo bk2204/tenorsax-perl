@@ -577,6 +577,25 @@ my $requests = [
 		}
 	},
 	{
+		name => 'sp',
+		arg_types => ['Numeric'],
+		code => sub {
+			my ($self, $state, $args) = @_;
+			my $value = $args->[0] || 0;
+			my $p = $state->{parser};
+
+			_do_break($state);
+			my $curfill = $state->{parser}->_env->fill;
+			$state->{parser}->_env->fill(0);
+			$p->_ch->start_element($p->_lookup_element('_t:block',
+				$p->_state_to_hash));
+			$p->_ch->characters({Data => ("\n" x $value)});
+			$p->_ch->end_element($p->_lookup_element('_t:block'));
+			$state->{parser}->_env->fill($curfill);
+			return;
+		}
+	},
+	{
 		name => 'start',
 		max_args => 99999,
 		arg_types => ['', ''],
