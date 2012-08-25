@@ -1,6 +1,6 @@
 #!perl -T
 
-use Test::More tests => 51;
+use Test::More tests => 55;
 use TenorSAX::Source::Troff;
 use TenorSAX::Output::Text;
 
@@ -104,3 +104,7 @@ EOM
 
 is(run($test1), "R:start\nText.\nR:end\nR:start\nMore text.",
 	"bug - parsing if correctly");
+is(run(".if d AA Text.\n"), "", "bug - false d conditionals");
+is(run(".if r AA Text.\n"), "", "bug - false r conditionals");
+is(run(".ds AA text\n.if d AA Text.\n"), "Text.", "bug - true d conditionals");
+is(run(".nr AA 2\n.if r AA Text.\n"), "Text.", "bug - true r conditionals");

@@ -294,7 +294,7 @@ sub parse {
 		return "$arg$1";
 	}
 
-	if ($$lineref =~ s/^([cdr]\X*?)([ \t]+|$)//) {
+	if ($$lineref =~ s/^([cdr][ \t]*\X*?)([ \t]+|$)//) {
 		return "$arg$1";
 	}
 
@@ -334,7 +334,7 @@ sub _evaluate {
 		return $1 eq 't' ? 1 : 0;
 	}
 
-	if ($arg =~ s/^([cdr])(\X*)//) {
+	if ($arg =~ s/^([cdr])[ \t]*(\X*)//) {
 		my $name = $2;
 		given ($1) {
 			# FIXME: ask the layout engine to look this up for us.
