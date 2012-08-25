@@ -272,7 +272,7 @@ sub _expand {
 	$text =~ s{$strpat}
 		{$self->_lookup_request($2 || $3 || $4)->perform($state, $args)||''}ge;
 
-	$text =~ s{\Q$ec\E$}{shift $self->_data}ge;
+	1 while $text =~ s{\Q$ec\E$}{shift $self->_data}ge;
 	$text =~ s{\Q$ec\E#.*$}{shift $self->_data}ge;
 	$text =~ s{\Q$ec\E".*$}{}g;
 

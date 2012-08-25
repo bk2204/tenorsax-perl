@@ -1,6 +1,6 @@
 #!perl -T
 
-use Test::More tests => 55;
+use Test::More tests => 57;
 use TenorSAX::Source::Troff;
 use TenorSAX::Output::Text;
 
@@ -108,3 +108,25 @@ is(run(".if d AA Text.\n"), "", "bug - false d conditionals");
 is(run(".if r AA Text.\n"), "", "bug - false r conditionals");
 is(run(".ds AA text\n.if d AA Text.\n"), "Text.", "bug - true d conditionals");
 is(run(".nr AA 2\n.if r AA Text.\n"), "Text.", "bug - true r conditionals");
+
+# This code is from groff's e.tmac.
+my $test2 = <<EOM;
+.if \\n(.V<1v \\
+\\{\\
+.ds [. \\s-2\\v'-.4m'\\f1
+.ds .] \\v'.4m'\\s+2\\fP
+.\\}
+EOM
+
+my $test3 = <<EOM;
+.el \\
+\\{\\
+.ds [. " [
+.ds .] ]
+.\\}
+EOM
+
+
+is(run($test2), "", "bug - parsing .if \{ correctly");
+$test2 =~ s/^\.if/.ie/;
+is(run("$test2$test3"), "", "bug - parsing .ie \{ correctly");
