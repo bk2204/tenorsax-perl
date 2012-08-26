@@ -40,6 +40,7 @@ has 'arg_type' => (
 	isa => 'ArrayRef[Str]',
 	is => 'rw',
 	default => sub { [] },
+	traits => [qw(Clone)],
 );
 has 'disable_compat' => (
 	isa => 'Bool',

@@ -1,6 +1,6 @@
 #!perl -T
 
-use Test::More tests => 57;
+use Test::More tests => 58;
 use TenorSAX::Source::Troff;
 use TenorSAX::Output::Text;
 
@@ -130,3 +130,17 @@ EOM
 is(run($test2), "", "bug - parsing .if \{ correctly");
 $test2 =~ s/^\.if/.ie/;
 is(run("$test2$test3"), "", "bug - parsing .ie \{ correctly");
+
+my $test4 = <<EOM;
+.do if 1 .ft 1
+.de i
+.ft 2
+.if \\\\n(.\$ still
+..
+.de au
+.i "\\$1" "\\$2"
+..
+.i "brian m. carlson"
+EOM
+
+is(run($test4), "still", "bug - parsing .if \\n(.\$");
