@@ -1,6 +1,6 @@
 #!perl -T
 
-use Test::More tests => 16;
+use Test::More tests => 18;
 use TenorSAX::Source::Troff;
 use TenorSAX::Output::Text;
 
@@ -58,3 +58,9 @@ is(run("ABC\\\"other\nDEF\n"), "ABC\nDEF",
 	"\\\" - comment without swallowing newline");
 is(run("ABC\\#other\nDEF\n"), "ABCDEF",
 	"\\# - comment swallowing newline");
+
+TODO: {
+	local $TODO = "Fix item-by-item parsing";
+	is(run("\\fI\\n(.f\\fP \\n(.f\n"), "2 1", "\\f - \\n(.f reflects changes");
+}
+is(run("\\fI\n\\n(.f\\fP\n\\n(.f\n"), "\n2\n1", "\\f - \\n(.f reflects changes");

@@ -22,6 +22,14 @@ my $registers = [
 		}
 	},
 	{
+		name => '.f',
+		code => sub {
+			my ($self, $state) = @_;
+
+			return $state->{environment}->font;
+		}
+	},
+	{
 		name => '.j',
 		code => sub {
 			my ($self, $state) = @_;
