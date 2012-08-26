@@ -1,6 +1,6 @@
 #!perl -T
 
-use Test::More tests => 42;
+use Test::More tests => 46;
 use TenorSAX::Source::Troff;
 use TenorSAX::Output::Text;
 
@@ -56,6 +56,12 @@ my $ff = <<EOM;
 ..
 EOM
 
+my $gg = <<EOM;
+.de GG
+\\\\n(.\$.
+..
+EOM
+
 my $aaa = $aas =~ s/^/.nop /msgr;
 $aaa =~ s/^/.cp 0\n/;
 $aaa =~ s/\.nop \.\./../;
@@ -76,6 +82,8 @@ foreach my $aa ($aas, $aaa) {
 			"de - multiple arguments are interpolated");
 	like(run("$ff.FF A\n"), qr/FF\./ms,
 			"de - argument 0 works");
+	is(run("$gg.GG A B C D\n"), '4.', 'de - \\n(.$ is properly expanded');
+	is(run("$gg.GG\n"), '0.', 'de - \\n(.$ is properly expanded with no args');
 
 	is(run("$bb.rm BB\n.BB\n"), '', "rm - can remove a macro");
 	like(run("$aa$bb.rm BB\n.AA\n"), qr/Before.\s+After/ms,

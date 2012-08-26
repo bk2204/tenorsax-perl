@@ -220,6 +220,7 @@ sub _substitute_args {
 	my $opts = shift || {};
 	my $compat = $opts->{compat};
 	my $ec = $self->_ec;
+	my $nargs = scalar @$args - 1;
 
 	return $text unless defined $ec;
 
@@ -227,6 +228,9 @@ sub _substitute_args {
 	my $argpat = $compat ? qr/\Q$ec\E\$(\(([0-9]{2})|([0-9]))/ :
 		qr/\Q$ec\E\$(\(([0-9]{2})|\[([0-9]*?)\]|([0-9]))/;
 	$text =~ s{$argpat}{$args->[int($2 // $3 // $4)] // ''}ge;
+	my $nargspat = $compat ? qr/\Q$ec\En\(\.\$/ :
+		qr/\Q$ec\En(\(\.\$|\[\.\$\])/;
+	$text =~ s{$nargspat}{$nargs}g;
 	$text =~ s/\x{102204}/$ec$ec/g;
 
 	return $text;
