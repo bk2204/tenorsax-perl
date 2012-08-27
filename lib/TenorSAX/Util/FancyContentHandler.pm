@@ -26,6 +26,12 @@ has '_stack' => (
 	default => sub { [] },
 	init_arg => undef
 );
+has '_ignored' => (
+	isa => 'HashRef',
+	is => 'rw',
+	default => sub { {} },
+	init_arg => undef
+);
 # This function is called on the first characters call if no start_element call
 # has occurred before it.  This allows the caller to ensure that some element
 # exists before outputting characters.
@@ -115,11 +121,20 @@ sub in_element {
 	return $count;
 }
 
+sub ignore_element {
+	my ($self, $qname) = @_;
+
+	$self->_ignored->{$qname} = 1;
+}
+
 # This function automatically determines the required prefixes for the mappings
 # and if they have not already been mapped, calls start_prefix_mapping to set
 # them up.
 sub start_element {
 	my ($self, $element) = @_;
+
+	return if $self->_ignored->{$element->{Name}};
+
 	my $item = {type => 'element', value => \%{$element}};
 
 	my @prefixes = keys %{$self->prefixes};
@@ -155,6 +170,8 @@ sub start_prefix_mapping {
 
 sub end_element {
 	my ($self, $element) = @_;
+
+	return if $self->_ignored->{$element->{Name}};
 
 	my $state = 0;
 	my $ret;

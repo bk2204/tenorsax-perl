@@ -640,6 +640,9 @@ my $requests = [
 						TenorSAX::Source::Troff::Number->new(value =>
 							$state->{parser}->_compat ? 0 : 1);
 				}
+				when (/^ignore-element$/) {
+					$state->{parser}->_ch->ignore_element($arg);
+				}
 			}
 
 			return;
