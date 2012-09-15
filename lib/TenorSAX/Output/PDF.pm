@@ -227,11 +227,6 @@ sub end_element {
 	my ($self, $element) = @_;
 
 	$self->SUPER::end_element($element);
-	if ($element->{NamespaceURI} eq $TROFF_NS &&
-		$element->{LocalName} eq "block") {
-
-		$self->_print("\n");
-	}
 }
 
 
