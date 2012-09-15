@@ -91,7 +91,7 @@ sub _parse_unparenthesized {
 			$level++;
 		}
 		elsif ($char =~ m/[ \t]/) {
-			$$lineref =~ s/([ \t]+|$)//;
+			$$lineref =~ s/^([ \t]+|$)//;
 			last;
 		}
 		else {
@@ -109,22 +109,28 @@ sub parse {
 		return $1;
 	}
 	elsif ($$lineref =~ m/\(/) {
-		my ($level, $arg) = $class->_parse_unparenthesized("", $lineref);
+		my $level = 0;
+		my $arg = "";
 
-		while ($level) {
-			last unless $$lineref =~ s/^(\X)//;
-			my $char = $1;
+		for (;;) {
+			if (!$level) {
+				($level, $arg) = $class->_parse_unparenthesized($arg, $lineref);
+				last unless $level;
+			}
+			else {
+				last unless $$lineref =~ s/^(\X)//;
+				my $char = $1;
 
-			if ($char eq "(") {
-				$level++;
+				if ($char eq "(") {
+					$level++;
+				}
+				elsif ($char eq ")") {
+					$level--;
+				}
+				$arg .= $char;
 			}
-			elsif ($char eq ")") {
-				$level--;
-			}
-			$arg .= $char;
 		}
 
-		($level, $arg) = $class->_parse_unparenthesized($arg, $lineref);
 		$$lineref =~ s/^([ \t]+|$)//;
 		return $arg;
 	}
@@ -180,7 +186,7 @@ sub _evaluate {
 	my @vals;
 	my @ops;
 
-	while ($level) {
+	for (;;) {
 		if ($$ref =~ s/^([0-9]+(?:\.[0-9]+)?)([icPmnMpzustTDCv]?)//) {
 			push @vals, $class->_map_units($request, $state, $1 + 0, $2);
 		}
@@ -194,7 +200,6 @@ sub _evaluate {
 				}
 				when ($_ eq ")") {
 					$level--;
-					last;
 				}
 				when (/^([-+*\/%])/) {
 					my $op = $1;

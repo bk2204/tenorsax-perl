@@ -1,6 +1,6 @@
 #!perl -T
 
-use Test::More tests => 58;
+use Test::More tests => 59;
 use TenorSAX::Source::Troff;
 use TenorSAX::Output::Text;
 
@@ -138,9 +138,17 @@ my $test4 = <<EOM;
 .if \\\\n(.\$ still
 ..
 .de au
-.i "\\$1" "\\$2"
+.i "\\\$1" "\\\$2"
 ..
 .i "brian m. carlson"
 EOM
 
 is(run($test4), "still", "bug - parsing .if \\n(.\$");
+
+my $test5 = <<EOM;
+.nr _L 1
+.if (5<=1):(6>4) .nr _L 2
+\\n(_L
+EOM
+
+is(run($test5), "2", "bug - parsing .if with multiple parentheses");
