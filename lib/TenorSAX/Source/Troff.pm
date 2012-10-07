@@ -85,6 +85,18 @@ has '_env' => (
 	default => sub { TenorSAX::Source::Troff::Environment->new(); },
 	init_arg => undef,
 );
+has '_linenos' => (
+	isa => 'HashRef[Int]'
+	is => 'rw',
+	default => sub { { text => 0, input => 0 } },
+	init_arg => undef,
+);
+has '_traps' => (
+	isa => 'HashRef'
+	is => 'rw',
+	default => sub { { text => {} } },
+	init_arg => undef,
+);
 # Previous condition.
 has '_condition' => (
 	isa => 'Bool',
@@ -412,12 +424,25 @@ sub _copy_until {
 	return $self->_copy->{data};
 }
 
+sub _do_line_traps {
+	my $self = shift;
+	my $state = {parser => $self, environment => $self->_env, opts => {},
+		state => $self->_state};
+
+	if (exists $self->_traps->{line}{$self->_lineno}) {
+		foreach my $trap ($self->_traps->{line}{$self->_lineno}) {
+			$trap->{code}->($state);
+		}
+	}
+}
+
 sub _parse_line_compat {
 	my $self = shift;
 	my $line = shift;
 	my $controls = $self->_env->cc . $self->_env->c2;
 	my $opts = {compat => 1};
 
+	$self->_linenos->{input}++;
 	if ($self->_copy->{enabled} && $line =~ $self->_copy->{pattern}) {
 		$self->_copy->{enabled} = 0;
 	}
@@ -433,8 +458,10 @@ sub _parse_line_compat {
 		$self->_do_request($request, $opts, $line);
 	}
 	else {
+		$self->_linenos->{text}++;
 		$self->_do_text_line($line, $opts);
 	}
+	$self->_do_line_traps();
 }
 
 sub _parse_line {
@@ -443,6 +470,7 @@ sub _parse_line {
 	my $controls = $self->_env->cc . $self->_env->c2;
 	my $opts = {compat => 0};
 
+	$self->_linenos->{input}++;
 	if ($self->_copy->{enabled} && $line =~ $self->_copy->{pattern}) {
 		$self->_copy->{enabled} = 0;
 	}
@@ -456,8 +484,10 @@ sub _parse_line {
 		$self->_do_request($request, $opts, $line);
 	}
 	else {
+		$self->_linenos->{text}++;
 		$self->_do_text_line($line, $opts);
 	}
+	$self->_do_line_traps();
 }
 
 sub _do_text_line {
