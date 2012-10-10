@@ -86,13 +86,13 @@ has '_env' => (
 	init_arg => undef,
 );
 has '_linenos' => (
-	isa => 'HashRef[Int]'
+	isa => 'HashRef[Int]',
 	is => 'rw',
 	default => sub { { text => 0, input => 0 } },
 	init_arg => undef,
 );
 has '_traps' => (
-	isa => 'HashRef'
+	isa => 'HashRef',
 	is => 'rw',
 	default => sub { { text => {} } },
 	init_arg => undef,
@@ -429,9 +429,12 @@ sub _do_line_traps {
 	my $state = {parser => $self, environment => $self->_env, opts => {},
 		state => $self->_state};
 
-	if (exists $self->_traps->{line}{$self->_lineno}) {
-		foreach my $trap ($self->_traps->{line}{$self->_lineno}) {
-			$trap->{code}->($state);
+	foreach my $key (keys $self->_linenos) {
+		my $lineno = $self->_linenos->{$key};
+		if (exists $self->_traps->{$key}{$lineno}) {
+			foreach my $trap (values $self->_traps->{$key}{$lineno}) {
+				$trap->($state);
+			}
 		}
 	}
 }

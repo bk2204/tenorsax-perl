@@ -111,6 +111,53 @@ my $requests = [
 		}
 	},
 	{
+		name => 'ce',
+		arg_types => ['Numeric'],
+		code => sub {
+			my ($self, $state, $args) = @_;
+			my $value = $args->[0] // 1;
+			my $traps = $state->{parser}->_traps;
+			# Clean up any existing traps, which are now obsolete.  We then set
+			# the new traps up.
+			$traps->{text}{$traps->{ce}}{ce}->($state) if defined $traps->{ce};
+
+			# This must be done after triggering the existing traps because
+			# otherwise $curadjust will have the wrong value.
+			my $curadjust = $state->{environment}->adjust;
+			my $curfill = $state->{environment}->fill;
+			my $coderef = sub {
+				my $state = shift;
+				my $line = $traps->{ce};
+				my $curline = $state->{parser}->_linenos->{text};
+
+				if (defined $line) {
+					for my $i ($curline..$line) {
+						delete $traps->{text}{$i}{br};
+					}
+				}
+
+				$state->{environment}->adjust($curadjust);
+				$state->{environment}->fill($curfill);
+				delete $traps->{text}{$line}{ce} if defined $line;
+				delete $traps->{ce};
+			};
+
+			if ($value) {
+				my $curline = $state->{parser}->_linenos->{text};
+				$traps->{ce} = $curline + $value;
+				$traps->{text}{$traps->{ce}}{ce} = $coderef;
+				for my $i ($curline..$traps->{ce}) {
+					$traps->{text}{$i}{br} = \&_do_break;
+				}
+				$state->{environment}->adjust("c");
+				$state->{environment}->fill(1);
+			}
+
+			_do_break($state);
+			return;
+		}
+	},
+	{
 		name => 'cp',
 		arg_types => ['Numeric'],
 		code => sub {

@@ -22,6 +22,16 @@ my $registers = [
 		}
 	},
 	{
+		name => '.ce',
+		code => sub {
+			my ($self, $state) = @_;
+			my $traps = $state->{parser}->_traps;
+
+			return 0 unless defined $traps->{ce};
+			return $traps->{ce} - $state->{parser}->_linenos->{text};
+		}
+	},
+	{
 		name => '.f',
 		code => sub {
 			my ($self, $state) = @_;

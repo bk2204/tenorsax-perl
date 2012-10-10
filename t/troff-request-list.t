@@ -26,6 +26,7 @@ my @implemented = qw/
 ad
 als
 br
+ce
 cp
 de
 do
@@ -87,7 +88,6 @@ rt
 
 brp
 padj
-ce
 rj
 brnl
 brpnl
