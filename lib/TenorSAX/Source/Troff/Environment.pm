@@ -142,6 +142,7 @@ sub setup {
 	$self->font_size($value * $state->{parser}->_resolution / 72);
 	$self->line_length(6.5 * $state->{parser}->_resolution);
 	$self->vertical_space($state->{parser}->_resolution / 6);
+	return;
 }
 
 =head1 NAME

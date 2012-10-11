@@ -68,7 +68,7 @@ Perhaps a little code snippet.
 
 sub start_document {
 	my ($self, @args) = @_;
-	$self->handler->start_document(@args);
+	return $self->handler->start_document(@args);
 }
 
 sub end_document {
@@ -87,7 +87,7 @@ sub end_document {
 				if $self->_is_space_preserving;
 		}
 	}
-	$self->handler->end_document(@args);
+	return $self->handler->end_document(@args);
 }
 
 sub _is_space_preserving {
@@ -125,6 +125,7 @@ sub ignore_element {
 	my ($self, $qname) = @_;
 
 	$self->_ignored->{$qname} = 1;
+	return;
 }
 
 # This function automatically determines the required prefixes for the mappings
@@ -157,7 +158,7 @@ sub start_element {
 	$self->$trap($element);
 
 	push @{$self->_stack}, $item;
-	$self->handler->start_element($element);
+	return $self->handler->start_element($element);
 }
 
 sub start_prefix_mapping {
@@ -165,7 +166,7 @@ sub start_prefix_mapping {
 	my $item = {type => 'prefix', value => \%{$mapping}};
 
 	push @{$self->_stack}, $item;
-	$self->handler->start_prefix_mapping($mapping);
+	return $self->handler->start_prefix_mapping($mapping);
 }
 
 sub end_element {
@@ -211,6 +212,7 @@ sub end_prefix_mapping {
 			$self->handler->end_prefix_mapping($self, $item->{value});
 		}
 	}
+	return;
 }
 
 sub characters {
@@ -231,22 +233,19 @@ sub characters {
 		}
 	}
 	if ($data->{Data} =~ s/\n\z//ms) {
-		$self->handler->characters($data);
 		push @{$self->_stack}, {type => 'characters', value => {Data => "\n"}};
 	}
-	else {
-		$self->handler->characters($data);
-	}
+	return $self->handler->characters($data);
 }
 
 sub ignorable_whitespace {
 	my ($self, @args) = @_;
-	$self->handler->ignorable_whitespace(@args);
+	return $self->handler->ignorable_whitespace(@args);
 }
 
 sub processing_instruction {
 	my ($self, @args) = @_;
-	$self->handler->processing_instruction(@args);
+	return $self->handler->processing_instruction(@args);
 }
 
 

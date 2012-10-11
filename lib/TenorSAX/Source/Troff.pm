@@ -169,6 +169,7 @@ sub _setup {
 		$self->_state};
 	$self->_env->setup($state);
 	$self->_state->setup($state);
+	return;
 }
 
 sub _parse_string {
@@ -184,6 +185,7 @@ sub _parse_string {
 
 	push @{$self->_data}, split /\R/, $str;
 	$self->_do_parse();
+	return;
 }
 
 sub _extract_attributes {
@@ -330,6 +332,7 @@ sub _emit_characters {
 		}
 	}
 	$self->_ch->characters({Data => $suffix}) if $suffix;
+	return;
 }
 
 sub _do_request {
@@ -353,6 +356,7 @@ sub _do_request {
 
 	my $text = $request->perform($state, $args);
 	$self->_emit_characters($text) if defined $text;
+	return;
 }
 
 sub _lookup {
@@ -437,6 +441,7 @@ sub _do_line_traps {
 			}
 		}
 	}
+	return;
 }
 
 sub _parse_line_compat {
@@ -465,6 +470,7 @@ sub _parse_line_compat {
 		$self->_do_text_line($line, $opts);
 	}
 	$self->_do_line_traps();
+	return;
 }
 
 sub _parse_line {
@@ -491,6 +497,7 @@ sub _parse_line {
 		$self->_do_text_line($line, $opts);
 	}
 	$self->_do_line_traps();
+	return;
 }
 
 sub _do_text_line {
@@ -518,6 +525,7 @@ sub _do_text_line {
 	else {
 		$self->_emit_characters($line, "\n");
 	}
+	return;
 };
 
 sub _lookup_prefix {
@@ -609,7 +617,7 @@ sub _do_parse {
 			}
 		);
 	}
-	$self->_ch->end_document({});
+	return $self->_ch->end_document({});
 }
 
 =head1 AUTHOR

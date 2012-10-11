@@ -92,6 +92,7 @@ sub setup {
 
 	$self->page_length(11 * $state->{parser}->_resolution);
 	$self->page_offset($state->{parser}->_resolution);
+	return;
 }
 
 =head1 NAME

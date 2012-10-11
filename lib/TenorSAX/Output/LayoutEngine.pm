@@ -104,7 +104,7 @@ sub _format_block {
 	foreach my $block (@{$self->_text}) {
 		next unless $block->{text};
 		# ... unless they're no-fill.
-		my $prev = $blocks[$#blocks];
+		my $prev = $blocks[-1];
 		if ($block->{fill} && @blocks && keys %$prev == grep {
 			$_ eq "text" ||
 				(exists $block->{$_} && $prev->{$_} eq $block->{$_}) } %$prev) {
@@ -172,12 +172,14 @@ sub _format_block {
 		@output = $self->_adjust_line(@output);
 	}
 	$self->_do_line(@output);
+	return;
 }
 
 sub start_document {
 	my ($self, @args) = @_;
 
 	$self->_setup_output;
+	return;
 }
 
 sub end_document {
@@ -186,6 +188,7 @@ sub end_document {
 	if (blessed $self->_output && $self->_output->can('finalize')) {
 		$self->_output->finalize();
 	}
+	return;
 }
 
 sub start_element {
@@ -207,10 +210,12 @@ sub start_element {
 		} keys $element->{Attributes};
 		push $self->_attrs, {%{$self->_attrs->[-1]}, %attrs};
 	}
+	return;
 }
 
 sub start_prefix_mapping {
 	my ($self, $mapping) = @_;
+	return;
 }
 
 sub end_element {
@@ -224,10 +229,12 @@ sub end_element {
 	elsif ($element->{LocalName} eq "inline") {
 		pop $self->_attrs;
 	}
+	return;
 }
 
 sub end_prefix_mapping {
 	my ($self, @args) = @_;
+	return;
 }
 
 sub characters {
@@ -237,21 +244,24 @@ sub characters {
 
 	$text =~ s/\R/ /g if $attrs{'xml:space'} ne "preserve";
 	push $self->_text, {%attrs, text => $text};
+	return;
 }
 
 sub ignorable_whitespace {
 	my ($self, @args) = @_;
+	return;
 }
 
 sub processing_instruction {
 	my ($self, @args) = @_;
+	return;
 }
 
 sub _print {
 	my ($self, @args) = @_;;
 	my $method = $self->_print_func;
 
-	$self->$method(@args);
+	return $self->$method(@args);
 }
 
 sub _setup_output {
@@ -287,36 +297,39 @@ sub _setup_output {
 		}
 		$self->_print_func(\&_do_output_print);
 	}
+	return;
 }
 
 sub _do_output_fh {
 	my ($self, $text) = @_;
 
-	print {$self->_output} $text;
+	return print {$self->_output} $text;
 }
 
 sub _do_output_push {
 	my ($self, $text) = @_;
 
 	push $self->_output, $text;
+	return 1;
 }
 
 sub _do_output_scalar {
 	my ($self, $text) = @_;
 
 	${$self->_output} .= $text;
+	return 1;
 }
 
 sub _do_output_method {
 	my ($self, $text) = @_;
 
-	$self->_output->output($text);
+	return $self->_output->output($text);
 }
 
 sub _do_output_print {
 	my ($self, $text) = @_;
 
-	$self->_output->print($text);
+	return $self->_output->print($text);
 }
 
 =head1 AUTHOR

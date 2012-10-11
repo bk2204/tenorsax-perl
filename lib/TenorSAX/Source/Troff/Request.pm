@@ -16,7 +16,7 @@ sub perform {
 	my ($self, @args) = @_;
 	my $ref = $self->code;
 
-	$self->$ref(@args);
+	return $self->$ref(@args);
 }
 
 =head1 NAME

@@ -106,7 +106,7 @@ sub _new_page {
 	$self->_move_to($self->_res($chunk->{'page-offset'}),
 			$self->_res($chunk->{'page-length'}) -
 			$self->_res($chunk->{'vertical-space'}));
-
+	return;
 }
 
 # Convert from resolution units to PDF units.
@@ -138,6 +138,7 @@ sub _move_to {
 
 	$self->_x($x);
 	$self->_y($y);
+	return;
 }
 
 sub _adjust_line {
@@ -233,25 +234,26 @@ sub _do_line {
 	}
 
 	$self->_move_to($x, $y - $self->_res($self->_last_chunk->{'vertical-space'}));
+	return;
 }
 
 sub start_document {
 	my ($self, @args) = @_;
 
-	$self->SUPER::start_document(@args);
+	return $self->SUPER::start_document(@args);
 }
 
 sub end_document {
 	my ($self, @args) = @_;
 
 	$self->SUPER::end_document(@args);
-	$self->_print($self->_pdf->stringify());
+	return $self->_print($self->_pdf->stringify());
 }
 
 sub end_element {
 	my ($self, $element) = @_;
 
-	$self->SUPER::end_element($element);
+	return $self->SUPER::end_element($element);
 }
 
 

@@ -47,6 +47,7 @@ sub start_document {
 	my ($self, @args) = @_;
 
 	$self->_setup_output;
+	return;
 }
 
 sub end_document {
@@ -55,22 +56,27 @@ sub end_document {
 	if (blessed $self->_output && $self->_output->can('finalize')) {
 		$self->_output->finalize();
 	}
+	return;
 }
 
 sub start_element {
 	my ($self, $element) = @_;
+	return;
 }
 
 sub start_prefix_mapping {
 	my ($self, $mapping) = @_;
+	return;
 }
 
 sub end_element {
 	my ($self, $element) = @_;
+	return;
 }
 
 sub end_prefix_mapping {
 	my ($self, @args) = @_;
+	return;
 }
 
 sub characters {
@@ -78,14 +84,17 @@ sub characters {
 	my $method = $self->_print;
 
 	$self->$method($ref->{Data} // '');
+	return;
 }
 
 sub ignorable_whitespace {
 	my ($self, @args) = @_;
+	return;
 }
 
 sub processing_instruction {
 	my ($self, @args) = @_;
+	return;
 }
 
 sub _setup_output {
@@ -96,50 +105,52 @@ sub _setup_output {
 		open(my $fh, '>', $filename) or
 			die "Can't open $filename for writing: $!";
 		$self->_output = $fh;
-		$self->_print(\&_do_output_fh);
+		return $self->_print(\&_do_output_fh);
 	}
 	elsif (ref $self->_output eq 'ARRAY') {
-		$self->_print(\&_do_output_push);
+		return $self->_print(\&_do_output_push);
 	}
 	elsif (ref $self->_output eq 'SCALAR') {
-		$self->_print(\&_do_output_scalar);
+		return $self->_print(\&_do_output_scalar);
 	}
 	elsif ($self->_output->can('output')) {
-		$self->_print(\&_do_output_method);
+		return $self->_print(\&_do_output_method);
 	}
 	else {
-		$self->_print(\&_do_output_print);
+		return $self->_print(\&_do_output_print);
 	}
 }
 
 sub _do_output_fh {
 	my ($self, $text) = @_;
 
-	print {$self->_output} $text;
+	return print {$self->_output} $text;
 }
 
 sub _do_output_push {
 	my ($self, $text) = @_;
 
 	push $self->_output, $text;
+	return 1;
 }
 
 sub _do_output_scalar {
 	my ($self, $text) = @_;
 
 	${$self->_output} .= $text;
+	return 1;
 }
 
 sub _do_output_method {
 	my ($self, $text) = @_;
 
-	$self->_output->output($text);
+	return $self->_output->output($text);
 }
 
 sub _do_output_print {
 	my ($self, $text) = @_;
 
-	$self->_output->print($text);
+	return $self->_output->print($text);
 }
 
 =head1 AUTHOR

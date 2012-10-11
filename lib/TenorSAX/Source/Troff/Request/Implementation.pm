@@ -25,6 +25,7 @@ sub _do_break {
 		$p->_ch->start_element($p->_lookup_element('_t:block',
 			$p->_state_to_hash));
 	}
+	return;
 }
 
 sub _load_file {
@@ -41,6 +42,7 @@ sub _load_file {
 		".do tenorsax filename \"" . $parser->_filename .
 		"\"\n");
 	unshift @{$parser->_data}, split /\R/, $data;
+	return;
 }
 
 sub _do_offset {
@@ -446,7 +448,6 @@ my $requests = [
 			}
 
 			die "Can't find macro package '$name': $!";
-			return;
 		}
 	},
 	{

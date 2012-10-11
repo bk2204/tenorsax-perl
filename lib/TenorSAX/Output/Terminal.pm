@@ -109,6 +109,7 @@ sub _do_line {
 	my $text = join('', map { $_->{text} } @chunks) . "\n";
 
 	$self->_print($text);
+	return;
 }
 
 sub end_element {
@@ -120,6 +121,7 @@ sub end_element {
 
 		$self->_print("\n");
 	}
+	return;
 }
 
 

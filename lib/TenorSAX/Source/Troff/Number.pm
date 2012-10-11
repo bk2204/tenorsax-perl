@@ -36,12 +36,12 @@ sub format {
 
 sub increment {
 	my $self = shift;
-	$self->value += $self->inc_value;
+	return $self->value += $self->inc_value;
 }
 
 sub decrement {
 	my $self = shift;
-	$self->value -= $self->inc_value;
+	return $self->value -= $self->inc_value;
 }
 
 =head1 NAME
