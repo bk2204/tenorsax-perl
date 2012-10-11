@@ -670,7 +670,7 @@ my $requests = [
 			my $cmd = $args->[0] or return;
 			my $arg = $args->[1] or return;
 
-			given ($cmd) {
+			for ($cmd) {
 				when (/^ext$/) {
 					$state->{parser}->_compat($arg ? 0 : 1);
 				}

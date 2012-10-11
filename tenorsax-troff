@@ -33,7 +33,7 @@ $p->getoptions($options,
 my %attr = ($options->{output} ? (Output => $options->{output}) : ());
 my $output;
 my $resolution = 72000;
-given ($options->{device}) {
+for ($options->{device}) {
 	when ("text") {
 		require TenorSAX::Output::Text;
 		$output = TenorSAX::Output::Text->new(%attr);

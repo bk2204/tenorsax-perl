@@ -150,7 +150,7 @@ sub evaluate {
 sub _compute_unit {
 	my ($class, $res, $value, $unit, $ptsize) = @_;
 
-	given ($unit) {
+	for ($unit) {
 		return $value when /^[us]$/;
 		return $value * $res when 'i';
 		return $value * $res * 50 / 127 when 'c';
@@ -193,7 +193,7 @@ sub _evaluate {
 		else {
 			last unless $$ref =~ s/^(\X)//;
 
-			given ($1) {
+			for ($1) {
 				when ($_ eq "(") {
 					$level++;
 					push @vals, $class->_evaluate($request, $state, $ref);
@@ -341,7 +341,7 @@ sub _evaluate {
 
 	if ($arg =~ s/^([cdr])[ \t]*(\X*)//) {
 		my $name = $2;
-		given ($1) {
+		for ($1) {
 			# FIXME: ask the layout engine to look this up for us.
 			when (/c/) {
 				return 1;
