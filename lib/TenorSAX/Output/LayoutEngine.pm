@@ -167,6 +167,10 @@ sub _format_block {
 			push @output, $block;
 		}
 	}
+	if (@output && ($output[0]->{fill} + 0) &&
+		$output[0]->{adjust} eq "center") {
+		@output = $self->_adjust_line(@output);
+	}
 	$self->_do_line(@output);
 }
 
