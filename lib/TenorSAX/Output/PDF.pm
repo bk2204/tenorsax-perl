@@ -232,8 +232,15 @@ sub _do_line {
 		$obj->text($text);
 		$self->_last_chunk($chunk);
 	}
+	my $vertical = $self->_res($self->_last_chunk->{'vertical-space'});
 
-	$self->_move_to($x, $y - $self->_res($self->_last_chunk->{'vertical-space'}));
+	if ($y < $vertical) {
+		$self->_new_page();
+	}
+	else {
+		$self->_move_to($x, $y - $vertical);
+	}
+
 	return;
 }
 
