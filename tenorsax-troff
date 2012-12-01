@@ -50,7 +50,7 @@ for ($options->{device}) {
 	}
 	when ("pdf") {
 		require TenorSAX::Output::PDF;
-		$output = TenorSAX::Output::PDF->new();
+		$output = TenorSAX::Output::PDF->new(%attr);
 	}
 	default {
 		my $stylesheet;

@@ -272,7 +272,7 @@ sub _setup_output {
 		open(my $fh, '>', $filename) or
 			die "Can't open $filename for writing: $!";
 		binmode $fh if $self->_binary_output;
-		$self->_output = $fh;
+		$self->_output($fh);
 		$self->_print_func(\&_do_output_fh);
 	}
 	elsif (ref $self->_output eq 'ARRAY') {
