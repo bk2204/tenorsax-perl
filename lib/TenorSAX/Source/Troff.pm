@@ -250,6 +250,34 @@ sub _substitute_args {
 	return $text;
 }
 
+sub _transform_escapes {
+	my $self = shift;
+	my $text = shift;
+	my $opts = shift || {};
+	my $compat = $opts->{compat};
+	my $ec = $self->_ec;
+	my $copy = $self->_copy->{enabled}; # copy mode
+
+	# The more complex forms are first because \X will match a ( or [.
+	my $numpat = $compat ? qr/\Q$ec\En(\((\X{2})|(\X))/ :
+		qr/\Q$ec\En(\((\X{2})|\[(\X*?)\]|(\X))/;
+	$text =~ s{$numpat}{"\x{102200}n" . ($2 || $3 || $4) . "\x{102202}"}ge;
+
+	my $strpat = $compat ? qr/\Q$ec\E\*(\((\X{2})|(\X))/ :
+		qr/\Q$ec\E\*(\((\X{2})|\[(\X*?)\]|(\X))/;
+	$text =~ s{$strpat}
+		{"\x{102200}s" . ($2 || $3 || $4) . "\x{102202}"}ge;
+
+	if (!$copy) {
+		my $fontpat = $compat ? qr/\Q$ec\Ef(\((\X{2})|(\X))/ :
+			qr/\Q$ec\Ef(\((\X{2})|\[(\X*?)\]|(\X))/;
+		$text =~ s{$fontpat}
+			{"\x{102200}xft\x{102201}" . ($2 || $3 || $4) . "\x{102202}"}ge;
+	}
+
+	return $text;
+}
+
 sub _expand {
 	my $self = shift;
 	my $text = shift;
@@ -276,37 +304,44 @@ sub _expand {
 	# Temporarily save doubled backslashes.
 	$text =~ s/\Q$ec$ec\E/\x{102204}/g;
 
-	# FIXME: handle the case where one of these letters is followed by a
-	# combining mark.
-	$text =~ s/\Q$ec\E([eta&;])/$charmap->{$1}/ge;
-
-	# The more complex forms are first because \X will match a ( or [.
-	my $numpat = $compat ? qr/\Q$ec\En(\((\X{2})|(\X))/ :
-		qr/\Q$ec\En(\((\X{2})|\[(\X*?)\]|(\X))/;
-	$text =~ s{$numpat}{$self->_lookup_number($2 || $3 || $4)->format($state)}ge;
-
-	my $strpat = $compat ? qr/\Q$ec\E\*(\((\X{2})|(\X))/ :
-		qr/\Q$ec\E\*(\((\X{2})|\[(\X*?)\]|(\X))/;
-	$text =~ s{$strpat}
-		{$self->_lookup_request($2 || $3 || $4)->perform($state, $args)||''}ge;
-
 	1 while $text =~ s{\Q$ec\E$}{shift $self->_data}ge;
 	$text =~ s{\Q$ec\E#.*$}{shift $self->_data}ge;
 	$text =~ s{\Q$ec\E".*$}{}g;
 
+	$text = $self->_transform_escapes($text, $opts);
+
+	# FIXME: handle the case where one of these letters is followed by a
+	# combining mark.
+	$text =~ s/\Q$ec\E([eta&;])/$charmap->{$1}/ge;
+
 	if (!$copy) {
 		$text =~ s{\Q$ec\EU'([A-Fa-f0-9]+)'}{chr(hex($1))}ge;
-
-		my $fontpat = $compat ? qr/\Q$ec\Ef(\((\X{2})|(\X))/ :
-			qr/\Q$ec\Ef(\((\X{2})|\[(\X*?)\]|(\X))/;
-		$text =~ s{$fontpat}
-			{"\x{102200}xft\x{102201}" . ($2 || $3 || $4) . "\x{102202}"}ge;
 	}
 
 	# Turn doubled backslashes into regular ones.
 	$text =~ s/\x{102204}/$ec/g;
 
-	return $text;
+	my $result = "";
+
+	while (length $text) {
+		$text =~ s/^([^\x{102200}]*)(\x{102200}(\X)(\X*?)((?:\x{102201}\X*)*)\x{102202})?//;
+		$result .= $1;
+		next unless $3;
+		for ($3) {
+			when ("n") {
+				$result .= $self->_lookup_number($4)->format($state);
+			}
+			when ("s") {
+				$result .= $self->_lookup_request($4)->perform($state, $args) ||
+					'';
+			}
+			default {
+				$result .= $2;
+			}
+		}
+	}
+
+	return $result;
 }
 
 sub _emit_characters {
