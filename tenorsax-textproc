@@ -1,0 +1,108 @@
+#!/usr/bin/perl
+
+use v5.14;
+use strict;
+use warnings;
+
+use open qw/:encoding(UTF-8) :std/;
+use warnings qw/FATAL utf8/;
+use utf8;
+
+use FindBin;
+use lib "$FindBin::RealBin/lib";
+
+use Getopt::Long;
+use TenorSAX;
+use XML::SAX::Writer;
+
+my $options = {
+	device => 'xml',
+	macro => [],
+	output => undef,
+};
+my $p = Getopt::Long::Parser->new();
+$p->configure('no_ignore_case', 'bundling');
+$p->getoptions($options,
+	'device|T=s',
+	'format|r=s',
+	'macro|m=s@',
+	'output|o=s',
+);
+
+my %attr = ($options->{output} ? (Output => $options->{output}) : ());
+my $output;
+my $resolution = 72000;
+# tm for text markup namespace; le for layout engine namespace.
+my $convert_to = "tm";
+my $processor;
+
+for ($options->{device}) {
+	when ("text") {
+		require TenorSAX::Output::Text;
+		$output = TenorSAX::Output::Text->new(%attr);
+	}
+	when ("utf8") {
+		require TenorSAX::Output::Terminal;
+		$resolution = 240;
+		$output = TenorSAX::Output::Terminal->new(Resolution => $resolution,
+			%attr);
+		$convert_to = "le";
+	}
+	when ("xml") {
+		require XML::SAX::Writer;
+		$processor = $output = XML::SAX::Writer->new(%attr);
+	}
+	when ("tmxml") {
+		require XML::SAX::Writer;
+		$output = XML::SAX::Writer->new(%attr);
+	}
+	when ("lexml") {
+		require XML::SAX::Writer;
+		$output = XML::SAX::Writer->new(%attr);
+		$convert_to = "le";
+	}
+	when ("pdf") {
+		require TenorSAX::Output::PDF;
+		$output = TenorSAX::Output::PDF->new(%attr);
+		$convert_to = "le";
+	}
+	default {
+		die "I don't understand that output format.";
+	}
+}
+my $filter;
+if ($convert_to eq "le") {
+	require TenorSAX::Filter::TextMarkupToLayoutEngine;
+	$filter = TenorSAX::Filter::TextMarkupToLayoutEngine->new(Resolution =>
+		$resolution, %attr);
+}
+else {
+	$filter = $output;
+}
+
+my $parser;
+for ($options->{format}) {
+	when ("pod") {
+		require Pod::SAX;
+		$parser = Pod::SAX->new(Handler => $output);
+	}
+	default {
+		die "I don't understand that input format.";
+	}
+}
+
+my $data = "";
+if (@ARGV) {
+	foreach my $file (@ARGV) {
+		local $/;
+		open(my $fh, '<', $file) or die "Can't open file '$file': $!";
+		$data .= <$fh>;
+		close($fh) or die "Can't close file '$file': $!";
+	}
+}
+else {
+	local $/;
+	$data = <STDIN>;
+}
+
+$parser->parse_string($data);
