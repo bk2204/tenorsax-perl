@@ -67,7 +67,8 @@ for ($options->{device}) {
 		$convert_to = "le";
 	}
 	default {
-		die "I don't understand that output format.";
+		die "I don't understand that output format.\n" if $options->{device};
+		die "I need an output format.\n";
 	}
 }
 my $filter;
@@ -84,10 +85,16 @@ my $parser;
 for ($options->{format}) {
 	when ("pod") {
 		require Pod::SAX;
-		$parser = Pod::SAX->new(Handler => $output);
+		unless ($processor) {
+			require TenorSAX::Filter::PodSAXToTextMarkup;
+			$processor = TenorSAX::Filter::PodSAXToTextMarkup->new(Handler =>
+				$output);
+		}
+		$parser = Pod::SAX->new(Handler => $processor);
 	}
 	default {
-		die "I don't understand that input format.";
+		die "I don't understand that input format.\n" if $options->{format};
+		die "I need an input format.\n";
 	}
 }
 
