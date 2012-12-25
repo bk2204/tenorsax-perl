@@ -278,20 +278,12 @@ sub _transform_escapes {
 	return $text;
 }
 
-sub _expand {
+sub _preprocess_line {
 	my $self = shift;
 	my $text = shift;
 	my $opts = shift || {};
-	my $compat = $opts->{compat};
-	my $copy = $self->_copy->{enabled}; # copy mode
-	my $args = [];
-	my $state = {parser => $self, environment => $self->_env, state =>
-		$self->_state};
 	my $ec = $self->_ec;
-
-	$opts->{return} = 1;
-
-	return $text unless defined $ec;
+	my $copy = $self->_copy->{enabled}; # copy mode
 
 	my $charmap = {
 		e => "\x{102204}",
@@ -301,14 +293,14 @@ sub _expand {
 		';' => "\x{200b}",
 	};
 
+	return $text unless defined $ec;
+
 	# Temporarily save doubled backslashes.
 	$text =~ s/\Q$ec$ec\E/\x{102204}/g;
 
 	1 while $text =~ s{\Q$ec\E$}{shift $self->_data}ge;
 	$text =~ s{\Q$ec\E#.*$}{shift $self->_data}ge;
 	$text =~ s{\Q$ec\E".*$}{}g;
-
-	$text = $self->_transform_escapes($text, $opts);
 
 	# FIXME: handle the case where one of these letters is followed by a
 	# combining mark.
@@ -318,8 +310,39 @@ sub _expand {
 		$text =~ s{\Q$ec\EU'([A-Fa-f0-9]+)'}{chr(hex($1))}ge;
 	}
 
-	# Turn doubled backslashes into regular ones.
+	return $text;
+}
+
+sub _expand_strings {
+	my $self = shift;
+	my $text = shift;
+	my $opts = shift || {};
+	my $args = [];
+	my $state = {parser => $self, environment => $self->_env, state =>
+		$self->_state};
+	my $ec = $self->_ec;
+
+	$text = $self->_preprocess_line($text, $opts);
+	$text = $self->_transform_escapes($text, $opts);
+
+	# Turn doubled backslashes into regular ones.  The first half of this step
+	# was done by _preprocess_line.
 	$text =~ s/\x{102204}/$ec/g;
+
+	my $result = "";
+
+	$text =~ s/\x{102200}s(\X*?)\x{102202}/$self->_lookup_request($1)->perform($state, $args) || ''/ge;
+
+	return $text;
+}
+
+sub _expand_escapes {
+	my $self = shift;
+	my $text = shift;
+	my $opts = shift || {};
+	my $args = [];
+	my $state = {parser => $self, environment => $self->_env, state =>
+		$self->_state};
 
 	my $result = "";
 
@@ -342,6 +365,22 @@ sub _expand {
 	}
 
 	return $result;
+}
+
+sub _expand {
+	my $self = shift;
+	my $text = shift;
+	my $opts = shift || {};
+	my $ec = $self->_ec;
+
+	$opts->{return} = 1;
+
+	return $text unless defined $ec;
+
+	$text = $self->_expand_strings($text, $opts);
+	$text = $self->_expand_escapes($text, $opts);
+
+	return $text;
 }
 
 sub _emit_characters {
@@ -633,6 +672,7 @@ sub _do_parse {
 
 	while (@{$self->_data}) {
 		my $line = shift @{$self->_data};
+
 
 		if ($self->_compat) {
 			$self->_parse_line_compat($line);
