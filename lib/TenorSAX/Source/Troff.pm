@@ -15,6 +15,7 @@ use namespace::autoclean;
 
 use TenorSAX::Source::Troff::Argument;
 use TenorSAX::Source::Troff::Environment;
+use TenorSAX::Source::Troff::Lexer;
 use TenorSAX::Source::Troff::Numerical::Implementation;
 use TenorSAX::Source::Troff::Request;
 use TenorSAX::Source::Troff::Request::Implementation;
@@ -250,69 +251,6 @@ sub _substitute_args {
 	return $text;
 }
 
-sub _transform_escapes {
-	my $self = shift;
-	my $text = shift;
-	my $opts = shift || {};
-	my $compat = $opts->{compat};
-	my $ec = $self->_ec;
-	my $copy = $self->_copy->{enabled}; # copy mode
-
-	# The more complex forms are first because \X will match a ( or [.
-	my $numpat = $compat ? qr/\Q$ec\En(\((\X{2})|(\X))/ :
-		qr/\Q$ec\En(\((\X{2})|\[(\X*?)\]|(\X))/;
-	$text =~ s{$numpat}{"\x{102200}n" . ($2 || $3 || $4) . "\x{102202}"}ge;
-
-	my $strpat = $compat ? qr/\Q$ec\E\*(\((\X{2})|(\X))/ :
-		qr/\Q$ec\E\*(\((\X{2})|\[(\X*?)\]|(\X))/;
-	$text =~ s{$strpat}
-		{"\x{102200}s" . ($2 || $3 || $4) . "\x{102202}"}ge;
-
-	if (!$copy) {
-		my $fontpat = $compat ? qr/\Q$ec\Ef(\((\X{2})|(\X))/ :
-			qr/\Q$ec\Ef(\((\X{2})|\[(\X*?)\]|(\X))/;
-		$text =~ s{$fontpat}
-			{"\x{102200}xft\x{102201}" . ($2 || $3 || $4) . "\x{102202}"}ge;
-	}
-
-	return $text;
-}
-
-sub _preprocess_line {
-	my $self = shift;
-	my $text = shift;
-	my $opts = shift || {};
-	my $ec = $self->_ec;
-	my $copy = $self->_copy->{enabled}; # copy mode
-
-	my $charmap = {
-		e => "\x{102204}",
-		t => "\t",
-		a => "\x{1}",
-		'&' => "\x{200b}",
-		';' => "\x{200b}",
-	};
-
-	return $text unless defined $ec;
-
-	# Temporarily save doubled backslashes.
-	$text =~ s/\Q$ec$ec\E/\x{102204}/g;
-
-	1 while $text =~ s{\Q$ec\E$}{shift $self->_data}ge;
-	$text =~ s{\Q$ec\E#.*$}{shift $self->_data}ge;
-	$text =~ s{\Q$ec\E".*$}{}g;
-
-	# FIXME: handle the case where one of these letters is followed by a
-	# combining mark.
-	$text =~ s/\Q$ec\E([eta&;])/$charmap->{$1}/ge;
-
-	if (!$copy) {
-		$text =~ s{\Q$ec\EU'([A-Fa-f0-9]+)'}{chr(hex($1))}ge;
-	}
-
-	return $text;
-}
-
 sub _expand_strings {
 	my $self = shift;
 	my $text = shift;
@@ -320,14 +258,13 @@ sub _expand_strings {
 	my $args = [];
 	my $state = {parser => $self, environment => $self->_env, state =>
 		$self->_state};
-	my $ec = $self->_ec;
+	my $lexer = TenorSAX::Source::Troff::Lexer->new(ec => $self->_ec,
+		copy => $opts->{copy}, parser => $self, compat => $opts->{compat});
 
-	$text = $self->_preprocess_line($text, $opts);
-	$text = $self->_transform_escapes($text, $opts);
-
-	# Turn doubled backslashes into regular ones.  The first half of this step
-	# was done by _preprocess_line.
-	$text =~ s/\x{102204}/$ec/g;
+	$text = $lexer->preprocess_line($text);
+	$text = $lexer->process_character_escapes($text);
+	$text = $lexer->transform_escapes($text);
+	$text = $lexer->postprocess_line($text);
 
 	my $result = "";
 
