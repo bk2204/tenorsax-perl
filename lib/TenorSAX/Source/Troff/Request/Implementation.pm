@@ -14,6 +14,7 @@ use TenorSAX::Source::Troff::Macro;
 use TenorSAX::Source::Troff::Number;
 use TenorSAX::Source::Troff::Request;
 use TenorSAX::Source::Troff::String;
+use TenorSAX::Source::Troff::Util;
 
 sub _do_break {
 	my ($state) = @_;
@@ -351,12 +352,13 @@ my $requests = [
 				$env->prev_font($env->font);
 				$env->font($choice) if defined $choice;
 			}
-			$p->_ch->characters({Data => "\n"}) if $state->{opts}->{as_request};
-			$p->_ch->end_element($p->_lookup_element('_t:inline'))
-				if $p->_ch->in_element({Name => '_t:inline'});
-			$p->_ch->start_element($p->_lookup_element('_t:inline', $p->_state_to_hash));
+			my $hash = $p->_state_to_hash;
+			$p->_stash->{$hash} = $hash;
 
-			return;
+			my $text = "";
+			my $cs = \&TenorSAX::Source::Troff::Util::command_string;
+			return $cs->("e", "_t:inline", "if-open") .
+				$cs->("b", "_t:inline", $hash);
 		}
 	},
 	{

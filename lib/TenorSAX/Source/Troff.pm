@@ -112,6 +112,12 @@ has '_copy' => (
 	default => sub { {enabled => 0} },
 	init_arg => undef,
 );
+has '_stash' => (
+	isa => 'HashRef',
+	is => 'rw',
+	default => sub { {} },
+	init_arg => undef,
+);
 
 =head1 NAME
 
@@ -221,6 +227,8 @@ sub _state_to_hash {
 	my $initial = shift;
 	my $hr = {};
 
+	# This function must always return a new reference, because its stringified
+	# representation will be used in the stash object as a key.
 	return {
 		$self->_extract_attributes($self->_env, $initial),
 		$self->_extract_attributes($self->_state, $initial),
@@ -277,16 +285,21 @@ sub _expand_escapes {
 	my $self = shift;
 	my $text = shift;
 	my $opts = shift || {};
+	my $allowed = shift || { map { $_ => 1 } qw/n s x/ };
 	my $args = [];
 	my $state = {parser => $self, environment => $self->_env, state =>
-		$self->_state};
+		$self->_state, opts => $opts};
 
 	my $result = "";
 
 	while (length $text) {
-		$text =~ s/^([^\x{102200}]*)(\x{102200}(\X)(\X*?)((?:\x{102201}\X*)*)\x{102202})?//;
+		$text =~ s/^([^\x{102200}]*)(\x{102200}(\X)(\X*?)((?:\x{102201}\X*?)*)\x{102202})?//;
 		$result .= $1;
 		next unless $3;
+		unless ($allowed->{$3} || $allowed->{all}) {
+			$result .= $2;
+			next;
+		}
 		for ($3) {
 			when ("n") {
 				$result .= $self->_lookup_number($4)->format($state);
@@ -294,6 +307,29 @@ sub _expand_escapes {
 			when ("s") {
 				$result .= $self->_lookup_request($4)->perform($state, $args) ||
 					'';
+			}
+			when ("x") {
+				my $name = $4;
+				my (undef, @pieces) = split /\x{102201}/, $5;
+				my $request = $self->_lookup_request($name);
+				my $res = $request->perform($state, \@pieces);
+				$result .= $res if defined $res;
+			}
+			when ("b") {
+				my ($element, $id) = split /\x{102201}/, $5;
+				my $state = $self->_stash->{$id};
+				$self->_ch->start_element($self->_lookup_element($element,
+						$state));
+				# Don't waste memory.
+				delete $self->_stash->{$id};
+			}
+			when ("e") {
+				my ($element, @flags) = split /\x{102201}/, $5;
+				my %flags = map { $_ => 1 } @flags;
+				if ($flags{'if-open'}) {
+					next unless $self->_ch->in_element({Name => $element});
+				}
+				$self->_ch->end_element($self->_lookup_element($element))
 			}
 			default {
 				$result .= $2;
@@ -331,12 +367,11 @@ sub _emit_characters {
 	foreach my $item (@items) {
 		if ($item =~ /\x{102200}(\X)(\X*)\x{102202}/) {
 			my $cmd = $1;
-			next unless $cmd eq "x";
-			my @pieces = split /\x{102201}/, $2;
-			my $name = shift @pieces;
-			my $request = $self->_lookup_request($name);
-			my $res = $request->perform($state, \@pieces);
-			$self->_emit_characters($res) if defined $res;
+			next unless $cmd =~ /^[xbe]/;
+			my $result = $self->_expand_escapes($item, {}, {all => 1});
+
+			# An x command can result in b and e commands, so process those.
+			$self->_emit_characters($result) if $result =~ /\x{102200}/;
 		}
 		else {
 			$self->_ch->characters({Data => $item});
