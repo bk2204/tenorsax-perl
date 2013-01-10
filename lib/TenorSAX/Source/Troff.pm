@@ -316,7 +316,8 @@ sub _expand_escapes {
 				$result .= $res if defined $res;
 			}
 			when ("b") {
-				my ($element, $id) = split /\x{102201}/, $5;
+				my $element = $4;
+				my (undef, $id) = split /\x{102201}/, $5;
 				my $state = $self->_stash->{$id};
 				$self->_ch->start_element($self->_lookup_element($element,
 						$state));
@@ -324,7 +325,8 @@ sub _expand_escapes {
 				delete $self->_stash->{$id};
 			}
 			when ("e") {
-				my ($element, @flags) = split /\x{102201}/, $5;
+				my $element = $4;
+				my @flags = split /\x{102201}/, $5;
 				my %flags = map { $_ => 1 } @flags;
 				if ($flags{'if-open'}) {
 					next unless $self->_ch->in_element({Name => $element});
@@ -634,7 +636,7 @@ sub _do_parse {
 	$self->_ch->element_trap(sub {
 			my $ch = shift;
 			my $element = shift;
-			return if !$element || $element->{NamespaceURI} ne $prefixes{_t};
+			return if $element && $element->{NamespaceURI} ne $prefixes{_t};
 			$ch->start_element($self->_lookup_element('_t:main'));
 			$ch->start_element($self->_lookup_element('_t:block',
 					$self->_state_to_hash(1)));
