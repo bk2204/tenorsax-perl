@@ -8,13 +8,7 @@ use warnings;
 
 TenorSAX - The great new TenorSAX!
 
-=head1 VERSION
-
-Version 0.01
-
 =cut
-
-our $VERSION = '0.01';
 
 our $Config = {
 	'troff' => {

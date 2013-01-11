@@ -123,15 +123,6 @@ has '_stash' => (
 
 TenorSAX::Source::Troff - The great new TenorSAX::Source::Troff!
 
-=head1 VERSION
-
-Version 2.00
-
-=cut
-
-our $VERSION = '2.00';
-
-
 =head1 SYNOPSIS
 
 Quick summary of what the module does.
