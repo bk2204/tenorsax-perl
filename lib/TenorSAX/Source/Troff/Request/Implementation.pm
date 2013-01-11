@@ -99,6 +99,8 @@ my $requests = [
 			my $old = $args->[1] or return;
 			my $requests = $state->{parser}->_requests;
 
+			return unless exists $requests->{$old};
+
 			$requests->{$new} = $requests->{$old};
 			return;
 		}

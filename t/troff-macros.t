@@ -1,6 +1,7 @@
 #!perl -T
 
-use Test::More tests => 46;
+use Test::More tests => 47;
+use Test::Exception;
 use TenorSAX::Source::Troff;
 use TenorSAX::Output::Text;
 
@@ -110,3 +111,11 @@ foreach my $aa ($aas, $aaa) {
 	is(run(".cp 0\n$bb.als XX BB\n.rn BB\n.XX\n"), 'BB.',
 		"als - alias works even after original is removed");
 }
+
+my $als_test = <<EOM;
+.cp 0
+.als AA BB
+.AA
+EOM
+
+lives_ok { run($als_test); }, "als - does not cause an undefined method call";
