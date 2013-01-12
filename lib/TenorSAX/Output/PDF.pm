@@ -67,14 +67,30 @@ Perhaps a little code snippet.
 our $TROFF_NS = $TenorSAX::Output::LayoutEngine::TROFF_NS;
 
 sub _lookup_font {
-	my ($self, $name) = @_;
+	my ($self, $name, $chunk) = @_;
 	my $cache = $self->_font_cache;
+	my $bold = $chunk->{'font-weight'} eq "bold";
+	my $italic = $chunk->{'font-variant'} eq "italic";
+	my $fcname = $name . ($bold ? ":bold" : "") . ($italic ? ":italic" : "");
 
-	return $cache->{$name} if exists $cache->{$name};
+	return $cache->{$fcname} if exists $cache->{$fcname};
+
 	my $font;
+	my @suffixes = ("");
+	@suffixes = map { "${_}Bold" } @suffixes if $bold;
+	@suffixes = map { ("${_}Italic", "${_}Oblique") } @suffixes if $italic;
+	@suffixes = map { $_ ? "-$_" : $_ } @suffixes;
+
+	foreach my $suffix (@suffixes) {
+		my $string = "$name$suffix";
+		eval {
+			$font = $self->_pdf->corefont($string, -dokern => 1, -encoding => 'UTF-8');
+		};
+		return $cache->{$fcname} = $font if $font;
+	}
+	return;
+
 	eval {
-		$font = $self->_pdf->corefont($name, -dokern => 1, -encoding => 'UTF-8');
-	} or eval {
 		$font = $self->_pdf->ttfont($name, -dokern => 1, -encoding => 'UTF-8');
 	} or eval {
 		$font = $self->_pdf->psfont($name, -dokern => 1, -encoding => 'UTF-8');
@@ -84,7 +100,7 @@ sub _lookup_font {
 
 sub _char_width {
 	my ($self, $char, $attrs) = @_;
-	my $font = $self->_lookup_font($attrs->{'font-family'});
+	my $font = $self->_lookup_font($attrs->{'font-family'}, $attrs);
 
 	return $self->_res($attrs->{'font-size'}) * $font->width($char);
 }
@@ -223,7 +239,7 @@ sub _do_line {
 
 	my $offset = $self->_units($x);
 	foreach my $chunk (@chunks) {
-		my $font = $self->_lookup_font($chunk->{'font-family'});
+		my $font = $self->_lookup_font($chunk->{'font-family'}, $chunk);
 		my $text = $chunk->{text};
 
 		if ($chunk->{'space-before'}) {
