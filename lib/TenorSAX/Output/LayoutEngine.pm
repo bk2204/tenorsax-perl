@@ -241,8 +241,9 @@ sub characters {
 	my ($self, $ref) = @_;
 	my $text = $ref->{Data} // '';
 	my %attrs = %{$self->_attrs->[-1]};
+	my $space = $attrs{'xml:space'} // '';
 
-	$text =~ s/\R/ /g if $attrs{'xml:space'} ne "preserve";
+	$text =~ s/\R/ /g if $space ne "preserve";
 	push $self->_text, {%attrs, text => $text};
 	return;
 }
