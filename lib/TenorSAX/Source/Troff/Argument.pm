@@ -232,6 +232,8 @@ sub _evaluate {
 		my $second = shift @vals;
 		my $op = shift @ops;
 
+		last unless defined $op;
+
 		if ($op eq "<?") {
 			$value = $second if $second < $value;
 		}
