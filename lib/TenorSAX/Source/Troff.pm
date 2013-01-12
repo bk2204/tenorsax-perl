@@ -258,7 +258,8 @@ sub _expand_strings {
 	my $state = {parser => $self, environment => $self->_env, state =>
 		$self->_state};
 	my $lexer = TenorSAX::Source::Troff::Lexer->new(ec => $self->_ec,
-		copy => $opts->{copy}, parser => $self, compat => $opts->{compat});
+		copy => $self->_copy->{enabled}, parser => $self,
+		compat => $opts->{compat});
 
 	$text = $lexer->preprocess_line($text);
 	$text = $lexer->process_character_escapes($text);
@@ -282,14 +283,18 @@ sub _expand_escapes {
 		$self->_state, opts => $opts};
 
 	my $result = "";
+	my $count = 0;
 
 	while (length $text) {
-		$text =~ s/^([^\x{102200}]*)(\x{102200}(\X)(\X*?)((?:\x{102201}\X*?)*)\x{102202})?//;
+		$text =~ s/^([^\x{102200}]*)(\x{102200}(\X)(\X*?)((?:\x{102201}\X*?)*)\x{102202})?//p;
 		$result .= $1;
 		next unless $3;
 		unless ($allowed->{$3} || $allowed->{all}) {
 			$result .= $2;
 			next;
+		}
+		if (defined $opts->{count} && $opts->{count} == $count++) {
+			return "$result${^MATCH}$text";
 		}
 		for ($3) {
 			when ("n") {

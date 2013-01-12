@@ -34,26 +34,52 @@ has 'parser' => (
 	is => 'rw'
 );
 
+sub _transform_named_escapes {
+	my ($self, $text, $char, $type) = @_;
+	my $ec = $self->ec;
+
+	# The more complex forms are first because \X will match a ( or [.
+	my $pat = $self->compat ? qr/\Q$ec$char\E(\((\X{2})|(\X))/ :
+		qr/\Q$ec$char\E(\((\X{2})|\[(\X*?)\]|(\X))/;
+
+	# We might end up with something like \*(\*(NA.  In this case, parse the
+	# second escape first, and then stick that into the proper place.
+	while ($text =~ /$pat/p) {
+		my $desc = $1;
+		my $name = $2 || $3 || $4;
+		my ($pre, $post) = (${^PREMATCH}, ${^POSTMATCH});
+		my $repl = "$desc$post";
+		if ($name =~ /^\Q$ec\E/) {
+			$repl = $self->transform_escapes($repl);
+			$text = "$pre$ec$char$repl";
+			next;
+		}
+		elsif ($name =~ /^\x{102200}/) {
+			my $repl = "$desc$post";
+			$repl = $self->parser->_expand_escapes($repl, {count => 1}, {n => 1, s => 1});
+			$text = "$pre$ec$char$repl";
+			next;
+		}
+		$text =~ s{$pat}{\x{102200}$type$name\x{102202}};
+	}
+
+	return $text;
+}
+
 sub transform_escapes {
 	my $self = shift;
 	my $text = shift;
 	my $ec = $self->ec;
 
-	# The more complex forms are first because \X will match a ( or [.
-	my $numpat = $self->compat ? qr/\Q$ec\En(\((\X{2})|(\X))/ :
-		qr/\Q$ec\En(\((\X{2})|\[(\X*?)\]|(\X))/;
-	$text =~ s{$numpat}{"\x{102200}n" . ($2 || $3 || $4) . "\x{102202}"}ge;
-
-	my $strpat = $self->compat ? qr/\Q$ec\E\*(\((\X{2})|(\X))/ :
-		qr/\Q$ec\E\*(\((\X{2})|\[(\X*?)\]|(\X))/;
-	$text =~ s{$strpat}
-		{"\x{102200}s" . ($2 || $3 || $4) . "\x{102202}"}ge;
+	$text = $self->_transform_named_escapes($text, "n", "n");
+	$text = $self->_transform_named_escapes($text, "*", "s");
 
 	if (!$self->copy) {
-		my $fontpat = $self->compat ? qr/\Q$ec\Ef(\((\X{2})|(\X))/ :
-			qr/\Q$ec\Ef(\((\X{2})|\[(\X*?)\]|(\X))/;
-		$text =~ s{$fontpat}
-			{"\x{102200}xft\x{102201}" . ($2 || $3 || $4) . "\x{102202}"}ge;
+		$text = $self->_transform_named_escapes($text, "f", "xft\x{102201}");
+		#my $fontpat = $self->compat ? qr/\Q$ec\Ef(\((\X{2})|(\X))/ :
+		#	qr/\Q$ec\Ef(\((\X{2})|\[(\X*?)\]|(\X))/;
+		#$text =~ s{$fontpat}
+		#	{"\x{102200}xft\x{102201}" . ($2 || $3 || $4) . "\x{102202}"}ge;
 	}
 
 	return $text;
