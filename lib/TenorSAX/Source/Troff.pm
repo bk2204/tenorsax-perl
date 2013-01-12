@@ -476,7 +476,8 @@ sub _do_line_traps {
 		my $lineno = $self->_linenos->{$key};
 		if (exists $self->_traps->{$key}{$lineno}) {
 			foreach my $trap (values $self->_traps->{$key}{$lineno}) {
-				$trap->($state);
+				my $text = $trap->($state);
+				$self->_expand_escapes($text, {}) if defined $text;
 			}
 		}
 	}
@@ -637,7 +638,6 @@ sub _do_parse {
 
 	while (@{$self->_data}) {
 		my $line = shift @{$self->_data};
-
 
 		if ($self->_compat) {
 			$self->_parse_line_compat($line);

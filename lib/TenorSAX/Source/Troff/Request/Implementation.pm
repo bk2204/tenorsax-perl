@@ -16,15 +16,17 @@ use TenorSAX::Source::Troff::Request;
 use TenorSAX::Source::Troff::String;
 use TenorSAX::Source::Troff::Util;
 
+
+*cs = \&TenorSAX::Source::Troff::Util::command_string;
+
 sub _do_break {
 	my ($state) = @_;
 	my $p = $state->{parser};
 
 	if ($state->{opts}->{can_break}) {
-		$p->_ch->end_element($p->_lookup_element('_t:block'))
-			if $p->_ch->in_element({Name => '_t:block'});
-		$p->_ch->start_element($p->_lookup_element('_t:block',
-			$p->_state_to_hash));
+		my $hash = $p->_state_to_hash;
+		$p->_stash->{$hash} = $hash;
+		return cs("e", "_t:block", "if-open") .  cs("b", "_t:block", $hash);
 	}
 	return;
 }
@@ -111,8 +113,7 @@ my $requests = [
 		code => sub {
 			my ($self, $state, $args) = @_;
 
-			_do_break($state);
-			return;
+			return _do_break($state);
 		}
 	},
 	{
@@ -158,8 +159,7 @@ my $requests = [
 				$state->{environment}->fill(1);
 			}
 
-			_do_break($state);
-			return;
+			return _do_break($state);
 		}
 	},
 	{
@@ -300,8 +300,7 @@ my $requests = [
 			my ($self, $state, $args) = @_;
 
 			$state->{parser}->_env->fill(1);
-			_do_break($state);
-			return;
+			return _do_break($state);
 		}
 	},
 	{
@@ -486,8 +485,7 @@ my $requests = [
 			my ($self, $state, $args) = @_;
 
 			$state->{parser}->_env->fill(0);
-			_do_break($state);
-			return;
+			return _do_break($state);
 		}
 	},
 	{
@@ -636,15 +634,15 @@ my $requests = [
 			my $value = $args->[0] || 0;
 			my $p = $state->{parser};
 
-			_do_break($state);
+			my $ret = _do_break($state);
 			my $curfill = $state->{parser}->_env->fill;
 			$state->{parser}->_env->fill(0);
-			$p->_ch->start_element($p->_lookup_element('_t:block',
-				$p->_state_to_hash));
-			$p->_ch->characters({Data => ("\n" x $value)});
-			$p->_ch->end_element($p->_lookup_element('_t:block'));
+			my $hash = $p->_state_to_hash;
+			$ret .= cs("b", "_t:block", $hash);
+			$ret .= "\n" x $value;
+			$ret .= cs("e", "_t:block");
 			$state->{parser}->_env->fill($curfill);
-			return;
+			return $ret;
 		}
 	},
 	{
