@@ -91,9 +91,10 @@ sub _char_width {
 
 sub _line_length {
 	my $self = shift;
+	my $chunk = shift // $self->_last_chunk;
 
 	# FIXME: look up when laying out.
-	return $self->_res($self->_last_chunk->{'line-length'});
+	return $self->_res($chunk->{'line-length'});
 }
 
 sub _new_page {
@@ -155,11 +156,15 @@ sub _adjust_line_center {
 	my ($self, @chunks) = @_;
 	my $length;
 
+	if (@chunks) {
+		$chunks[0]->{text} =~ s/^\s+//;
+		$chunks[-1]->{text} =~ s/\s+$//;
+	}
 	foreach my $chunk (@chunks) {
 		$length += $self->_char_width($chunk->{text}, $chunk);
 	}
 
-	my $diff = $self->_line_length - $length;
+	my $diff = $self->_line_length($chunks[0]) - $length;
 	my $each_gap = $diff / 2;
 	my $gap = $self->_units($each_gap) . "pt";
 
@@ -185,7 +190,7 @@ sub _adjust_line_both {
 		$spaces += !!($chunk->{text} =~ tr/ //);
 	}
 
-	my $diff = $self->_line_length - $length;
+	my $diff = $self->_line_length($chunks[0]) - $length;
 
 	return @chunks unless $spaces && $diff > 0;
 
