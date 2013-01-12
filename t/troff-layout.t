@@ -1,6 +1,7 @@
 #!perl -T
 
-use Test::More tests => 27;
+use Test::More tests => 28;
+use Test::Exception;
 use TenorSAX::Source::Troff;
 use TenorSAX::Output::Text;
 
@@ -52,3 +53,5 @@ is(run(".ad l\n\\n(.j\n"), "l", "ad - setting l affects .j register");
 is(run(".ad c\n\\n(.j\n"), "c", "ad - setting c affects .j register");
 is(run(".ad r\n\\n(.j\n"), "r", "ad - setting r affects .j register");
 is(run(".na\n\\n(.j\n"), "b", "na - no affect on .j register");
+
+lives_ok { run(".sp\n"); } "sp - properly inserts data into stash";

@@ -638,6 +638,7 @@ my $requests = [
 			my $curfill = $state->{parser}->_env->fill;
 			$state->{parser}->_env->fill(0);
 			my $hash = $p->_state_to_hash;
+			$p->_stash->{$hash} = $hash;
 			$ret .= cs("b", "_t:block", $hash);
 			$ret .= "\n" x $value;
 			$ret .= cs("e", "_t:block");

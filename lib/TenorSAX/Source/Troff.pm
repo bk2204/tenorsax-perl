@@ -314,6 +314,8 @@ sub _expand_escapes {
 			when ("b") {
 				my $element = $4;
 				my (undef, $id) = split /\x{102201}/, $5;
+				die "TenorSAX::Source::Troff: missing stash $id"
+					unless exists $self->_stash->{$id};
 				my $state = $self->_stash->{$id};
 				$self->_ch->start_element($self->_lookup_element($element,
 						$state));
