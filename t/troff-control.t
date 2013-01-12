@@ -1,6 +1,6 @@
 #!perl -T
 
-use Test::More tests => 59;
+use Test::More tests => 60;
 use TenorSAX::Source::Troff;
 use TenorSAX::Output::Text;
 
@@ -16,6 +16,11 @@ sub run {
 	$text =~ s/\n\z//;
 	return $text;
 }
+
+$SIG{ALRM} = sub {
+	require Carp;
+	Carp::confess("alarm");
+};
 
 is(run(".ex\nmessage"), '', 'ex - no further code is executed');
 
@@ -152,3 +157,18 @@ my $test5 = <<EOM;
 EOM
 
 is(run($test5), "2", "bug - parsing .if with multiple parentheses");
+
+my $ee = <<'EOM';
+.de EE
+.if \\n(.f<10 \
+.ds _F \\n(.f
+..
+.de BB
+.EE
+.if \\n(.$ \\$1\f\\*(_F\\$2
+..
+.BB A B
+EOM
+alarm(10);
+is(run($ee), "AB", "bug - parsing joined lines");
+alarm(0);

@@ -15,7 +15,6 @@ use namespace::autoclean;
 # Escape character.
 has 'ec' => (
 	is => 'rw',
-	isa => 'Str',
 	default => "\\",
 );
 # Compatibility mode.
@@ -55,7 +54,6 @@ sub _transform_named_escapes {
 			next;
 		}
 		elsif ($name =~ /^\x{102200}/) {
-			my $repl = "$desc$post";
 			$repl = $self->parser->_expand_escapes($repl, {count => 1}, {n => 1, s => 1});
 			$text = "$pre$ec$char$repl";
 			next;
@@ -71,15 +69,13 @@ sub transform_escapes {
 	my $text = shift;
 	my $ec = $self->ec;
 
+	return $text unless $text =~ /\Q$ec\E/;
+
 	$text = $self->_transform_named_escapes($text, "n", "n");
 	$text = $self->_transform_named_escapes($text, "*", "s");
 
 	if (!$self->copy) {
 		$text = $self->_transform_named_escapes($text, "f", "xft\x{102201}");
-		#my $fontpat = $self->compat ? qr/\Q$ec\Ef(\((\X{2})|(\X))/ :
-		#	qr/\Q$ec\Ef(\((\X{2})|\[(\X*?)\]|(\X))/;
-		#$text =~ s{$fontpat}
-		#	{"\x{102200}xft\x{102201}" . ($2 || $3 || $4) . "\x{102202}"}ge;
 	}
 
 	return $text;
@@ -106,6 +102,19 @@ sub process_character_escapes {
 		$text =~ s{\Q$ec\EU'([A-Fa-f0-9]+)'}{chr(hex($1))}ge;
 	}
 
+	return $text;
+}
+
+sub join_continuation_lines {
+	my $self = shift;
+	my $text = shift;
+	my $ec = $self->ec;
+	my $copy = $self->copy;
+
+	return $text unless defined $ec;
+
+	$text = $self->preprocess_line($text);
+	$text =~ s/\x{102204}/$ec$ec/g;
 	return $text;
 }
 

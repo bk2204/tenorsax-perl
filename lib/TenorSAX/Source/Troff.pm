@@ -494,8 +494,12 @@ sub _parse_line_compat {
 	my $line = shift;
 	my $controls = $self->_env->cc . $self->_env->c2;
 	my $opts = {compat => 1};
+	my $lexer = TenorSAX::Source::Troff::Lexer->new(ec => $self->_ec,
+		copy => $self->_copy->{enabled}, parser => $self,
+		compat => $opts->{compat});
 
 	$self->_linenos->{input}++;
+	$line = $lexer->join_continuation_lines($line);
 	if ($self->_copy->{enabled} && $line =~ $self->_copy->{pattern}) {
 		$self->_copy->{enabled} = 0;
 	}
@@ -523,8 +527,12 @@ sub _parse_line {
 	my $line = shift;
 	my $controls = $self->_env->cc . $self->_env->c2;
 	my $opts = {compat => 0};
+	my $lexer = TenorSAX::Source::Troff::Lexer->new(ec => $self->_ec,
+		copy => $self->_copy->{enabled}, parser => $self,
+		compat => $opts->{compat});
 
 	$self->_linenos->{input}++;
+	$line = $lexer->join_continuation_lines($line);
 	if ($self->_copy->{enabled} && $line =~ $self->_copy->{pattern}) {
 		$self->_copy->{enabled} = 0;
 	}
