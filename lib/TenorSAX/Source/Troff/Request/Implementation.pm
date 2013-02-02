@@ -266,6 +266,8 @@ my $requests = [
 			my $tag = $args->[0] or return;
 			my $parser = $state->{parser};
 
+			$state->{parser}->_xml_mode(1);
+
 			$parser->_ch->end_element($parser->_lookup_element($tag));
 
 			return;
@@ -474,6 +476,7 @@ my $requests = [
 			my $uri = $args->[1] or return;
 
 			$state->{parser}->_ch->prefixes->{$prefix} = $uri;
+			$state->{parser}->_xml_mode(1);
 
 			return;
 		}
@@ -655,6 +658,8 @@ my $requests = [
 			my $tag = shift @$args or return;
 			my $parser = $state->{parser};
 			my $attrs = {};
+
+			$state->{parser}->_xml_mode(1);
 
 			foreach my $arg (@$args) {
 				my ($name, $value) = split /=/, $arg, 2;

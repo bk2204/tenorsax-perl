@@ -118,6 +118,11 @@ has '_stash' => (
 	default => sub { {} },
 	init_arg => undef,
 );
+has '_xml_mode' => (
+	isa => 'Bool',
+	is => 'rw',
+	default => 0,
+);
 
 =head1 NAME
 
@@ -630,6 +635,7 @@ sub _do_parse {
 	my $self = shift;
 	my %prefixes = map { $_ => $self->_ch->prefixes->{$_} }
 		keys %{$self->_ch->prefixes};
+	my $prefix_count = scalar keys $self->_ch->prefixes;
 
 	$self->_ch->start_document({});
 	foreach my $prefix (keys %prefixes) {
@@ -644,6 +650,7 @@ sub _do_parse {
 			my $ch = shift;
 			my $element = shift;
 			return if $element && $element->{NamespaceURI} ne $prefixes{_t};
+			return if $self->_xml_mode;
 			$ch->start_element($self->_lookup_element('_t:main'));
 			$ch->start_element($self->_lookup_element('_t:block',
 					$self->_state_to_hash(1)));
