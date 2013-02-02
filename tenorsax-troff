@@ -20,6 +20,7 @@ use XML::SAX::Writer;
 my $options = {
 	device => 'xml',
 	macro => [],
+	macrodir => [],
 	output => undef,
 };
 my $p = Getopt::Long::Parser->new();
@@ -27,6 +28,7 @@ $p->configure('no_ignore_case', 'bundling');
 $p->getoptions($options,
 	'device|T=s',
 	'macro|m=s@',
+	'macrodir|M=s@',
 	'output|o=s',
 );
 
@@ -78,6 +80,9 @@ my @init_files = map { File::Path::Expand::expand_filename($_) }
 	@{$TenorSAX::Config->{troff}->{init_tmac}};
 
 my $data = "";
+foreach my $macrodir (@{$options->{macrodir}}) {
+	$data .= ".do tenorsax macrodir \"$macrodir\"\n";
+}
 foreach my $file (@init_files) {
 	local $/;
 	open(my $fh, '<', $file) or next;
