@@ -43,6 +43,11 @@ has 'element_trap' => (
 	is => 'rw',
 	default => sub { sub {} },
 );
+has '_seen_first_element' => (
+	isa => 'Bool',
+	is => 'rw',
+	default => 0,
+);
 
 =head1 NAME
 
@@ -138,6 +143,13 @@ sub start_element {
 	my ($self, $element) = @_;
 
 	return if $self->_ignored->{$element->{Name}};
+
+	if (!$self->_seen_first_element) {
+		$self->_seen_first_element(1);
+	}
+	elsif (!@{$self->_stack}) {
+		die "TenorSAX::Util::FancyContentHandler: attempting to start new root element!";
+	}
 
 	my $item = {type => 'element', value => \%{$element}};
 
