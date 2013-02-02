@@ -9,6 +9,9 @@ use utf8;
 use feature qw/unicode_strings/;
 
 use Moose;
+use MooseX::NonMoose;
+
+extends 'XML::SAX::Base';
 
 has 'prefixes' => (
 	isa => 'HashRef[Str]',

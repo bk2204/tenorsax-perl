@@ -213,6 +213,28 @@ my $requests = [
 		}
 	},
 	{
+		name => 'doctype',
+		arg_types => ['', '', ''],
+		code => sub {
+			my ($self, $state, $args) = @_;
+			my $element = shift @$args;
+			my $system = pop @$args;
+			my $public = pop @$args;
+			return unless defined $system;
+
+			$state->{parser}->_ch->start_dtd(
+				{
+					Name => $element,
+					PublicId => $public,
+					SystemId => $system,
+				}
+			);
+			$state->{parser}->_ch->end_dtd({});
+
+			return;
+		}
+	},
+	{
 		name => 'ds',
 		arg_types => ['', 'FinalString'],
 		code => sub {
