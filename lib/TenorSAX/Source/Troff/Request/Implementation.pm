@@ -494,7 +494,7 @@ my $requests = [
 		arg_types => ['', ''],
 		code => sub {
 			my ($self, $state, $args) = @_;
-			my $prefix = $args->[0] or return;
+			my $prefix = $args->[0];
 			my $uri = $args->[1] or return;
 
 			$state->{parser}->_ch->prefixes->{$prefix} = $uri;

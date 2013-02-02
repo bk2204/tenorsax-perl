@@ -591,10 +591,13 @@ sub _do_text_line {
 sub _lookup_prefix {
 	my $self = shift;
 	my $qname = shift;
+	my $attribute = shift;
 	my $result = {Name => $qname};
 	my ($prefix, $local) = (($qname =~ /:/) ? (split /:/, $qname, 2) :
 		(undef, $qname));
 	my $uri;
+
+	$prefix = "" unless $attribute || defined $prefix;
 	
 	if (defined $prefix) {
 		$uri = $self->_ch->prefixes->{$prefix} //
@@ -609,7 +612,7 @@ sub _lookup_prefix {
 
 sub _lookup_attribute {
 	my ($self, $qname, $value) = @_;
-	my $result = $self->_lookup_prefix($qname);
+	my $result = $self->_lookup_prefix($qname, 1);
 
 	$result->{Value} = $value;
 	return $result;
