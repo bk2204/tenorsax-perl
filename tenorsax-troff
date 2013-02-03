@@ -73,8 +73,12 @@ for ($options->{device}) {
 		$output->set_stylesheet_uri($stylesheet);
 	}
 }
+my $logger = sub {};
+if ($ENV{TENORSAX_DEBUG}) {
+	$logger = sub { say STDERR @_ };
+}
 my $parser = TenorSAX::Source::Troff->new(Handler => $output,
-	Resolution => $resolution);
+	Resolution => $resolution, Logger => $logger);
 
 my @init_files = map { File::Path::Expand::expand_filename($_) }
 	@{$TenorSAX::Config->{troff}->{init_tmac}};

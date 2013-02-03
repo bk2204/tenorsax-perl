@@ -123,6 +123,12 @@ has '_xml_mode' => (
 	is => 'rw',
 	default => 0,
 );
+has 'logger' => (
+	isa => 'CodeRef',
+	is => 'rw',
+	init_arg => 'Logger',
+	default => sub { sub {} },
+);
 
 =head1 NAME
 
@@ -663,6 +669,7 @@ sub _do_parse {
 
 	while (@{$self->_data}) {
 		my $line = shift @{$self->_data};
+		$self->logger->($line);
 
 		if ($self->_compat) {
 			$self->_parse_line_compat($line);
