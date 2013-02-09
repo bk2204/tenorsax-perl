@@ -1,6 +1,6 @@
 #!perl -T
 
-use Test::More tests => 101;
+use Test::More tests => 103;
 use TenorSAX::Source::Troff;
 use TenorSAX::Output::Text;
 
@@ -66,7 +66,9 @@ EOM
 is(run("$aa\\*[ST]\n"), 'compatST]', "ds - eval bracket string in compat mode");
 is(run("$aa\\*(ST\n"), 'regular', "ds - eval paren string in compat mode");
 
-# The following tests are based off groff's -me macro set.
+# Some of the following tests are based off groff's -me macro set.
+TODO: {
+	local $TODO = "buggy implementation not yet fixed";
 my $bb = <<'EOM';
 .de BB
 .ds FT \\n(.f
@@ -76,6 +78,7 @@ my $bb = <<'EOM';
 .BB A
 EOM
 is(run($bb), "A1", "string substituted before escapes interpreted");
+}
 
 my $cc = <<'EOM';
 .de BB
@@ -97,3 +100,28 @@ my $dd = <<'EOM';
 .DD A B
 EOM
 is(run($dd), "AB", "escapes do not cause infinite loop");
+
+my $ee = <<'EOM';
+.nf
+.de AA
+\\n(.f
+\\$2\\n(.f\\$1
+\\*X\\n(.f\\*Y
+..
+.ds X "\f3
+.ds Y "\f1
+.AA "\f1" "\f2A"
+EOM
+is(run($ee), "1\nA2\n3", "non-string arguments are interpreted on use");
+
+my $ff = <<'EOM';
+.de BB
+.ds FT \\n(.f
+.ft 3
+.if \\n(.$ \{
+\\$1\f\\*(FT\\n(.f
+.\}
+..
+.BB A
+EOM
+is(run($ff), "A1", "string substituted before escapes interpreted");

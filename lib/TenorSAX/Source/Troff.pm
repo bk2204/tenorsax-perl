@@ -355,6 +355,7 @@ sub _expand {
 	my $self = shift;
 	my $text = shift;
 	my $opts = shift || {};
+	my $escapes = shift;
 	my $ec = $self->_ec;
 
 	$opts->{return} = 1;
@@ -362,7 +363,7 @@ sub _expand {
 	return $text unless defined $ec;
 
 	$text = $self->_expand_strings($text, $opts);
-	$text = $self->_expand_escapes($text, $opts);
+	$text = $self->_expand_escapes($text, $opts, $escapes);
 
 	return $text;
 }
@@ -401,7 +402,7 @@ sub _do_request {
 	my $state = {parser => $self, environment => $self->_env, opts => $opts,
 		state => $self->_state};
 
-	$line = $self->_expand($line, $opts);
+	$line = $self->_expand($line, $opts, {n => 1, s => 1});
 
 	for (my $i = 0; $i < $request->max_args && length $line; $i++) {
 		my $argtype = $request->arg_type->[$i] //
