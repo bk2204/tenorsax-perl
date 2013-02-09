@@ -402,12 +402,14 @@ sub _do_request {
 	my $state = {parser => $self, environment => $self->_env, opts => $opts,
 		state => $self->_state};
 
-	$line = $self->_expand($line, $opts, {n => 1, s => 1});
+	$line = $self->_expand($line, $opts, {s => 1});
 
 	for (my $i = 0; $i < $request->max_args && length $line; $i++) {
 		my $argtype = $request->arg_type->[$i] //
 			'TenorSAX::Source::Troff::Argument';
 		my $arg = $argtype->parse($request, \$line);
+		$arg = $self->_expand_escapes($arg, $opts, {n => 1})
+			if $argtype->expand_ok;
 		push @$args, $argtype->evaluate($request, $state, $arg);
 		$request->modify($state, $args);
 	}

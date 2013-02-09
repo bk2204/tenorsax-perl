@@ -67,8 +67,6 @@ is(run("$aa\\*[ST]\n"), 'compatST]', "ds - eval bracket string in compat mode");
 is(run("$aa\\*(ST\n"), 'regular', "ds - eval paren string in compat mode");
 
 # Some of the following tests are based off groff's -me macro set.
-TODO: {
-	local $TODO = "buggy implementation not yet fixed";
 my $bb = <<'EOM';
 .de BB
 .ds FT \\n(.f
@@ -78,7 +76,6 @@ my $bb = <<'EOM';
 .BB A
 EOM
 is(run($bb), "A1", "string substituted before escapes interpreted");
-}
 
 my $cc = <<'EOM';
 .de BB

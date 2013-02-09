@@ -30,6 +30,10 @@ sub evaluate {
 	return $arg;
 }
 
+sub expand_ok {
+	return 1;
+}
+
 no Moose;
 __PACKAGE__->meta->make_immutable;
 
@@ -45,6 +49,19 @@ sub parse {
 
 	$$lineref =~ s/^(.*)$//;
 	return $1;
+}
+
+no Moose;
+__PACKAGE__->meta->make_immutable;
+
+package TenorSAX::Source::Troff::UnparsedArgument;
+
+use Moose;
+
+extends 'TenorSAX::Source::Troff::FinalArgument';
+
+sub expand_ok {
+	return 0;
 }
 
 no Moose;

@@ -409,7 +409,7 @@ my $requests = [
 	},
 	{
 		name => 'if',
-		arg_types => ['Conditional', 'FinalString'],
+		arg_types => ['Conditional', 'Unparsed'],
 		code => sub {
 			my ($self, $state, $args) = @_;
 			my $cond = $args->[0];
