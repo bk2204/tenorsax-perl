@@ -129,6 +129,15 @@ has 'logger' => (
 	init_arg => 'Logger',
 	default => sub { sub {} },
 );
+# A set of flags.  1 forbids IO, 2 dies on IO (otherwise it is silently
+# ignored), 4 forbids clearing flag 2.  Once set to a true value, cannot be set
+# to 0 again.
+has 'forbid_io' => (
+	isa => 'Int',
+	is => 'rw',
+	init_arg => 'ForbidIO',
+	default => 0,
+);
 
 =head1 NAME
 

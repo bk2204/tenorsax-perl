@@ -33,6 +33,12 @@ sub _do_break {
 
 sub _load_file {
 	my ($filename, $parser) = @_;
+	my $forbid_io = $parser->forbid_io;
+
+	# This should be handled in the individual requests, but we add an extra
+	# sanity check.
+	die __PACKAGE__ . ": IO not allowed for unknown request" if $forbid_io & 2;
+	return if $forbid_io;
 
 	local $/;
 	open(my $fh, '<', $filename) or die "Can't source '$filename': $!";
@@ -461,6 +467,10 @@ my $requests = [
 		code => sub {
 			my ($self, $state, $args) = @_;
 			my $name = $args->[0] or return;
+			my $forbid_io = $state->{parser}->forbid_io;
+
+			die __PACKAGE__ . ": IO not allowed for mso" if $forbid_io & 2;
+			return if $forbid_io;
 
 			foreach my $dir (@{$state->{parser}->_macrodirs}) {
 				$dir = File::Path::Expand::expand_filename($dir);
@@ -641,6 +651,10 @@ my $requests = [
 		code => sub {
 			my ($self, $state, $args) = @_;
 			my $filename = $args->[0] or return;
+			my $forbid_io = $state->{parser}->forbid_io;
+
+			die __PACKAGE__ . ": IO not allowed for so" if $forbid_io & 2;
+			return if $forbid_io;
 
 			if ($filename !~ m{^/}) {
 				my @pieces = File::Spec->splitpath($state->{parser}->_filename);
@@ -707,6 +721,21 @@ my $requests = [
 				}
 				when (/^macrodir$/) {
 					push $state->{parser}->_macrodirs, $arg;
+				}
+				when (/^no-io$/) {
+					# See the comment for the forbid_io attribute of the main
+					# parser.
+					if ($arg) {
+						my $curval = $state->{parser}->forbid_io;
+						return if $curval & 4;
+						$arg |= 1;
+						$state->{parser}->forbid_io($arg);
+					}
+				}
+				when (/^get-no-io$/) {
+					$state->{parser}->_numbers->{$arg} =
+						TenorSAX::Source::Troff::Number->new(value =>
+							$state->{parser}->forbid_io);
 				}
 				when (/^get-implementation$/) {
 					$state->{parser}->_numbers->{$arg} =
