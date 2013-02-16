@@ -722,6 +722,12 @@ my $requests = [
 				when (/^macrodir$/) {
 					push $state->{parser}->_macrodirs, $arg;
 				}
+				when (/^get-version$/) {
+					my $version = $TenorSAX::VERSION;
+					$version //= "development";
+					$state->{parser}->_requests->{$arg} =
+						TenorSAX::Source::Troff::String->new(text => $version);
+				}
 				when (/^no-io$/) {
 					# See the comment for the forbid_io attribute of the main
 					# parser.
