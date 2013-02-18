@@ -67,8 +67,26 @@ for ($options->{device}) {
 		$convert_to = "le";
 	}
 	default {
-		die "I don't understand that output format.\n" if $options->{device};
-		die "I need an output format.\n";
+		die "I need an output format.\n" unless $options->{device};
+
+		require File::Path::Expand;
+
+		my $stylesheet;
+		my @xslt_dirs = map { File::Path::Expand::expand_filename($_) }
+			@{$TenorSAX::Config->{troff}->{xslt}};
+		foreach my $dir (reverse @xslt_dirs) {
+			$stylesheet = "$dir/format-$options->{device}.xsl";
+			last if -r $stylesheet;
+			$stylesheet = undef;
+		}
+		die "Can't load stylesheet for device $options->{device}"
+			unless $stylesheet;
+
+		require XML::SAX::Writer;
+		require XML::Filter::XSLT;
+		my $final = XML::SAX::Writer->new(%attr);
+		$output = XML::Filter::XSLT->new(Handler => $final);
+		$output->set_stylesheet_uri($stylesheet);
 	}
 }
 my $filter;
