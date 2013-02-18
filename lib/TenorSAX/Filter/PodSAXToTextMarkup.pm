@@ -32,6 +32,18 @@ has '_prefixes' => (
 		}
 	},
 );
+# 0 for normal processing, 1 for tenorsax markup block, 2 for ignored markup
+# block
+has '_state' => (
+	is => 'rw',
+	isa => 'Int',
+	default => 0,
+);
+has '_charstore' => (
+	is => 'rw',
+	isa => 'Str',
+	default => "",
+);
 
 sub _element {
 	my ($self, $name, $prefix) = @_;
@@ -98,6 +110,15 @@ sub end_document {
 	return $self->SUPER::end_document({});
 }
 
+sub characters {
+	my ($self, $hr) = @_;
+
+	return $self->SUPER::characters($hr) if $self->_state == 0;
+	return if $self->_state == 2;
+	# state == 1
+	$self->_charstore($self->_charstore . $hr->{Data});
+}
+
 sub start_element {
 	my ($self, $element) = @_;
 	my $name;
@@ -153,6 +174,10 @@ sub start_element {
 			$elem->{Attributes} = {@attrs};
 			$self->SUPER::start_element($elem);
 		}
+		when ("markup") {
+			my $type = $element->{Attributes}->{"{}type"}->{Value};
+			$self->_state($type eq "tenorsax" ? 1 : 2);
+		}
 	}
 
 	return $self->SUPER::start_element($self->_element($name)) if $name;
@@ -170,9 +195,34 @@ sub end_element {
 		return $self->SUPER::end_element($self->_element("xlink", "xl"))
 			when "xlink";
 		$name = "inline" when /^(?:B|I)$/;
+		when ("markup") {
+			$self->_state(0);
+			$self->_parse_tenorsax_block($self->_charstore);
+			$self->_charstore("");
+		}
 	}
 	return $self->SUPER::end_element($self->_element($name)) if $name;
 	return;
+}
+
+sub _parse_tenorsax_block {
+	my ($self, $text) = @_;
+	my %attrs = map {
+		/^\s*([^:]+):\s?(.*)$/ ? ($1, $2) : ()
+	} split /\R/, $text;
+
+	if (exists $attrs{title}) {
+		$self->SUPER::start_element($self->_element("title"));
+		$self->SUPER::characters({Data => $attrs{title}});
+		$self->SUPER::end_element($self->_element("title"));
+	}
+	$self->SUPER::start_element($self->_element("meta"));
+	if (exists $attrs{author}) {
+		$self->SUPER::start_element($self->_element("author"));
+		$self->SUPER::characters({Data => $attrs{author}});
+		$self->SUPER::end_element($self->_element("author"));
+	}
+	$self->SUPER::end_element($self->_element("meta"));
 }
 
 no Moose;
