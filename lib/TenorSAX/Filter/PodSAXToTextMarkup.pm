@@ -66,11 +66,16 @@ sub _attribute {
 	$prefix //= "tm";
 
 	my $uri = $self->_prefixes->{$prefix};
-	die "No such prefix $prefix" unless defined $uri;
+	if ($prefix eq "") {
+		$uri = "";
+	}
+	elsif (!defined $uri) {
+		die "No such prefix $prefix";
+	}
 
 	return (
 		"\{$uri\}$name" => {
-			Name => "$prefix:$name",
+			Name => ($prefix ? "$prefix:$name" : $name),
 			NamespaceURI => $uri,
 			Prefix => $prefix,
 			LocalName => $name,
@@ -160,16 +165,19 @@ sub start_element {
 			my $type = $1;
 			my %inlines = (
 				"B" => {
-					"font-weight" => "bold"
+					type => "strong",
 				},
 				"I" => {
-					"font-variant" => "italic"
-				}
+					type => "emphasis",
+				},
+				"C" => {
+					type => "monospace",
+				},
 			);
 			return unless exists $inlines{$type};
 			my @attrs;
 			foreach my $key (keys $inlines{$type}) {
-				push @attrs, $self->_attribute($key, $inlines{$type}->{$key});
+				push @attrs, $self->_attribute($key, $inlines{$type}->{$key}, "");
 			}
 			$elem->{Attributes} = {@attrs};
 			$self->SUPER::start_element($elem);
