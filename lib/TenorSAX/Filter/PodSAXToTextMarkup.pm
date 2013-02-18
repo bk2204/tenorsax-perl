@@ -7,6 +7,7 @@ use warnings;
 use warnings qw/FATAL utf8/;
 use utf8;
 
+use TenorSAX;
 use Moose;
 use MooseX::NonMoose;
 use namespace::autoclean;
@@ -230,6 +231,15 @@ sub _parse_tenorsax_block {
 		$self->SUPER::characters({Data => $attrs{author}});
 		$self->SUPER::end_element($self->_element("author"));
 	}
+	my $version = $TenorSAX::VERSION // "development";
+	my %genattrs = (
+		$self->_attribute("name", "TenorSAX", ""),
+		$self->_attribute("version", $version, ""),
+	);
+	my $elem = $self->_element("generator");
+	$elem->{Attributes} = \%genattrs;
+	$self->SUPER::start_element($elem);
+	$self->SUPER::end_element($elem);
 	$self->SUPER::end_element($self->_element("meta"));
 }
 
