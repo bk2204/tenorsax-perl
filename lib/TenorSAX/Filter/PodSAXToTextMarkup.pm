@@ -161,7 +161,7 @@ sub start_element {
 			};
 			$self->SUPER::start_element($elem);
 		}
-		when (/^(B|I)$/) {
+		when (/^([BIC])$/) {
 			my $elem = $self->_element("inline");
 			my $type = $1;
 			my %inlines = (
@@ -203,7 +203,7 @@ sub end_element {
 		$name = $_ when /^(?:para|(?:itemized|ordered);list|listitem)$/;
 		return $self->SUPER::end_element($self->_element("xlink", "xl"))
 			when "xlink";
-		$name = "inline" when /^(?:B|I)$/;
+		$name = "inline" when /^[BIC]$/;
 		when ("markup") {
 			$self->_state(0);
 			$self->_parse_tenorsax_block($self->_charstore);
