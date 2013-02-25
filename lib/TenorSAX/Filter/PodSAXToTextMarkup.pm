@@ -40,6 +40,11 @@ has '_state' => (
 	isa => 'Int',
 	default => 0,
 );
+has '_seen_meta' => (
+	is => 'rw',
+	isa => 'Bool',
+	default => 0,
+);
 has '_charstore' => (
 	is => 'rw',
 	isa => 'Str',
@@ -225,22 +230,37 @@ sub _parse_tenorsax_block {
 		$self->SUPER::characters({Data => $attrs{title}});
 		$self->SUPER::end_element($self->_element("title"));
 	}
-	$self->SUPER::start_element($self->_element("meta"));
-	if (exists $attrs{author}) {
-		$self->SUPER::start_element($self->_element("author"));
-		$self->SUPER::characters({Data => $attrs{author}});
-		$self->SUPER::end_element($self->_element("author"));
+	if (!$self->_seen_meta) {
+		$self->_seen_meta(1);
+
+		$self->SUPER::start_element($self->_element("meta"));
+		if (exists $attrs{author}) {
+			$self->SUPER::start_element($self->_element("author"));
+			$self->SUPER::characters({Data => $attrs{author}});
+			$self->SUPER::end_element($self->_element("author"));
+		}
+		my $version = $TenorSAX::VERSION // "development";
+		my %genattrs = (
+			$self->_attribute("name", "TenorSAX", ""),
+			$self->_attribute("version", $version, ""),
+		);
+		my $elem = $self->_element("generator");
+		$elem->{Attributes} = \%genattrs;
+		$self->SUPER::start_element($elem);
+		$self->SUPER::end_element($elem);
+		$self->SUPER::end_element($self->_element("meta"));
 	}
-	my $version = $TenorSAX::VERSION // "development";
-	my %genattrs = (
-		$self->_attribute("name", "TenorSAX", ""),
-		$self->_attribute("version", $version, ""),
-	);
-	my $elem = $self->_element("generator");
-	$elem->{Attributes} = \%genattrs;
-	$self->SUPER::start_element($elem);
-	$self->SUPER::end_element($elem);
-	$self->SUPER::end_element($self->_element("meta"));
+	if (exists $attrs{image}) {
+		my ($uri, $alt) = split /\s+/, $attrs{image}, 2;
+		my $elem = $self->_element("image");
+		my %genattrs = (
+			$self->_attribute("uri", $uri, ""),
+			$self->_attribute("description", $alt, ""),
+		);
+		$elem->{Attributes} = \%genattrs;
+		$self->SUPER::start_element($elem);
+		$self->SUPER::end_element($self->_element("image"));
+	}
 }
 
 no Moose;
