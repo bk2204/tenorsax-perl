@@ -158,11 +158,12 @@ sub start_element {
 		}
 		$name = $_ when /^(?:para|(?:itemized|ordered);list|listitem)$/;
 		when ("xlink") {
-			my $elem = $self->_element("xlink", "xl");
+			my $elem = $self->_element("link", "tm");
 			$elem->{Attributes} = {
 				$self->_attribute("href", 
 					$element->{Attributes}->{"{}href"}->{Value},
-					"xl")
+					"xl"),
+				$self->_attribute("type", "simple", "xl")
 			};
 			$self->SUPER::start_element($elem);
 		}
@@ -206,7 +207,7 @@ sub end_element {
 		return when "pod";
 		$name = "title" when /^head(\d+)$/;
 		$name = $_ when /^(?:para|(?:itemized|ordered);list|listitem)$/;
-		return $self->SUPER::end_element($self->_element("xlink", "xl"))
+		return $self->SUPER::end_element($self->_element("link", "tm"))
 			when "xlink";
 		$name = "inline" when /^[BIC]$/;
 		when ("markup") {
