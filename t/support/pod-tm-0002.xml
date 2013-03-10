@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<tm:root xmlns:tm="http://ns.crustytoothpaste.net/text-markup" xmlns:xl="http://www.w3.org/1999/xlink">
+  <tm:section>
+    <tm:title>Title</tm:title>
+    <tm:para>This is some text.</tm:para>
+    <tm:itemizedlist>
+      <tm:listitem>
+        <tm:para>A bulleted item</tm:para>
+      </tm:listitem>
+      <tm:listitem>
+        <tm:para>Another bulleted item</tm:para>
+      </tm:listitem>
+    </tm:itemizedlist>
+  </tm:section>
+</tm:root>

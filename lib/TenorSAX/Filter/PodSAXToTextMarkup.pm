@@ -156,7 +156,7 @@ sub start_element {
 			$self->_depth($level);
 			return;
 		}
-		$name = $_ when /^(?:para|(?:itemized|ordered);list|listitem)$/;
+		$name = $_ when /^(?:para|(?:itemized|ordered)list|listitem)$/;
 		when ("xlink") {
 			my $elem = $self->_element("link", "tm");
 			$elem->{Attributes} = {
@@ -206,7 +206,7 @@ sub end_element {
 	for ($element->{Name}) {
 		return when "pod";
 		$name = "title" when /^head(\d+)$/;
-		$name = $_ when /^(?:para|(?:itemized|ordered);list|listitem)$/;
+		$name = $_ when /^(?:para|(?:itemized|ordered)list|listitem)$/;
 		return $self->SUPER::end_element($self->_element("link", "tm"))
 			when "xlink";
 		$name = "inline" when /^[BIC]$/;
