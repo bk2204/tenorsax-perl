@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<tm:root xmlns:tm="http://ns.crustytoothpaste.net/text-markup" xmlns:xl="http://www.w3.org/1999/xlink">
+  <tm:section>
+    <tm:title>This is a level one heading.</tm:title>
+    <tm:para>Level one text.</tm:para>
+    <tm:section>
+      <tm:title>This is a level two heading.</tm:title>
+      <tm:para>Level two text.</tm:para>
+      <tm:section>
+        <tm:title>This is a level three heading.</tm:title>
+        <tm:para>Level three text.</tm:para>
+      </tm:section>
+    </tm:section>
+  </tm:section>
+  <tm:section>
+    <tm:title>Another level one heading.</tm:title>
+    <tm:para>Some more prose.</tm:para>
+  </tm:section>
+</tm:root>

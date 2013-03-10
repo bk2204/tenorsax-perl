@@ -145,7 +145,7 @@ sub start_element {
 			}
 			elsif ($diff < 0) {
 				$self->SUPER::end_element($self->_element("section"))
-					for 1 .. -$diff;
+					for 0 .. -$diff;
 				$self->SUPER::start_element($self->_element("section"));
 			}
 			else {
