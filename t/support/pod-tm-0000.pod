@@ -1,0 +1,5 @@
+=pod
+
+This is some text.  It is uninteresting.
+
+=cut
