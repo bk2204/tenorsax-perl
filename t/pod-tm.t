@@ -39,5 +39,10 @@ foreach my $root (@roots) {
 	close($fh);
 
 	is_well_formed_xml($output, "$root produces well-formed XML");
-	is_xml($output, $expected, "$root produces expected XML");
+
+	TODO: {
+		local $TODO = "see Debian bugs 702740, 702742, and 702743"
+			if $root eq "pod-tm-0004";
+		is_xml($output, $expected, "$root produces expected XML");
+	}
 }

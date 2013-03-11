@@ -1,0 +1,521 @@
+=pod
+
+=encoding UTF-8
+
+=head1 Overview
+
+This is a list of character entities for POD.
+
+=over 4
+
+=item * E<34> E<0x0022> E<000042> " E<quot>
+
+=item * E<38> E<0x0026> E<000046> & E<amp>
+
+=item * E<60> E<0x003c> E<000074> < E<lt> 
+
+=item * E<62> E<0x003e> E<000076> > E<gt> 
+
+=item * E<47> E<0x002f> E<000057> / E<sol> 
+
+=item * E<124> E<0x007c> E<000174> | E<verbar> 
+
+=item * E<160> E<0x00a0> E<000240>   E<nbsp>
+
+=item * E<161> E<0x00a1> E<000241> ¡ E<iexcl>
+
+=item * E<162> E<0x00a2> E<000242> ¢ E<cent>
+
+=item * E<163> E<0x00a3> E<000243> £ E<pound>
+
+=item * E<164> E<0x00a4> E<000244> ¤ E<curren>
+
+=item * E<165> E<0x00a5> E<000245> ¥ E<yen>
+
+=item * E<166> E<0x00a6> E<000246> ¦ E<brvbar>
+
+=item * E<167> E<0x00a7> E<000247> § E<sect>
+
+=item * E<168> E<0x00a8> E<000250> ¨ E<uml>
+
+=item * E<169> E<0x00a9> E<000251> © E<copy>
+
+=item * E<170> E<0x00aa> E<000252> ª E<ordf>
+
+=item * E<171> E<0x00ab> E<000253> « E<laquo>
+
+=item * E<172> E<0x00ac> E<000254> ¬ E<not>
+
+=item * E<173> E<0x00ad> E<000255> ­ E<shy>
+
+=item * E<174> E<0x00ae> E<000256> ® E<reg>
+
+=item * E<175> E<0x00af> E<000257> ¯ E<macr>
+
+=item * E<176> E<0x00b0> E<000260> ° E<deg>
+
+=item * E<177> E<0x00b1> E<000261> ± E<plusmn>
+
+=item * E<178> E<0x00b2> E<000262> ² E<sup2>
+
+=item * E<179> E<0x00b3> E<000263> ³ E<sup3>
+
+=item * E<180> E<0x00b4> E<000264> ´ E<acute>
+
+=item * E<181> E<0x00b5> E<000265> µ E<micro>
+
+=item * E<182> E<0x00b6> E<000266> ¶ E<para>
+
+=item * E<183> E<0x00b7> E<000267> · E<middot>
+
+=item * E<184> E<0x00b8> E<000270> ¸ E<cedil>
+
+=item * E<185> E<0x00b9> E<000271> ¹ E<sup1>
+
+=item * E<186> E<0x00ba> E<000272> º E<ordm>
+
+=item * E<187> E<0x00bb> E<000273> » E<raquo>
+
+=item * E<188> E<0x00bc> E<000274> ¼ E<frac14>
+
+=item * E<189> E<0x00bd> E<000275> ½ E<frac12>
+
+=item * E<190> E<0x00be> E<000276> ¾ E<frac34>
+
+=item * E<191> E<0x00bf> E<000277> ¿ E<iquest>
+
+=item * E<192> E<0x00c0> E<000300> À E<Agrave>
+
+=item * E<193> E<0x00c1> E<000301> Á E<Aacute>
+
+=item * E<194> E<0x00c2> E<000302> Â E<Acirc>
+
+=item * E<195> E<0x00c3> E<000303> Ã E<Atilde>
+
+=item * E<196> E<0x00c4> E<000304> Ä E<Auml>
+
+=item * E<197> E<0x00c5> E<000305> Å E<Aring>
+
+=item * E<198> E<0x00c6> E<000306> Æ E<AElig>
+
+=item * E<199> E<0x00c7> E<000307> Ç E<Ccedil>
+
+=item * E<200> E<0x00c8> E<000310> È E<Egrave>
+
+=item * E<201> E<0x00c9> E<000311> É E<Eacute>
+
+=item * E<202> E<0x00ca> E<000312> Ê E<Ecirc>
+
+=item * E<203> E<0x00cb> E<000313> Ë E<Euml>
+
+=item * E<204> E<0x00cc> E<000314> Ì E<Igrave>
+
+=item * E<205> E<0x00cd> E<000315> Í E<Iacute>
+
+=item * E<206> E<0x00ce> E<000316> Î E<Icirc>
+
+=item * E<207> E<0x00cf> E<000317> Ï E<Iuml>
+
+=item * E<208> E<0x00d0> E<000320> Ð E<ETH>
+
+=item * E<209> E<0x00d1> E<000321> Ñ E<Ntilde>
+
+=item * E<210> E<0x00d2> E<000322> Ò E<Ograve>
+
+=item * E<211> E<0x00d3> E<000323> Ó E<Oacute>
+
+=item * E<212> E<0x00d4> E<000324> Ô E<Ocirc>
+
+=item * E<213> E<0x00d5> E<000325> Õ E<Otilde>
+
+=item * E<214> E<0x00d6> E<000326> Ö E<Ouml>
+
+=item * E<215> E<0x00d7> E<000327> × E<times>
+
+=item * E<216> E<0x00d8> E<000330> Ø E<Oslash>
+
+=item * E<217> E<0x00d9> E<000331> Ù E<Ugrave>
+
+=item * E<218> E<0x00da> E<000332> Ú E<Uacute>
+
+=item * E<219> E<0x00db> E<000333> Û E<Ucirc>
+
+=item * E<220> E<0x00dc> E<000334> Ü E<Uuml>
+
+=item * E<221> E<0x00dd> E<000335> Ý E<Yacute>
+
+=item * E<222> E<0x00de> E<000336> Þ E<THORN>
+
+=item * E<223> E<0x00df> E<000337> ß E<szlig>
+
+=item * E<224> E<0x00e0> E<000340> à E<agrave>
+
+=item * E<225> E<0x00e1> E<000341> á E<aacute>
+
+=item * E<226> E<0x00e2> E<000342> â E<acirc>
+
+=item * E<227> E<0x00e3> E<000343> ã E<atilde>
+
+=item * E<228> E<0x00e4> E<000344> ä E<auml>
+
+=item * E<229> E<0x00e5> E<000345> å E<aring>
+
+=item * E<230> E<0x00e6> E<000346> æ E<aelig>
+
+=item * E<231> E<0x00e7> E<000347> ç E<ccedil>
+
+=item * E<232> E<0x00e8> E<000350> è E<egrave>
+
+=item * E<233> E<0x00e9> E<000351> é E<eacute>
+
+=item * E<234> E<0x00ea> E<000352> ê E<ecirc>
+
+=item * E<235> E<0x00eb> E<000353> ë E<euml>
+
+=item * E<236> E<0x00ec> E<000354> ì E<igrave>
+
+=item * E<237> E<0x00ed> E<000355> í E<iacute>
+
+=item * E<238> E<0x00ee> E<000356> î E<icirc>
+
+=item * E<239> E<0x00ef> E<000357> ï E<iuml>
+
+=item * E<240> E<0x00f0> E<000360> ð E<eth>
+
+=item * E<241> E<0x00f1> E<000361> ñ E<ntilde>
+
+=item * E<242> E<0x00f2> E<000362> ò E<ograve>
+
+=item * E<243> E<0x00f3> E<000363> ó E<oacute>
+
+=item * E<244> E<0x00f4> E<000364> ô E<ocirc>
+
+=item * E<245> E<0x00f5> E<000365> õ E<otilde>
+
+=item * E<246> E<0x00f6> E<000366> ö E<ouml>
+
+=item * E<247> E<0x00f7> E<000367> ÷ E<divide>
+
+=item * E<248> E<0x00f8> E<000370> ø E<oslash>
+
+=item * E<249> E<0x00f9> E<000371> ù E<ugrave>
+
+=item * E<250> E<0x00fa> E<000372> ú E<uacute>
+
+=item * E<251> E<0x00fb> E<000373> û E<ucirc>
+
+=item * E<252> E<0x00fc> E<000374> ü E<uuml>
+
+=item * E<253> E<0x00fd> E<000375> ý E<yacute>
+
+=item * E<254> E<0x00fe> E<000376> þ E<thorn>
+
+=item * E<255> E<0x00ff> E<000377> ÿ E<yuml>
+
+=item * E<338> E<0x0152> E<000522> Œ E<OElig>
+
+=item * E<339> E<0x0153> E<000523> œ E<oelig>
+
+=item * E<352> E<0x0160> E<000540> Š E<Scaron>
+
+=item * E<353> E<0x0161> E<000541> š E<scaron>
+
+=item * E<376> E<0x0178> E<000570> Ÿ E<Yuml>
+
+=item * E<402> E<0x0192> E<000622> ƒ E<fnof>
+
+=item * E<710> E<0x02c6> E<001306> ˆ E<circ>
+
+=item * E<732> E<0x02dc> E<001334> ˜ E<tilde>
+
+=item * E<913> E<0x0391> E<001621> Α E<Alpha>
+
+=item * E<914> E<0x0392> E<001622> Β E<Beta>
+
+=item * E<915> E<0x0393> E<001623> Γ E<Gamma>
+
+=item * E<916> E<0x0394> E<001624> Δ E<Delta>
+
+=item * E<917> E<0x0395> E<001625> Ε E<Epsilon>
+
+=item * E<918> E<0x0396> E<001626> Ζ E<Zeta>
+
+=item * E<919> E<0x0397> E<001627> Η E<Eta>
+
+=item * E<920> E<0x0398> E<001630> Θ E<Theta>
+
+=item * E<921> E<0x0399> E<001631> Ι E<Iota>
+
+=item * E<922> E<0x039a> E<001632> Κ E<Kappa>
+
+=item * E<923> E<0x039b> E<001633> Λ E<Lambda>
+
+=item * E<924> E<0x039c> E<001634> Μ E<Mu>
+
+=item * E<925> E<0x039d> E<001635> Ν E<Nu>
+
+=item * E<926> E<0x039e> E<001636> Ξ E<Xi>
+
+=item * E<927> E<0x039f> E<001637> Ο E<Omicron>
+
+=item * E<928> E<0x03a0> E<001640> Π E<Pi>
+
+=item * E<929> E<0x03a1> E<001641> Ρ E<Rho>
+
+=item * E<931> E<0x03a3> E<001643> Σ E<Sigma>
+
+=item * E<932> E<0x03a4> E<001644> Τ E<Tau>
+
+=item * E<933> E<0x03a5> E<001645> Υ E<Upsilon>
+
+=item * E<934> E<0x03a6> E<001646> Φ E<Phi>
+
+=item * E<935> E<0x03a7> E<001647> Χ E<Chi>
+
+=item * E<936> E<0x03a8> E<001650> Ψ E<Psi>
+
+=item * E<937> E<0x03a9> E<001651> Ω E<Omega>
+
+=item * E<945> E<0x03b1> E<001661> α E<alpha>
+
+=item * E<946> E<0x03b2> E<001662> β E<beta>
+
+=item * E<947> E<0x03b3> E<001663> γ E<gamma>
+
+=item * E<948> E<0x03b4> E<001664> δ E<delta>
+
+=item * E<949> E<0x03b5> E<001665> ε E<epsilon>
+
+=item * E<950> E<0x03b6> E<001666> ζ E<zeta>
+
+=item * E<951> E<0x03b7> E<001667> η E<eta>
+
+=item * E<952> E<0x03b8> E<001670> θ E<theta>
+
+=item * E<953> E<0x03b9> E<001671> ι E<iota>
+
+=item * E<954> E<0x03ba> E<001672> κ E<kappa>
+
+=item * E<955> E<0x03bb> E<001673> λ E<lambda>
+
+=item * E<956> E<0x03bc> E<001674> μ E<mu>
+
+=item * E<957> E<0x03bd> E<001675> ν E<nu>
+
+=item * E<958> E<0x03be> E<001676> ξ E<xi>
+
+=item * E<959> E<0x03bf> E<001677> ο E<omicron>
+
+=item * E<960> E<0x03c0> E<001700> π E<pi>
+
+=item * E<961> E<0x03c1> E<001701> ρ E<rho>
+
+=item * E<962> E<0x03c2> E<001702> ς E<sigmaf>
+
+=item * E<963> E<0x03c3> E<001703> σ E<sigma>
+
+=item * E<964> E<0x03c4> E<001704> τ E<tau>
+
+=item * E<965> E<0x03c5> E<001705> υ E<upsilon>
+
+=item * E<966> E<0x03c6> E<001706> φ E<phi>
+
+=item * E<967> E<0x03c7> E<001707> χ E<chi>
+
+=item * E<968> E<0x03c8> E<001710> ψ E<psi>
+
+=item * E<969> E<0x03c9> E<001711> ω E<omega>
+
+=item * E<977> E<0x03d1> E<001721> ϑ E<thetasym>
+
+=item * E<978> E<0x03d2> E<001722> ϒ E<upsih>
+
+=item * E<982> E<0x03d6> E<001726> ϖ E<piv>
+
+=item * E<8194> E<0x2002> E<020002>   E<ensp>
+
+=item * E<8195> E<0x2003> E<020003>   E<emsp>
+
+=item * E<8201> E<0x2009> E<020011>   E<thinsp>
+
+=item * E<8204> E<0x200c> E<020014> ‌ E<zwnj>
+
+=item * E<8205> E<0x200d> E<020015> ‍ E<zwj>
+
+=item * E<8206> E<0x200e> E<020016> ‎ E<lrm>
+
+=item * E<8207> E<0x200f> E<020017> ‏ E<rlm>
+
+=item * E<8211> E<0x2013> E<020023> – E<ndash>
+
+=item * E<8212> E<0x2014> E<020024> — E<mdash>
+
+=item * E<8216> E<0x2018> E<020030> ‘ E<lsquo>
+
+=item * E<8217> E<0x2019> E<020031> ’ E<rsquo>
+
+=item * E<8218> E<0x201a> E<020032> ‚ E<sbquo>
+
+=item * E<8220> E<0x201c> E<020034> “ E<ldquo>
+
+=item * E<8221> E<0x201d> E<020035> ” E<rdquo>
+
+=item * E<8222> E<0x201e> E<020036> „ E<bdquo>
+
+=item * E<8224> E<0x2020> E<020040> † E<dagger>
+
+=item * E<8225> E<0x2021> E<020041> ‡ E<Dagger>
+
+=item * E<8240> E<0x2030> E<020060> ‰ E<permil>
+
+=item * E<8249> E<0x2039> E<020071> ‹ E<lsaquo>
+
+=item * E<8250> E<0x203a> E<020072> › E<rsaquo>
+
+=item * E<8364> E<0x20ac> E<020254> € E<euro>
+
+=item * E<8226> E<0x2022> E<020042> • E<bull>
+
+=item * E<8230> E<0x2026> E<020046> … E<hellip>
+
+=item * E<8242> E<0x2032> E<020062> ′ E<prime>
+
+=item * E<8243> E<0x2033> E<020063> ″ E<Prime>
+
+=item * E<8254> E<0x203e> E<020076> ‾ E<oline>
+
+=item * E<8260> E<0x2044> E<020104> ⁄ E<frasl>
+
+=item * E<8472> E<0x2118> E<020430> ℘ E<weierp>
+
+=item * E<8465> E<0x2111> E<020421> ℑ E<image>
+
+=item * E<8476> E<0x211c> E<020434> ℜ E<real>
+
+=item * E<8482> E<0x2122> E<020442> ™ E<trade>
+
+=item * E<8501> E<0x2135> E<020465> ℵ E<alefsym>
+
+=item * E<8592> E<0x2190> E<020620> ← E<larr>
+
+=item * E<8593> E<0x2191> E<020621> ↑ E<uarr>
+
+=item * E<8594> E<0x2192> E<020622> → E<rarr>
+
+=item * E<8595> E<0x2193> E<020623> ↓ E<darr>
+
+=item * E<8596> E<0x2194> E<020624> ↔ E<harr>
+
+=item * E<8629> E<0x21b5> E<020665> ↵ E<crarr>
+
+=item * E<8656> E<0x21d0> E<020720> ⇐ E<lArr>
+
+=item * E<8657> E<0x21d1> E<020721> ⇑ E<uArr>
+
+=item * E<8658> E<0x21d2> E<020722> ⇒ E<rArr>
+
+=item * E<8659> E<0x21d3> E<020723> ⇓ E<dArr>
+
+=item * E<8660> E<0x21d4> E<020724> ⇔ E<hArr>
+
+=item * E<8704> E<0x2200> E<021000> ∀ E<forall>
+
+=item * E<8706> E<0x2202> E<021002> ∂ E<part>
+
+=item * E<8707> E<0x2203> E<021003> ∃ E<exist>
+
+=item * E<8709> E<0x2205> E<021005> ∅ E<empty>
+
+=item * E<8711> E<0x2207> E<021007> ∇ E<nabla>
+
+=item * E<8712> E<0x2208> E<021010> ∈ E<isin>
+
+=item * E<8713> E<0x2209> E<021011> ∉ E<notin>
+
+=item * E<8715> E<0x220b> E<021013> ∋ E<ni>
+
+=item * E<8719> E<0x220f> E<021017> ∏ E<prod>
+
+=item * E<8721> E<0x2211> E<021021> ∑ E<sum>
+
+=item * E<8722> E<0x2212> E<021022> − E<minus>
+
+=item * E<8727> E<0x2217> E<021027> ∗ E<lowast>
+
+=item * E<8730> E<0x221a> E<021032> √ E<radic>
+
+=item * E<8733> E<0x221d> E<021035> ∝ E<prop>
+
+=item * E<8734> E<0x221e> E<021036> ∞ E<infin>
+
+=item * E<8736> E<0x2220> E<021040> ∠ E<ang>
+
+=item * E<8743> E<0x2227> E<021047> ∧ E<and>
+
+=item * E<8744> E<0x2228> E<021050> ∨ E<or>
+
+=item * E<8745> E<0x2229> E<021051> ∩ E<cap>
+
+=item * E<8746> E<0x222a> E<021052> ∪ E<cup>
+
+=item * E<8747> E<0x222b> E<021053> ∫ E<int>
+
+=item * E<8756> E<0x2234> E<021064> ∴ E<there4>
+
+=item * E<8764> E<0x223c> E<021074> ∼ E<sim>
+
+=item * E<8773> E<0x2245> E<021105> ≅ E<cong>
+
+=item * E<8776> E<0x2248> E<021110> ≈ E<asymp>
+
+=item * E<8800> E<0x2260> E<021140> ≠ E<ne>
+
+=item * E<8801> E<0x2261> E<021141> ≡ E<equiv>
+
+=item * E<8804> E<0x2264> E<021144> ≤ E<le>
+
+=item * E<8805> E<0x2265> E<021145> ≥ E<ge>
+
+=item * E<8834> E<0x2282> E<021202> ⊂ E<sub>
+
+=item * E<8835> E<0x2283> E<021203> ⊃ E<sup>
+
+=item * E<8836> E<0x2284> E<021204> ⊄ E<nsub>
+
+=item * E<8838> E<0x2286> E<021206> ⊆ E<sube>
+
+=item * E<8839> E<0x2287> E<021207> ⊇ E<supe>
+
+=item * E<8853> E<0x2295> E<021225> ⊕ E<oplus>
+
+=item * E<8855> E<0x2297> E<021227> ⊗ E<otimes>
+
+=item * E<8869> E<0x22a5> E<021245> ⊥ E<perp>
+
+=item * E<8901> E<0x22c5> E<021305> ⋅ E<sdot>
+
+=item * E<8968> E<0x2308> E<021410> ⌈ E<lceil>
+
+=item * E<8969> E<0x2309> E<021411> ⌉ E<rceil>
+
+=item * E<8970> E<0x230a> E<021412> ⌊ E<lfloor>
+
+=item * E<8971> E<0x230b> E<021413> ⌋ E<rfloor>
+
+=item * E<9001> E<0x2329> E<021451> 〈 E<lang>
+
+=item * E<9002> E<0x232a> E<021452> 〉 E<rang>
+
+=item * E<9674> E<0x25ca> E<022712> ◊ E<loz>
+
+=item * E<9824> E<0x2660> E<023140> ♠ E<spades>
+
+=item * E<9827> E<0x2663> E<023143> ♣ E<clubs>
+
+=item * E<9829> E<0x2665> E<023145> ♥ E<hearts>
+
+=item * E<9830> E<0x2666> E<023146> ♦ E<diams>
+
+=back
+
+=cut
