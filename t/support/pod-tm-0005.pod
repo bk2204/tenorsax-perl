@@ -1,0 +1,10 @@
+=pod
+
+=head1 Title
+
+This is some text.
+
+Here is a B<bold> word.  And an I<italic> word.
+And C<some constant-width text>.  And a reminder to never run F</bin/csh>.
+
+=cut

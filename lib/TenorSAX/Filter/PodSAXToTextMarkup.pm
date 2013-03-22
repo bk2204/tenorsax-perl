@@ -167,7 +167,7 @@ sub start_element {
 			};
 			$self->SUPER::start_element($elem);
 		}
-		when (/^([BIC])$/) {
+		when (/^([BIFC])$/) {
 			my $elem = $self->_element("inline");
 			my $type = $1;
 			my %inlines = (
@@ -179,6 +179,10 @@ sub start_element {
 				},
 				"C" => {
 					type => "monospace",
+				},
+				"F" => {
+					type => "emphasis",
+					semantic => "filename",
 				},
 			);
 			return unless exists $inlines{$type};
@@ -209,7 +213,7 @@ sub end_element {
 		$name = $_ when /^(?:para|(?:itemized|ordered)list|listitem)$/;
 		return $self->SUPER::end_element($self->_element("link", "tm"))
 			when "xlink";
-		$name = "inline" when /^[BIC]$/;
+		$name = "inline" when /^[BIFC]$/;
 		when ("markup") {
 			$self->_state(0);
 			$self->_parse_tenorsax_block($self->_charstore);

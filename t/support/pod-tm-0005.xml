@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<tm:root xmlns:tm="http://ns.crustytoothpaste.net/text-markup" xmlns:xl="http://www.w3.org/1999/xlink">
+  <tm:section>
+    <tm:title>Title</tm:title>
+    <tm:para>This is some text.</tm:para>
+    <tm:para>Here is a <tm:inline type="strong">bold</tm:inline> word.  And an <tm:inline type="emphasis">italic</tm:inline> word.
+And <tm:inline type="monospace">some constant-width text</tm:inline>.  And a reminder to never run <tm:inline type="emphasis" semantic="filename">/bin/csh</tm:inline>.</tm:para>
+  </tm:section>
+</tm:root>
