@@ -1,6 +1,9 @@
 #!perl
 
 use v5.14;
+use warnings;
+use open qw/:encoding(UTF-8) :std/;
+use utf8;
 
 use FindBin;
 use Test::XML;
@@ -20,8 +23,6 @@ opendir(my $dh, $testdir) or
 my @roots = sort map { s/\.pod$//r; } grep { /^pod-tm-\d+\.pod$/ } readdir $dh;
 die "No tests to run!?" unless @roots;
 plan tests => (2 * scalar @roots) + 1;
-
-# A package to strip Pod::SAX comments; otherwise,
 
 foreach my $root (@roots) {
 	my $output = "";
