@@ -28,8 +28,9 @@ has '_prefixes' => (
 	isa => 'HashRef[Str]',
 	default => sub {
 		{
-			"tm" => "http://ns.crustytoothpaste.net/text-markup",
-			"xl" => "http://www.w3.org/1999/xlink",
+			tm => "http://ns.crustytoothpaste.net/text-markup",
+			xl => "http://www.w3.org/1999/xlink",
+			xml => 'http://www.w3.org/XML/1998/namespace',
 		}
 	},
 );
@@ -193,6 +194,13 @@ sub start_element {
 			$elem->{Attributes} = {@attrs};
 			$self->SUPER::start_element($elem);
 		}
+		when ("verbatim") {
+			my $elem = $self->_element("verbatim");
+			$elem->{Attributes} = {
+				$self->_attribute("space", "preserve", "xml")
+			};
+			$self->SUPER::start_element($elem);
+		}
 		when ("markup") {
 			my $type = $element->{Attributes}->{"{}type"}->{Value};
 			$self->_state($type eq "tenorsax" ? 1 : 2);
@@ -210,7 +218,7 @@ sub end_element {
 	for ($element->{Name}) {
 		return when "pod";
 		$name = "title" when /^head(\d+)$/;
-		$name = $_ when /^(?:para|(?:itemized|ordered)list|listitem)$/;
+		$name = $_ when /^(?:para|(?:itemized|ordered)list|listitem|verbatim)$/;
 		return $self->SUPER::end_element($self->_element("link", "tm"))
 			when "xlink";
 		$name = "inline" when /^[BIFC]$/;

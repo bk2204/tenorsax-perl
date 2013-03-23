@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<tm:root xmlns:tm="http://ns.crustytoothpaste.net/text-markup" xmlns:xl="http://www.w3.org/1999/xlink">
+  <tm:section>
+    <tm:title>Title</tm:title>
+    <tm:para>This is some regular text.  Below is a verbatim block.</tm:para>
+    <tm:verbatim xml:space="preserve">Roses are red,
+Violets are blue,
+Sugar is sweet,
+and you're a banana.</tm:verbatim>
+    <tm:para>And some more non-verbatim text.</tm:para>
+  </tm:section>
+</tm:root>

@@ -1,0 +1,14 @@
+=pod
+
+=head1 Title
+
+This is some regular text.  Below is a verbatim block.
+
+  Roses are red,
+  Violets are blue,
+  Sugar is sweet,
+  and you're a banana.
+
+And some more non-verbatim text.
+
+=cut
