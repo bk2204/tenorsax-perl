@@ -1,0 +1,7 @@
+=pod
+
+=head1 Title
+
+There is noZ<>thing in the middle of the third word in this sentence.
+
+=cut

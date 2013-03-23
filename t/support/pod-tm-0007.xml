@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<tm:root xmlns:tm="http://ns.crustytoothpaste.net/text-markup" xmlns:xl="http://www.w3.org/1999/xlink">
+  <tm:section>
+    <tm:title>Title</tm:title>
+    <tm:para>There is nothing in the middle of the third word in this sentence.</tm:para>
+  </tm:section>
+</tm:root>
