@@ -232,6 +232,11 @@ sub end_element {
 	return;
 }
 
+# Eat those annoying Pod::SAX comments.
+sub comment {
+	return;
+}
+
 sub _parse_tenorsax_block {
 	my ($self, $text) = @_;
 	my %attrs = map {
