@@ -8,6 +8,7 @@ use warnings qw/FATAL utf8/;
 use utf8;
 
 use TenorSAX;
+use TenorSAX::Util::NodeGenerator;
 use Moose;
 use MooseX::NonMoose;
 use namespace::autoclean;
@@ -51,45 +52,10 @@ has '_charstore' => (
 	isa => 'Str',
 	default => "",
 );
-
-sub _element {
-	my ($self, $name, $prefix) = @_;
-	$prefix //= "tm";
-
-	my $uri = $self->_prefixes->{$prefix};
-	die "No such prefix $prefix" unless defined $uri;
-
-	return {
-		Name => "$prefix:$name",
-		Attributes => {},
-		NamespaceURI => $uri,
-		Prefix => $prefix,
-		LocalName => $name,
-	};
-}
-
-sub _attribute {
-	my ($self, $name, $value, $prefix) = @_;
-	$prefix //= "tm";
-
-	my $uri = $self->_prefixes->{$prefix};
-	if ($prefix eq "") {
-		$uri = "";
-	}
-	elsif (!defined $uri) {
-		die "No such prefix $prefix";
-	}
-
-	return (
-		"\{$uri\}$name" => {
-			Name => ($prefix ? "$prefix:$name" : $name),
-			NamespaceURI => $uri,
-			Prefix => $prefix,
-			LocalName => $name,
-			Value => $value,
-		}
-	);
-}
+has '_ng' => (
+	is => 'rw',
+	isa => 'TenorSAX::Util::NodeGenerator',
+);
 
 sub _get_prefixes {
 	my ($self) = @_;
@@ -103,19 +69,22 @@ sub _get_prefixes {
 sub start_document {
 	my ($self) = @_;
 
+	$self->_ng(TenorSAX::Util::NodeGenerator->new(prefixes =>
+			$self->_prefixes));
+
 	$self->SUPER::start_document({});
 	foreach my $mapping ($self->_get_prefixes) {
 		$self->SUPER::start_prefix_mapping($mapping);
 	}
-	$self->SUPER::start_element($self->_element("root"));
+	$self->SUPER::start_element($self->_ng->element("tm:root"));
 }
 
 sub end_document {
 	my ($self) = @_;
 
-	$self->SUPER::end_element($self->_element("section"))
+	$self->SUPER::end_element($self->_ng->element("tm:section"))
 		for 1 .. $self->_depth;
-	$self->SUPER::end_element($self->_element("root"));
+	$self->SUPER::end_element($self->_ng->element("tm:root"));
 	foreach my $mapping (reverse $self->_get_prefixes) {
 		$self->SUPER::end_prefix_mapping($mapping);
 	}
@@ -141,35 +110,32 @@ sub start_element {
 			my $level = $1;
 			my $diff = $level - $self->_depth;
 			if ($diff > 0) {
-				$self->SUPER::start_element($self->_element("section"))
+				$self->SUPER::start_element($self->_ng->element("tm:section"))
 					for 1 .. $diff;
 			}
 			elsif ($diff < 0) {
-				$self->SUPER::end_element($self->_element("section"))
+				$self->SUPER::end_element($self->_ng->element("tm:section"))
 					for 0 .. -$diff;
-				$self->SUPER::start_element($self->_element("section"));
+				$self->SUPER::start_element($self->_ng->element("tm:section"));
 			}
 			else {
-				$self->SUPER::end_element($self->_element("section"));
-				$self->SUPER::start_element($self->_element("section"));
+				$self->SUPER::end_element($self->_ng->element("tm:section"));
+				$self->SUPER::start_element($self->_ng->element("tm:section"));
 			}
-			$self->SUPER::start_element($self->_element("title"));
+			$self->SUPER::start_element($self->_ng->element("tm:title"));
 			$self->_depth($level);
 			return;
 		}
 		$name = $_ when /^(?:para|(?:itemized|ordered)list|listitem)$/;
 		when ("xlink") {
-			my $elem = $self->_element("link", "tm");
-			$elem->{Attributes} = {
-				$self->_attribute("href", 
-					$element->{Attributes}->{"{}href"}->{Value},
-					"xl"),
-				$self->_attribute("type", "simple", "xl")
-			};
+			my $elem = $self->_ng->element("tm:link", {
+					"xl:href" => $element->{Attributes}->{"{}href"}->{Value},
+					"xl:type" => "simple",
+				}
+			);
 			$self->SUPER::start_element($elem);
 		}
 		when (/^([BIFC])$/) {
-			my $elem = $self->_element("inline");
 			my $type = $1;
 			my %inlines = (
 				"B" => {
@@ -187,18 +153,14 @@ sub start_element {
 				},
 			);
 			return unless exists $inlines{$type};
-			my @attrs;
-			foreach my $key (keys $inlines{$type}) {
-				push @attrs, $self->_attribute($key, $inlines{$type}->{$key}, "");
-			}
-			$elem->{Attributes} = {@attrs};
+			my $elem = $self->_ng->element("tm:inline", $inlines{$type});
 			$self->SUPER::start_element($elem);
 		}
 		when ("verbatim") {
-			my $elem = $self->_element("verbatim");
-			$elem->{Attributes} = {
-				$self->_attribute("space", "preserve", "xml")
-			};
+			my $elem = $self->_ng->element("tm:verbatim", {
+					"xml:space" => "preserve"
+				}
+			);
 			$self->SUPER::start_element($elem);
 		}
 		when ("markup") {
@@ -207,7 +169,8 @@ sub start_element {
 		}
 	}
 
-	return $self->SUPER::start_element($self->_element($name)) if $name;
+	return $self->SUPER::start_element($self->_ng->element("tm:$name"))
+		if $name;
 	return;
 }
 
@@ -219,7 +182,7 @@ sub end_element {
 		return when "pod";
 		$name = "title" when /^head(\d+)$/;
 		$name = $_ when /^(?:para|(?:itemized|ordered)list|listitem|verbatim)$/;
-		return $self->SUPER::end_element($self->_element("link", "tm"))
+		return $self->SUPER::end_element($self->_ng->element("tm:link"))
 			when "xlink";
 		$name = "inline" when /^[BIFC]$/;
 		when ("markup") {
@@ -228,7 +191,7 @@ sub end_element {
 			$self->_charstore("");
 		}
 	}
-	return $self->SUPER::end_element($self->_element($name)) if $name;
+	return $self->SUPER::end_element($self->_ng->element("tm:$name")) if $name;
 	return;
 }
 
@@ -244,40 +207,38 @@ sub _parse_tenorsax_block {
 	} split /\R/, $text;
 
 	if (exists $attrs{title}) {
-		$self->SUPER::start_element($self->_element("title"));
+		$self->SUPER::start_element($self->_ng->element("tm:title"));
 		$self->SUPER::characters({Data => $attrs{title}});
-		$self->SUPER::end_element($self->_element("title"));
+		$self->SUPER::end_element($self->_ng->element("tm:title"));
 	}
 	if (!$self->_seen_meta) {
 		$self->_seen_meta(1);
 
-		$self->SUPER::start_element($self->_element("meta"));
+		$self->SUPER::start_element($self->_ng->element("tm:meta"));
 		if (exists $attrs{author}) {
-			$self->SUPER::start_element($self->_element("author"));
+			$self->SUPER::start_element($self->_ng->element("tm:author"));
 			$self->SUPER::characters({Data => $attrs{author}});
-			$self->SUPER::end_element($self->_element("author"));
+			$self->SUPER::end_element($self->_ng->element("tm:author"));
 		}
 		my $version = $TenorSAX::VERSION // "development";
-		my %genattrs = (
-			$self->_attribute("name", "TenorSAX", ""),
-			$self->_attribute("version", $version, ""),
+		my $elem = $self->_ng->element("tm:generator", {
+				name => "TenorSAX",
+				version => $version
+			}
 		);
-		my $elem = $self->_element("generator");
-		$elem->{Attributes} = \%genattrs;
 		$self->SUPER::start_element($elem);
 		$self->SUPER::end_element($elem);
-		$self->SUPER::end_element($self->_element("meta"));
+		$self->SUPER::end_element($self->_ng->element("tm:meta"));
 	}
 	if (exists $attrs{image}) {
 		my ($uri, $alt) = split /\s+/, $attrs{image}, 2;
-		my $elem = $self->_element("image");
-		my %genattrs = (
-			$self->_attribute("uri", $uri, ""),
-			$self->_attribute("description", $alt, ""),
+		my $elem = $self->_ng->element("tm:image", {
+				uri => $uri,
+				description => $alt,
+			}
 		);
-		$elem->{Attributes} = \%genattrs;
 		$self->SUPER::start_element($elem);
-		$self->SUPER::end_element($self->_element("image"));
+		$self->SUPER::end_element($self->_ng->element("tm:image"));
 	}
 }
 
