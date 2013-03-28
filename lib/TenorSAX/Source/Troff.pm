@@ -21,6 +21,7 @@ use TenorSAX::Source::Troff::Request;
 use TenorSAX::Source::Troff::Request::Implementation;
 use TenorSAX::Source::Troff::State;
 use TenorSAX::Util::FancyContentHandler;
+use TenorSAX::Util::NodeGenerator;
 
 extends 'XML::SAX::Base';
 
@@ -138,6 +139,10 @@ has 'forbid_io' => (
 	init_arg => 'ForbidIO',
 	default => 0,
 );
+has '_ng' => (
+	isa => 'TenorSAX::Util::NodeGenerator',
+	is => 'rw',
+);
 
 =head1 NAME
 
@@ -180,6 +185,8 @@ sub _setup {
 			}
 		)
 	);
+	$self->_ng(TenorSAX::Util::NodeGenerator->new(prefixes =>
+			$self->_ch->prefixes));
 	$self->_requests(TenorSAX::Source::Troff::Request::Implementation->requests());
 	$self->_numbers(TenorSAX::Source::Troff::Numerical::Implementation->numbers());
 
@@ -337,7 +344,7 @@ sub _expand_escapes {
 				die "TenorSAX::Source::Troff: missing stash $id"
 					unless exists $self->_stash->{$id};
 				my $state = $self->_stash->{$id};
-				$self->_ch->start_element($self->_lookup_element($element,
+				$self->_ch->start_element($self->_ng->element($element,
 						$state));
 				# Don't waste memory.
 				delete $self->_stash->{$id};
@@ -349,7 +356,7 @@ sub _expand_escapes {
 				if ($flags{'if-open'}) {
 					next unless $self->_ch->in_element({Name => $element});
 				}
-				$self->_ch->end_element($self->_lookup_element($element))
+				$self->_ch->end_element($self->_ng->element($element))
 			}
 			default {
 				$result .= $2;
@@ -628,30 +635,6 @@ sub _lookup_prefix {
 	return $result;
 }
 
-sub _lookup_attribute {
-	my ($self, $qname, $value) = @_;
-	my $result = $self->_lookup_prefix($qname, 1);
-
-	$result->{Value} = $value;
-	return $result;
-}
-
-sub _lookup_element {
-	my $self = shift;
-	my $qname = shift;
-	my $attributes = shift // {};
-	my $result = $self->_lookup_prefix($qname);
-
-	$result->{Attributes} = {};
-
-	foreach my $attr (keys %$attributes) {
-		my $hr = $self->_lookup_attribute($attr, $attributes->{$attr});
-		my $key = '{' . ($hr->{NamespaceURI} // '') . '}' . $hr->{LocalName};
-		$result->{Attributes}->{$key} = $hr;
-	}
-	return $result;
-}
-
 sub _do_parse {
 	my $self = shift;
 	my %prefixes = map { $_ => $self->_ch->prefixes->{$_} }
@@ -672,8 +655,8 @@ sub _do_parse {
 			my $element = shift;
 			return if $element && $element->{NamespaceURI} ne $prefixes{_t};
 			return if $self->_xml_mode;
-			$ch->start_element($self->_lookup_element('_t:main'));
-			$ch->start_element($self->_lookup_element('_t:block',
+			$ch->start_element($self->_ng->element('_t:main'));
+			$ch->start_element($self->_ng->element('_t:block',
 					$self->_state_to_hash(1)));
 			return;
 		}
@@ -691,8 +674,8 @@ sub _do_parse {
 		}
 	}
 
-	$self->_ch->end_element($self->_lookup_element('_t:block'));
-	$self->_ch->end_element($self->_lookup_element('_t:main'));
+	$self->_ch->end_element($self->_ng->element('_t:block'));
+	$self->_ch->end_element($self->_ng->element('_t:main'));
 	foreach my $prefix (keys %prefixes) {
 		$self->_ch->end_prefix_mapping(
 			{
