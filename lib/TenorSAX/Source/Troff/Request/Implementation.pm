@@ -296,7 +296,7 @@ my $requests = [
 
 			$state->{parser}->_xml_mode(1);
 
-			$parser->_ch->end_element($parser->_lookup_element($tag));
+			$parser->_ch->end_element($parser->_ng->element($tag));
 
 			return;
 		}
@@ -702,7 +702,7 @@ my $requests = [
 
 				$attrs->{$name} = $value;
 			}
-			$parser->_ch->start_element($parser->_lookup_element($tag, $attrs));
+			$parser->_ch->start_element($parser->_ng->element($tag, $attrs));
 
 			return;
 		}
