@@ -35,24 +35,35 @@ $p->getoptions($options,
 my %attr = ($options->{output} ? (Output => $options->{output}) : ());
 my $output;
 my $resolution = 72000;
+my @stack;
 for ($options->{device}) {
 	when ("text") {
-		require TenorSAX::Output::Text;
-		$output = TenorSAX::Output::Text->new(%attr);
+		unshift @stack, {
+			name => "TenorSAX::Output::Text",
+			attributes => \%attr,
+		};
 	}
 	when ("utf8") {
-		require TenorSAX::Output::Terminal;
 		$resolution = 240;
-		$output = TenorSAX::Output::Terminal->new(Resolution => $resolution,
-			%attr);
+		unshift @stack, {
+			name => "TenorSAX::Output::Terminal",
+			attributes => {
+				Resolution => $resolution,
+				%attr,
+			},
+		};
 	}
 	when ("xml") {
-		require XML::SAX::Writer;
-		$output = XML::SAX::Writer->new(%attr);
+		unshift @stack, {
+			name => "XML::SAX::Writer",
+			attributes => \%attr,
+		};
 	}
 	when ("pdf") {
-		require TenorSAX::Output::PDF;
-		$output = TenorSAX::Output::PDF->new(%attr);
+		unshift @stack, {
+			name => "TenorSAX::Output::PDF",
+			attributes => \%attr,
+		};
 	}
 	default {
 		my $stylesheet;
@@ -66,18 +77,44 @@ for ($options->{device}) {
 		die "Can't load stylesheet for device $options->{device}"
 			unless $stylesheet;
 
-		require XML::SAX::Writer;
-		require XML::Filter::XSLT;
-		my $final = XML::SAX::Writer->new(%attr);
-		$output = XML::Filter::XSLT->new(Handler => $final);
-		$output->set_stylesheet_uri($stylesheet);
+		unshift @stack, {
+			name => "XML::SAX::Writer",
+			attributes => \%attr,
+		};
+		unshift @stack, {
+			name => "XML::Filter::XSLT",
+			methods => [
+				{
+					name => "set_stylesheet_uri",
+					args => [$stylesheet],
+				}
+			],
+		};
 	}
 }
 my $logger = sub {};
 if ($ENV{TENORSAX_DEBUG}) {
 	$logger = sub { say STDERR @_ };
 }
-my $parser = TenorSAX::Source::Troff->new(Handler => $output,
+my $previous;
+foreach my $handler_args (reverse @stack) {
+	my $attributes = $handler_args->{attributes} // {};
+	my $methods = $handler_args->{methods} // [];
+	my $class = $handler_args->{name};
+	eval "require $class" or die "Can't load $class: $@";
+	my $handler = $class->new(%$attributes,
+		($previous ? (Handler => $previous) : ())
+	);
+	foreach my $method (@$methods) {
+		my $args = $method->{args} || [];
+		my $func = $handler->can($method->{name}) or
+			die "Can't call method $method->{name} on objects of type $class";
+		$handler->$func(@$args);
+	}
+	$previous = $handler;
+}
+
+my $parser = TenorSAX::Source::Troff->new(Handler => $previous,
 	Resolution => $resolution, Logger => $logger);
 
 my @init_files = map { File::Path::Expand::expand_filename($_) }
