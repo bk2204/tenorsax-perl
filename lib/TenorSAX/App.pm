@@ -1,0 +1,158 @@
+package TenorSAX::App;
+
+use v5.14;
+use strict;
+use warnings;
+
+use warnings qw/FATAL utf8/;
+use utf8;
+
+use Moose;
+use namespace::autoclean;
+use TenorSAX;
+use TenorSAX::Util::HandlerGenerator;
+
+has 'input_device' => (
+	is => 'rw',
+	isa => 'Str',
+	init_arg => 'InputDevice',
+);
+has 'output_device' => (
+	is => 'rw',
+	isa => 'Str',
+	init_arg => 'OutputDevice',
+);
+has 'resolution' => (
+	is => 'rw',
+	default => undef,
+	init_arg => 'Resolution',
+);
+has 'output_devices' => (
+	is => 'ro',
+	default => sub { 
+		{
+			text => {
+				name => "TenorSAX::Output::Text",
+				takes => "tm",
+			},
+			utf8 => {
+				name => "TenorSAX::Output::Terminal",
+				resolution => 240,
+				takes => "le",
+			},
+			xml => {
+				name => "XML::SAX::Writer",
+				takes => "xml",
+			},
+			tmxml => {
+				name => "XML::SAX::Writer",
+				takes => "tm",
+			},
+			lexml => {
+				name => "XML::SAX::Writer",
+				takes => "le",
+			},
+			pdf => {
+				name => "TenorSAX::Output::PDF",
+				takes => "le",
+			},
+		}
+	},
+);
+
+sub BUILD {
+	my ($self) = @_;
+
+	my $device = $self->output_devices->{$self->output_device};
+	my $resolution = $device->{resolution} // 72000;
+	$self->resolution($resolution) unless defined $self->resolution;
+	return;
+}
+
+sub generate_output_chain {
+	my ($self, $output, $provided_inputs) = @_;
+	my @chain;
+	my $devicename = $self->output_device;
+	my $device = $self->output_devices->{$devicename};
+	my $takes;
+
+	if (defined $device) {
+		my $name = $device->{name};
+		push @chain, {
+			name => $name,
+			attributes => {
+				(defined $output ? (Output => $output) : ()),
+				Resolution => $self->resolution,
+			},
+		};
+		$takes = $device->{takes};
+	}
+	else {
+		require File::Path::Expand;
+
+		my $stylesheet;
+		my @xslt_dirs = map { File::Path::Expand::expand_filename($_) }
+			@{$TenorSAX::Config->{troff}->{xslt}};
+		foreach my $dir (reverse @xslt_dirs) {
+			$stylesheet = "$dir/format-$devicename.xsl";
+			last if -r $stylesheet;
+			$stylesheet = undef;
+		}
+		die "Can't load stylesheet for device $devicename"
+			unless $stylesheet;
+		unshift @chain, {
+			name => "XML::SAX::Writer",
+			attributes => { Output => $output },
+		};
+		unshift @chain, {
+			name => "XML::Filter::XSLT",
+			methods => [
+				{
+					name => "set_stylesheet_uri",
+					args => [$stylesheet],
+				}
+			],
+		};
+		$takes = "xml";
+	}
+	$self->insert_filters(\@chain, $takes, $provided_inputs);
+	return TenorSAX::Util::HandlerGenerator->new->generate(@chain);
+}
+
+sub insert_filters {
+	my ($self, $chain, $takes, $provided_inputs) = @_;
+
+	return if $takes eq "xml";
+
+	for ($takes) {
+		when (@$provided_inputs) {
+			return;
+		}
+		when ("le") {
+			unshift $chain, {
+				name => "TenorSAX::Filter::TextMarkupToLayoutEngine",
+				attributes => {
+					Resolution => $self->resolution,
+				},
+			};
+			$takes = "tm";
+			redo;
+		}
+		when ("tm") {
+			if ("xml-Pod::SAX" ~~ @$provided_inputs) {
+				unshift $chain, {
+					name => "TenorSAX::Filter::PodSAXToTextMarkup",
+				};
+				$takes = "xml-Pod::SAX";
+				redo;
+			}
+			continue;
+		}
+		default {
+			die "Can't convert $takes to one of [@$provided_inputs]";
+		}
+	}
+	return;
+}
+
+1;

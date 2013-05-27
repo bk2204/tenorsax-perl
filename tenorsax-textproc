@@ -14,7 +14,7 @@ use lib "$FindBin::RealBin/lib";
 use Getopt::Long;
 use TenorSAX;
 use XML::SAX::Writer;
-use TenorSAX::Util::HandlerGenerator;
+use TenorSAX::App;
 
 my $options = {
 	device => 'xml',
@@ -30,99 +30,15 @@ $p->getoptions($options,
 	'output|o=s',
 );
 
-my %attr = ($options->{output} ? (Output => $options->{output}) : ());
-my $resolution = 72000;
-my $raw;
-my @stack;
-
-for ($options->{device}) {
-	when ("text") {
-		unshift @stack, {
-			name => "TenorSAX::Output::Text",
-			attributes => \%attr,
-		};
-	}
-	when ("utf8") {
-		$resolution = 240;
-		unshift @stack, {
-			name => "TenorSAX::Output::Terminal",
-			attributes => {
-				Resolution => $resolution,
-				%attr
-			},
-		};
-		unshift @stack, tm_to_le($resolution, \%attr);
-	}
-	when ("xml") {
-		$raw = 1;
-		unshift @stack, {
-			name => "XML::SAX::Writer",
-			attributes => \%attr,
-		};
-	}
-	when ("tmxml") {
-		unshift @stack, {
-			name => "XML::SAX::Writer",
-			attributes => \%attr,
-		};
-	}
-	when ("lexml") {
-		unshift @stack, {
-			name => "XML::SAX::Writer",
-			attributes => \%attr,
-		};
-		unshift @stack, tm_to_le($resolution, \%attr);
-	}
-	when ("pdf") {
-		unshift @stack, {
-			name => "TenorSAX::Output::PDF",
-			attributes => \%attr,
-		};
-		unshift @stack, tm_to_le($resolution, \%attr);
-	}
-	default {
-		die "I need an output format.\n" unless $options->{device};
-
-		require File::Path::Expand;
-
-		my $stylesheet;
-		my @xslt_dirs = map { File::Path::Expand::expand_filename($_) }
-			@{$TenorSAX::Config->{troff}->{xslt}};
-		foreach my $dir (reverse @xslt_dirs) {
-			$stylesheet = "$dir/format-$options->{device}.xsl";
-			last if -r $stylesheet;
-			$stylesheet = undef;
-		}
-		die "Can't load stylesheet for device $options->{device}"
-			unless $stylesheet;
-
-		unshift @stack, {
-			name => "XML::SAX::Writer",
-			attributes => \%attr,
-		};
-		unshift @stack, {
-			name => "XML::Filter::XSLT",
-			methods => [
-				{
-					name => "set_stylesheet_uri",
-					args => [$stylesheet],
-				}
-			],
-		};
-	}
-}
-
 my $parser;
-my $generator = TenorSAX::Util::HandlerGenerator->new;
+my $app = TenorSAX::App->new(InputDevice => $options->{format},
+	OutputDevice => $options->{device});
 for ($options->{format}) {
 	when ("pod") {
 		require Pod::SAX;
-		unless ($raw) {
-			unshift @stack, {
-				name => "TenorSAX::Filter::PodSAXToTextMarkup",
-			};
-		}
-		$parser = Pod::SAX->new(Handler => $generator->generate(@stack));
+		my $chain = $app->generate_output_chain($options->{output},
+			["xml-Pod::SAX"]);
+		$parser = Pod::SAX->new(Handler => $chain);
 	}
 	default {
 		die "I don't understand that input format.\n" if $options->{format};
@@ -145,15 +61,3 @@ else {
 }
 
 $parser->parse_string($data);
-
-sub tm_to_le {
-	my ($resolution, $args) = @_;
-
-	return {
-		name => "TenorSAX::Filter::TextMarkupToLayoutEngine",
-		attributes => {
-			Resolution => $resolution,
-			%$args
-		},
-	};
-}
