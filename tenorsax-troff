@@ -15,6 +15,7 @@ use File::Path::Expand;
 use Getopt::Long;
 use TenorSAX;
 use TenorSAX::Source::Troff;
+use TenorSAX::Util::HandlerGenerator;
 use XML::SAX::Writer;
 
 my $options = {
@@ -33,7 +34,6 @@ $p->getoptions($options,
 );
 
 my %attr = ($options->{output} ? (Output => $options->{output}) : ());
-my $output;
 my $resolution = 72000;
 my @stack;
 for ($options->{device}) {
@@ -96,25 +96,10 @@ my $logger = sub {};
 if ($ENV{TENORSAX_DEBUG}) {
 	$logger = sub { say STDERR @_ };
 }
-my $previous;
-foreach my $handler_args (reverse @stack) {
-	my $attributes = $handler_args->{attributes} // {};
-	my $methods = $handler_args->{methods} // [];
-	my $class = $handler_args->{name};
-	eval "require $class" or die "Can't load $class: $@";
-	my $handler = $class->new(%$attributes,
-		($previous ? (Handler => $previous) : ())
-	);
-	foreach my $method (@$methods) {
-		my $args = $method->{args} || [];
-		my $func = $handler->can($method->{name}) or
-			die "Can't call method $method->{name} on objects of type $class";
-		$handler->$func(@$args);
-	}
-	$previous = $handler;
-}
 
-my $parser = TenorSAX::Source::Troff->new(Handler => $previous,
+my $generator = TenorSAX::Util::HandlerGenerator->new;
+my $output = $generator->generate(@stack);
+my $parser = TenorSAX::Source::Troff->new(Handler => $output,
 	Resolution => $resolution, Logger => $logger);
 
 my @init_files = map { File::Path::Expand::expand_filename($_) }
