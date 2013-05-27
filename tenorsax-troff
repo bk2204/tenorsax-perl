@@ -15,8 +15,7 @@ use File::Path::Expand;
 use Getopt::Long;
 use TenorSAX;
 use TenorSAX::Source::Troff;
-use TenorSAX::Util::HandlerGenerator;
-use XML::SAX::Writer;
+use TenorSAX::App;
 
 my $options = {
 	device => 'xml',
@@ -33,74 +32,16 @@ $p->getoptions($options,
 	'output|o=s',
 );
 
-my %attr = ($options->{output} ? (Output => $options->{output}) : ());
-my $resolution = 72000;
-my @stack;
-for ($options->{device}) {
-	when ("text") {
-		unshift @stack, {
-			name => "TenorSAX::Output::Text",
-			attributes => \%attr,
-		};
-	}
-	when ("utf8") {
-		$resolution = 240;
-		unshift @stack, {
-			name => "TenorSAX::Output::Terminal",
-			attributes => {
-				Resolution => $resolution,
-				%attr,
-			},
-		};
-	}
-	when ("xml") {
-		unshift @stack, {
-			name => "XML::SAX::Writer",
-			attributes => \%attr,
-		};
-	}
-	when ("pdf") {
-		unshift @stack, {
-			name => "TenorSAX::Output::PDF",
-			attributes => \%attr,
-		};
-	}
-	default {
-		my $stylesheet;
-		my @xslt_dirs = map { File::Path::Expand::expand_filename($_) }
-			@{$TenorSAX::Config->{troff}->{xslt}};
-		foreach my $dir (reverse @xslt_dirs) {
-			$stylesheet = "$dir/format-$options->{device}.xsl";
-			last if -r $stylesheet;
-			$stylesheet = undef;
-		}
-		die "Can't load stylesheet for device $options->{device}"
-			unless $stylesheet;
-
-		unshift @stack, {
-			name => "XML::SAX::Writer",
-			attributes => \%attr,
-		};
-		unshift @stack, {
-			name => "XML::Filter::XSLT",
-			methods => [
-				{
-					name => "set_stylesheet_uri",
-					args => [$stylesheet],
-				}
-			],
-		};
-	}
-}
 my $logger = sub {};
 if ($ENV{TENORSAX_DEBUG}) {
 	$logger = sub { say STDERR @_ };
 }
 
-my $generator = TenorSAX::Util::HandlerGenerator->new;
-my $output = $generator->generate(@stack);
-my $parser = TenorSAX::Source::Troff->new(Handler => $output,
-	Resolution => $resolution, Logger => $logger);
+my $app = TenorSAX::App->new(InputDevice => "troff",
+	OutputDevice => $options->{device});
+my $chain = $app->generate_output_chain($options->{output}, [qw/le xml/]);
+my $parser = TenorSAX::Source::Troff->new(Handler => $chain,
+	Resolution => $app->resolution, Logger => $logger);
 
 my @init_files = map { File::Path::Expand::expand_filename($_) }
 	@{$TenorSAX::Config->{troff}->{init_tmac}};
