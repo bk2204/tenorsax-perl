@@ -14,6 +14,7 @@ use lib "$FindBin::RealBin/lib";
 use Getopt::Long;
 use TenorSAX;
 use XML::SAX::Writer;
+use TenorSAX::Util::HandlerGenerator;
 
 my $options = {
 	device => 'xml',
@@ -30,41 +31,54 @@ $p->getoptions($options,
 );
 
 my %attr = ($options->{output} ? (Output => $options->{output}) : ());
-my $output;
 my $resolution = 72000;
-# tm for text markup namespace; le for layout engine namespace.
-my $convert_to = "tm";
-my $processor;
+my $raw;
+my @stack;
 
 for ($options->{device}) {
 	when ("text") {
-		require TenorSAX::Output::Text;
-		$output = TenorSAX::Output::Text->new(%attr);
+		unshift @stack, {
+			name => "TenorSAX::Output::Text",
+			attributes => \%attr,
+		};
 	}
 	when ("utf8") {
-		require TenorSAX::Output::Terminal;
 		$resolution = 240;
-		$output = TenorSAX::Output::Terminal->new(Resolution => $resolution,
-			%attr);
-		$convert_to = "le";
+		unshift @stack, {
+			name => "TenorSAX::Output::Terminal",
+			attributes => {
+				Resolution => $resolution,
+				%attr
+			},
+		};
+		unshift @stack, tm_to_le($resolution, \%attr);
 	}
 	when ("xml") {
-		require XML::SAX::Writer;
-		$processor = $output = XML::SAX::Writer->new(%attr);
+		$raw = 1;
+		unshift @stack, {
+			name => "XML::SAX::Writer",
+			attributes => \%attr,
+		};
 	}
 	when ("tmxml") {
-		require XML::SAX::Writer;
-		$output = XML::SAX::Writer->new(%attr);
+		unshift @stack, {
+			name => "XML::SAX::Writer",
+			attributes => \%attr,
+		};
 	}
 	when ("lexml") {
-		require XML::SAX::Writer;
-		$output = XML::SAX::Writer->new(%attr);
-		$convert_to = "le";
+		unshift @stack, {
+			name => "XML::SAX::Writer",
+			attributes => \%attr,
+		};
+		unshift @stack, tm_to_le($resolution, \%attr);
 	}
 	when ("pdf") {
-		require TenorSAX::Output::PDF;
-		$output = TenorSAX::Output::PDF->new(%attr);
-		$convert_to = "le";
+		unshift @stack, {
+			name => "TenorSAX::Output::PDF",
+			attributes => \%attr,
+		};
+		unshift @stack, tm_to_le($resolution, \%attr);
 	}
 	default {
 		die "I need an output format.\n" unless $options->{device};
@@ -82,33 +96,33 @@ for ($options->{device}) {
 		die "Can't load stylesheet for device $options->{device}"
 			unless $stylesheet;
 
-		require XML::SAX::Writer;
-		require XML::Filter::XSLT;
-		my $final = XML::SAX::Writer->new(%attr);
-		$output = XML::Filter::XSLT->new(Handler => $final);
-		$output->set_stylesheet_uri($stylesheet);
+		unshift @stack, {
+			name => "XML::SAX::Writer",
+			attributes => \%attr,
+		};
+		unshift @stack, {
+			name => "XML::Filter::XSLT",
+			methods => [
+				{
+					name => "set_stylesheet_uri",
+					args => [$stylesheet],
+				}
+			],
+		};
 	}
-}
-my $filter;
-if ($convert_to eq "le") {
-	require TenorSAX::Filter::TextMarkupToLayoutEngine;
-	$filter = TenorSAX::Filter::TextMarkupToLayoutEngine->new(Resolution =>
-		$resolution, %attr);
-}
-else {
-	$filter = $output;
 }
 
 my $parser;
+my $generator = TenorSAX::Util::HandlerGenerator->new;
 for ($options->{format}) {
 	when ("pod") {
 		require Pod::SAX;
-		unless ($processor) {
-			require TenorSAX::Filter::PodSAXToTextMarkup;
-			$processor = TenorSAX::Filter::PodSAXToTextMarkup->new(Handler =>
-				$output);
+		unless ($raw) {
+			unshift @stack, {
+				name => "TenorSAX::Filter::PodSAXToTextMarkup",
+			};
 		}
-		$parser = Pod::SAX->new(Handler => $processor);
+		$parser = Pod::SAX->new(Handler => $generator->generate(@stack));
 	}
 	default {
 		die "I don't understand that input format.\n" if $options->{format};
@@ -131,3 +145,15 @@ else {
 }
 
 $parser->parse_string($data);
+
+sub tm_to_le {
+	my ($resolution, $args) = @_;
+
+	return {
+		name => "TenorSAX::Filter::TextMarkupToLayoutEngine",
+		attributes => {
+			Resolution => $resolution,
+			%$args
+		},
+	};
+}
