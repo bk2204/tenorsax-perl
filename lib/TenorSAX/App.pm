@@ -24,8 +24,15 @@ has 'output_device' => (
 );
 has 'resolution' => (
 	is => 'rw',
-	default => undef,
 	init_arg => 'Resolution',
+	lazy => 1,
+	default => sub {
+		my $self = shift;
+		my $default = 72000;
+		return $default unless defined $self->output_device;
+		my $device = $self->output_devices->{$self->output_device};
+		return $device->{resolution} // $default;
+	},
 );
 has 'output_devices' => (
 	is => 'ro',
@@ -59,15 +66,6 @@ has 'output_devices' => (
 		}
 	},
 );
-
-sub BUILD {
-	my ($self) = @_;
-
-	my $device = $self->output_devices->{$self->output_device};
-	my $resolution = $device->{resolution} // 72000;
-	$self->resolution($resolution) unless defined $self->resolution;
-	return;
-}
 
 sub generate_output_chain {
 	my ($self, $output, $provided_inputs) = @_;
