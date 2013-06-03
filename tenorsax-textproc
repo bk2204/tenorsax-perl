@@ -59,19 +59,5 @@ sub handle_input_format {
 
 sub load_data {
 	my ($self, @args) = @_;
-	my $data = "";
-	if (@args) {
-		foreach my $file (@args) {
-			local $/;
-			open(my $fh, '<', $file) or die "Can't open file '$file': $!";
-			$data .= <$fh>;
-			close($fh) or die "Can't close file '$file': $!";
-		}
-	}
-	else {
-		local $/;
-		$data = <STDIN>;
-	}
-
-	return $data;
+	return $self->load_files(@args);
 }

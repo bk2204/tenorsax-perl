@@ -194,4 +194,29 @@ sub insert_filters {
 	return;
 }
 
+sub load_file {
+	my ($self, $file) = @_;
+
+	local $/;
+	open(my $fh, '<', $file) or die "Can't open file '$file': $!";
+	my $data = <$fh>;
+	close($fh) or die "Can't close file '$file': $!";
+	return $data;
+}
+
+sub load_files {
+	my ($self, @args) = @_;
+	my $data = "";
+	if (@args) {
+		foreach my $file (@args) {
+			$data .= $self->load_file($file);
+		}
+	}
+	else {
+		local $/;
+		$data = <STDIN>;
+	}
+	return $data;
+}
+
 1;

@@ -70,6 +70,16 @@ sub handle_input_format {
 	return $parser;
 }
 
+sub load_file {
+	my ($self, $file) = @_;
+
+	local $/;
+	open(my $fh, '<', $file) or die "Can't open file '$file': $!";
+	my $data = qq(.do tenorsax filename "$file"\n) . <$fh>;
+	close($fh) or die "Can't close file '$file': $!";
+	return $data;
+}
+
 sub load_data {
 	my ($self, @args) = @_;
 	my @init_files = map { File::Path::Expand::expand_filename($_) }
@@ -81,26 +91,12 @@ sub load_data {
 	}
 	foreach my $file (@init_files) {
 		local $/;
-		open(my $fh, '<', $file) or next;
-		$data .= ".do tenorsax filename \"$file\"\n";
-		$data .= <$fh>;
-		close($fh);
+		my $loaded = eval { $self->load_file($file) } or next;
+		$data .= $loaded;
 	}
 	foreach my $macro (@{$self->macro}) {
 		$data .= ".do mso \"$macro\"\n";
 	}
-	if (@args) {
-		foreach my $file (@args) {
-			local $/;
-			open(my $fh, '<', $file) or die "Can't open file '$file': $!";
-			$data .= ".do tenorsax filename \"$file\"\n";
-			$data .= <$fh>;
-			close($fh) or die "Can't close file '$file': $!";
-		}
-	}
-	else {
-		local $/;
-		$data .= <STDIN>;
-	}
+	$data .= $self->load_files(@args);
 	return $data;
 }
