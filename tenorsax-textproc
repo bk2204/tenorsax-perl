@@ -1,5 +1,7 @@
 #!/usr/bin/perl
 
+package TenorSAX::App::TextProc;
+
 use v5.14;
 use strict;
 use warnings;
@@ -11,53 +13,65 @@ use utf8;
 use FindBin;
 use lib "$FindBin::RealBin/lib";
 
-use Getopt::Long;
-use TenorSAX;
-use XML::SAX::Writer;
-use TenorSAX::App;
+use Moose;
 
-my $options = {
-	device => 'xml',
-	macro => [],
-	output => undef,
-};
-my $p = Getopt::Long::Parser->new();
-$p->configure('no_ignore_case', 'bundling');
-$p->getoptions($options,
-	'device|T=s',
-	'format|r=s',
-	'macro|m=s@',
-	'output|o=s',
+extends "TenorSAX::App";
+
+has '+options' => (
+	default => sub {
+		[
+			'device|T=s',
+			'format|r=s',
+			'output|o=s',
+		],
+	},
 );
 
-my $parser;
-my $app = TenorSAX::App->new(InputDevice => $options->{format},
-	OutputDevice => $options->{device});
-for ($options->{format}) {
-	when ("pod") {
-		require Pod::SAX;
-		my $chain = $app->generate_output_chain($options->{output},
-			["xml-Pod::SAX"]);
-		$parser = Pod::SAX->new(Handler => $chain);
-	}
-	default {
-		die "I don't understand that input format.\n" if $options->{format};
-		die "I need an input format.\n";
-	}
+exit run(@ARGV) unless caller;
+
+sub run {
+	my @args = @_;
+	my $app = __PACKAGE__->new;
+	$app->parse_options(\@args);
+	my $parser = $app->handle_input_format;
+	my $data = $app->load_data(@args);
+	$parser->parse_string($data);
+	return 0;
 }
 
-my $data = "";
-if (@ARGV) {
-	foreach my $file (@ARGV) {
+sub handle_input_format {
+	my $self = shift;
+	my $parser;
+	for ($self->input_device) {
+		when ("pod") {
+			require Pod::SAX;
+			my $chain = $self->generate_output_chain(["xml-Pod::SAX"]);
+			$parser = Pod::SAX->new(Handler => $chain);
+		}
+		default {
+			die "I don't understand that input format.\n"
+				if $self->input_device;
+			die "I need an input format.\n";
+		}
+	}
+	return $parser;
+}
+
+sub load_data {
+	my ($self, @args) = @_;
+	my $data = "";
+	if (@args) {
+		foreach my $file (@args) {
+			local $/;
+			open(my $fh, '<', $file) or die "Can't open file '$file': $!";
+			$data .= <$fh>;
+			close($fh) or die "Can't close file '$file': $!";
+		}
+	}
+	else {
 		local $/;
-		open(my $fh, '<', $file) or die "Can't open file '$file': $!";
-		$data .= <$fh>;
-		close($fh) or die "Can't close file '$file': $!";
+		$data = <STDIN>;
 	}
-}
-else {
-	local $/;
-	$data = <STDIN>;
-}
 
-$parser->parse_string($data);
+	return $data;
+}

@@ -1,5 +1,7 @@
 #!/usr/bin/perl
 
+package TenorSAX::App::Troff;
+
 use v5.14;
 use strict;
 use warnings;
@@ -15,63 +17,90 @@ use File::Path::Expand;
 use Getopt::Long;
 use TenorSAX;
 use TenorSAX::Source::Troff;
-use TenorSAX::App;
 
-my $options = {
-	device => 'xml',
-	macro => [],
-	macrodir => [],
-	output => undef,
-};
-my $p = Getopt::Long::Parser->new();
-$p->configure('no_ignore_case', 'bundling');
-$p->getoptions($options,
-	'device|T=s',
-	'macro|m=s@',
-	'macrodir|M=s@',
-	'output|o=s',
+use Moose;
+
+extends "TenorSAX::App";
+
+has '+options' => (
+	default => sub {
+		[
+			'device|T=s',
+			'macro|m=s@',
+			'macrodir|M=s@',
+			'output|o=s',
+		],
+	},
+);
+# macro names
+has 'macro' => (
+	is => 'rw',
+	isa => 'ArrayRef',
+	default => sub { [] },
+);
+has 'macrodir' => (
+	is => 'rw',
+	isa => 'ArrayRef',
+	default => sub { [] },
 );
 
-my $logger = sub {};
-if ($ENV{TENORSAX_DEBUG}) {
-	$logger = sub { say STDERR @_ };
+exit run(@ARGV) unless caller;
+
+sub run {
+	my @args = @_;
+	my $app = __PACKAGE__->new(InputDevice => "troff");
+	$app->parse_options(\@args);
+	my $parser = $app->handle_input_format;
+	my $data = $app->load_data(@args);
+	$parser->parse_string($data);
+
+	return 0;
 }
 
-my $app = TenorSAX::App->new(InputDevice => "troff",
-	OutputDevice => $options->{device});
-my $chain = $app->generate_output_chain($options->{output}, [qw/le xml/]);
-my $parser = TenorSAX::Source::Troff->new(Handler => $chain,
-	Resolution => $app->resolution, Logger => $logger);
+sub handle_input_format {
+	my $self = shift;
+	my $logger = sub {};
+	if ($ENV{TENORSAX_DEBUG}) {
+		$logger = sub { say STDERR @_ };
+	}
 
-my @init_files = map { File::Path::Expand::expand_filename($_) }
-	@{$TenorSAX::Config->{troff}->{init_tmac}};
+	my $chain = $self->generate_output_chain([qw/le xml/], "xml");
+	my $parser = TenorSAX::Source::Troff->new(Handler => $chain,
+		Resolution => $self->resolution, Logger => $logger);
+	return $parser;
+}
 
-my $data = "";
-foreach my $macrodir (@{$options->{macrodir}}) {
-	$data .= ".do tenorsax macrodir \"$macrodir\"\n";
-}
-foreach my $file (@init_files) {
-	local $/;
-	open(my $fh, '<', $file) or next;
-	$data .= ".do tenorsax filename \"$file\"\n";
-	$data .= <$fh>;
-	close($fh);
-}
-foreach my $macro (@{$options->{macro}}) {
-	$data .= ".do mso \"$macro\"\n";
-}
-if (@ARGV) {
-	foreach my $file (@ARGV) {
+sub load_data {
+	my ($self, @args) = @_;
+	my @init_files = map { File::Path::Expand::expand_filename($_) }
+		@{$TenorSAX::Config->{troff}->{init_tmac}};
+
+	my $data = "";
+	foreach my $macrodir (@{$self->macrodir}) {
+		$data .= ".do tenorsax macrodir \"$macrodir\"\n";
+	}
+	foreach my $file (@init_files) {
 		local $/;
-		open(my $fh, '<', $file) or die "Can't open file '$file': $!";
+		open(my $fh, '<', $file) or next;
 		$data .= ".do tenorsax filename \"$file\"\n";
 		$data .= <$fh>;
-		close($fh) or die "Can't close file '$file': $!";
+		close($fh);
 	}
+	foreach my $macro (@{$self->macro}) {
+		$data .= ".do mso \"$macro\"\n";
+	}
+	if (@args) {
+		foreach my $file (@args) {
+			local $/;
+			open(my $fh, '<', $file) or die "Can't open file '$file': $!";
+			$data .= ".do tenorsax filename \"$file\"\n";
+			$data .= <$fh>;
+			close($fh) or die "Can't close file '$file': $!";
+		}
+	}
+	else {
+		local $/;
+		$data .= <STDIN>;
+	}
+	return $data;
 }
-else {
-	local $/;
-	$data .= <STDIN>;
-}
-
-$parser->parse_string($data);

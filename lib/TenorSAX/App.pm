@@ -9,6 +9,7 @@ use utf8;
 
 use Moose;
 use namespace::autoclean;
+use Getopt::Long;
 use TenorSAX;
 use TenorSAX::Util::HandlerGenerator;
 
@@ -21,6 +22,7 @@ has 'output_device' => (
 	is => 'rw',
 	isa => 'Str',
 	init_arg => 'OutputDevice',
+	default => "xml",
 );
 has 'resolution' => (
 	is => 'rw',
@@ -66,13 +68,45 @@ has 'output_devices' => (
 		}
 	},
 );
+has 'options' => (
+	is => 'rw',
+	isa => 'ArrayRef',
+	default => sub { [] },
+);
+has 'output' => (
+	is => 'rw',
+);
 
-sub generate_output_chain {
-	my ($self, $output, $provided_inputs) = @_;
+sub parse_options {
+	my ($self, $args) = @_;
+
+	my $options = {};
+	local @ARGV = @$args;
+	my $p = Getopt::Long::Parser->new();
+	$p->configure('no_ignore_case', 'bundling');
+	$p->getoptions($options,
+		@{$self->options},
+	);
+	@$args = @ARGV;
+	my $map = {
+		device => 'output_device',
+		format => 'input_device',
+	};
+
+	foreach my $opt (keys $options) {
+		my $value = $options->{$opt};
+		$opt = $map->{$opt} if exists $map->{$opt};
+		my $method = $self->can($opt);
+		$self->$method($value);
+	}
+}
+
+sub build_output_chain {
+	my ($self, $provided_inputs, $takes) = @_;
 	my @chain;
 	my $devicename = $self->output_device;
 	my $device = $self->output_devices->{$devicename};
-	my $takes;
+	my $output = $self->output;
 
 	if (defined $device) {
 		my $name = $device->{name};
@@ -100,7 +134,7 @@ sub generate_output_chain {
 			unless $stylesheet;
 		unshift @chain, {
 			name => "XML::SAX::Writer",
-			attributes => { Output => $output },
+			attributes => $output ? { Output => $output } : {},
 		};
 		unshift @chain, {
 			name => "XML::Filter::XSLT",
@@ -111,9 +145,15 @@ sub generate_output_chain {
 				}
 			],
 		};
-		$takes = "xml";
+		$takes = "tm" unless defined $takes;
 	}
 	$self->insert_filters(\@chain, $takes, $provided_inputs);
+	return @chain;
+}
+
+sub generate_output_chain {
+	my ($self, @args) = @_;
+	my @chain = $self->build_output_chain(@args);
 	return TenorSAX::Util::HandlerGenerator->new->generate(@chain);
 }
 
@@ -122,6 +162,7 @@ sub insert_filters {
 
 	return if $takes eq "xml";
 
+	say "inputs are @$provided_inputs";
 	for ($takes) {
 		when (@$provided_inputs) {
 			return;
