@@ -90,7 +90,6 @@ sub load_data {
 		$data .= ".do tenorsax macrodir \"$macrodir\"\n";
 	}
 	foreach my $file (@init_files) {
-		local $/;
 		my $loaded = eval { $self->load_file($file) } or next;
 		$data .= $loaded;
 	}
