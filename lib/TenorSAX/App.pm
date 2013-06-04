@@ -162,7 +162,6 @@ sub insert_filters {
 
 	return if $takes eq "xml";
 
-	say "inputs are @$provided_inputs";
 	for ($takes) {
 		when (@$provided_inputs) {
 			return;
