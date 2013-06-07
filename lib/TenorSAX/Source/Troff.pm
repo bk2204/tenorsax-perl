@@ -10,7 +10,6 @@ use feature qw/unicode_strings/;
 use re '/u';
 
 use Moose;
-use MooseX::NonMoose;
 use namespace::autoclean;
 
 use TenorSAX::Source::Troff::Argument;
@@ -23,7 +22,7 @@ use TenorSAX::Source::Troff::State;
 use TenorSAX::Util::FancyContentHandler;
 use TenorSAX::Util::NodeGenerator;
 
-extends 'XML::SAX::Base';
+extends 'TenorSAX::Source::Parser';
 
 has '_ec' => (
 	is => 'rw',
