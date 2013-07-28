@@ -6,11 +6,11 @@ use warnings;
 
 use warnings qw/FATAL utf8/;
 use utf8;
-#use feature qw/unicode_strings/;
 
 use Moose;
 use Scalar::Util;
 use PDF::API2;
+use experimental "smartmatch";
 
 extends 'TenorSAX::Output::PageLayoutEngine';
 
