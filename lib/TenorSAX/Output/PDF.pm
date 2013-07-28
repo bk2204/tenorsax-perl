@@ -164,8 +164,8 @@ sub _adjust_line {
 	for ($chunks[0]{adjust}) {
 		return $self->_adjust_line_both(@chunks) when "both";
 		return $self->_adjust_line_center(@chunks) when "center";
-		default { return @chunks; }
 	}
+	return @chunks;
 }
 
 sub _adjust_line_center {
@@ -198,7 +198,7 @@ sub _adjust_line_both {
 	# Split out spaces into their own chunks.
 	@chunks = map {
 		my $item = $_;
-		map { {%$item, text => $_} } split m/( +)/, $item->{text};
+		map { +{%$item, text => $_} } split m/( +)/, $item->{text};
 	} @chunks;
 
 	foreach my $chunk (@chunks) {

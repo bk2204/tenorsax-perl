@@ -77,7 +77,7 @@ sub start_document {
 	foreach my $mapping ($self->_get_prefixes) {
 		$self->SUPER::start_prefix_mapping($mapping);
 	}
-	$self->SUPER::start_element($self->_ng->element("tm:root"));
+	return $self->SUPER::start_element($self->_ng->element("tm:root"));
 }
 
 sub end_document {
@@ -99,6 +99,7 @@ sub characters {
 	return if $self->_state == 2;
 	# state == 1
 	$self->_charstore($self->_charstore . $hr->{Data});
+	return;
 }
 
 sub start_element {
@@ -241,7 +242,10 @@ sub _parse_tenorsax_block {
 		$self->SUPER::start_element($elem);
 		$self->SUPER::end_element($self->_ng->element("tm:image"));
 	}
+	return;
 }
 
 no Moose;
 __PACKAGE__->meta->make_immutable;
+
+1;

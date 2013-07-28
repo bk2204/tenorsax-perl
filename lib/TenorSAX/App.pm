@@ -100,6 +100,7 @@ sub parse_options {
 		my $method = $self->can($opt);
 		$self->$method($value);
 	}
+	return;
 }
 
 sub build_output_chain {
