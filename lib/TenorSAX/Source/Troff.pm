@@ -391,6 +391,10 @@ sub _emit_characters {
 	my $state = {parser => $self, environment => $self->_env, opts => {},
 		state => $self->_state};
 
+	$text =~ s{
+		\x{102200}b_t:block[^\x{102202}]+\x{102202}
+		\x{102200}e_t:block[^\x{102202}]+\x{102202}
+	}{}gx;
 	my @items = split /(\x{102200}\X*?\x{102202})/, $text;
 	foreach my $item (@items) {
 		if ($item =~ /\x{102200}(\X)(\X*)\x{102202}/) {
