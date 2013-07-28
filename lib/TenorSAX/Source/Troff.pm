@@ -11,6 +11,7 @@ use re '/u';
 
 use Moose;
 use namespace::autoclean;
+use experimental "smartmatch";
 
 use TenorSAX::Source::Troff::Argument;
 use TenorSAX::Source::Troff::Environment;

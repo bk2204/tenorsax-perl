@@ -12,6 +12,7 @@ use TenorSAX::Util::NodeGenerator;
 use Moose;
 use MooseX::NonMoose;
 use namespace::autoclean;
+use experimental "smartmatch";
 
 extends 'XML::SAX::Base';
 
