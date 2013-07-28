@@ -38,12 +38,12 @@ sub _transform_named_escapes {
 	my $ec = $self->ec;
 
 	# The more complex forms are first because \X will match a ( or [.
-	my $pat = $self->compat ? qr/\Q$ec$char\E(\((\X{2})|(\X))/ :
-		qr/\Q$ec$char\E(\((\X{2})|\[(\X*?)\]|(\X))/;
+	my $pat = $self->compat ? qr/\Q$ec$char\E(\((\X{2})|(\X))/p :
+		qr/\Q$ec$char\E(\((\X{2})|\[(\X*?)\]|(\X))/p;
 
 	# We might end up with something like \*(\*(NA.  In this case, parse the
 	# second escape first, and then stick that into the proper place.
-	while ($text =~ /$pat/p) {
+	while ($text =~ $pat) {
 		my $desc = $1;
 		my $name = $2 || $3 || $4;
 		my ($pre, $post) = (${^PREMATCH}, ${^POSTMATCH});
