@@ -17,6 +17,11 @@ sub run {
 	return $text;
 }
 
+local $SIG{ALRM} = sub {
+	require Carp;
+	Carp::confess("alarm");
+};
+
 my @tests = (
 	['S', '.S', '\\*S', 0],
 	['S', '.S', '\\*[S]', 0],
@@ -75,7 +80,9 @@ my $bb = <<'EOM';
 ..
 .BB A
 EOM
+alarm(10);
 is(run($bb), "A1", "string substituted before escapes interpreted");
+alarm(0);
 
 my $cc = <<'EOM';
 .de BB
