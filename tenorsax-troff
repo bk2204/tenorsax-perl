@@ -29,7 +29,7 @@ has '+options' => (
 			'macro|m=s@',
 			'macrodir|M=s@',
 			'output|o=s',
-		],
+		]
 	},
 );
 # macro names
