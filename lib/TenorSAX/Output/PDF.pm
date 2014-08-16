@@ -10,7 +10,7 @@ use utf8;
 use Moose;
 use Scalar::Util;
 use PDF::API2;
-use experimental "smartmatch";
+use experimental qw/smartmatch autoderef/;
 
 extends 'TenorSAX::Output::PageLayoutEngine';
 

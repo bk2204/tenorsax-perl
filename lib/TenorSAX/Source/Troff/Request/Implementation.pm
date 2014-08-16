@@ -15,7 +15,7 @@ use TenorSAX::Source::Troff::Number;
 use TenorSAX::Source::Troff::Request;
 use TenorSAX::Source::Troff::String;
 use TenorSAX::Source::Troff::Util;
-use experimental "smartmatch";
+use experimental qw/smartmatch autoderef/;
 
 
 *cs = \&TenorSAX::Source::Troff::Util::command_string;

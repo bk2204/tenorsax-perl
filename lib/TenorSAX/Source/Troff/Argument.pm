@@ -10,7 +10,7 @@ use feature qw/unicode_strings/;
 use re '/u';
 
 use Moose;
-use experimental "smartmatch";
+use experimental qw/smartmatch autoderef/;
 
 sub parse {
 	my ($class, undef, $lineref) = @_;
@@ -93,7 +93,7 @@ __PACKAGE__->meta->make_immutable;
 package TenorSAX::Source::Troff::NumericArgument;
 
 use Moose;
-use experimental "smartmatch";
+use experimental qw/smartmatch autoderef/;
 
 extends 'TenorSAX::Source::Troff::Argument';
 
@@ -305,7 +305,7 @@ __PACKAGE__->meta->make_immutable;
 package TenorSAX::Source::Troff::ConditionalArgument;
 
 use Moose;
-use experimental "smartmatch";
+use experimental qw/smartmatch autoderef/;
 
 extends 'TenorSAX::Source::Troff::Argument';
 

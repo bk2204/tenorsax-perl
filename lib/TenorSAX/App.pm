@@ -12,7 +12,7 @@ use namespace::autoclean;
 use Getopt::Long;
 use TenorSAX;
 use TenorSAX::Util::HandlerGenerator;
-use experimental "smartmatch";
+use experimental qw/smartmatch autoderef/;
 
 has 'input_device' => (
 	is => 'rw',

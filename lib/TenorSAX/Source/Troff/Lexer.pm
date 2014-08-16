@@ -11,6 +11,7 @@ use re '/u';
 
 use Moose;
 use namespace::autoclean;
+use experimental qw/smartmatch autoderef/;
 
 # Escape character.
 has 'ec' => (

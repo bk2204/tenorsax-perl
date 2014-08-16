@@ -10,6 +10,7 @@ use feature qw/unicode_strings/;
 
 use Moose;
 use MooseX::NonMoose;
+use experimental qw/smartmatch autoderef/;
 
 extends 'XML::SAX::Base';
 
