@@ -39,7 +39,7 @@ has 'resolution' => (
 );
 has 'output_devices' => (
 	is => 'ro',
-	default => sub { 
+	default => sub {
 		{
 			text => {
 				name => "TenorSAX::Output::Text",

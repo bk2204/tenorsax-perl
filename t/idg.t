@@ -18,7 +18,7 @@ is($gen->version, 0, "default version is 0");
 is($gen->length, 20, "default length is correct");
 is($gen->counter, 0, "counter starts at 0");
 
-my %saved_values; 
+my %saved_values;
 note "Testing _hash_value";
 my $hashed = $gen->_hash_value(undef);
 is($hashed, sha256("0"), "undef hashes to 0");

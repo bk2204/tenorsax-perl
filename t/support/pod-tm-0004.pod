@@ -12,13 +12,13 @@ This is a list of character entities for POD.
 
 =item * E<38> E<0x0026> E<000046> & E<amp>
 
-=item * E<60> E<0x003c> E<000074> < E<lt> 
+=item * E<60> E<0x003c> E<000074> < E<lt>
 
-=item * E<62> E<0x003e> E<000076> > E<gt> 
+=item * E<62> E<0x003e> E<000076> > E<gt>
 
-=item * E<47> E<0x002f> E<000057> / E<sol> 
+=item * E<47> E<0x002f> E<000057> / E<sol>
 
-=item * E<124> E<0x007c> E<000174> | E<verbar> 
+=item * E<124> E<0x007c> E<000174> | E<verbar>
 
 =item * E<160> E<0x00a0> E<000240>   E<nbsp>
 

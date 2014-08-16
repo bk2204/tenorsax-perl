@@ -40,9 +40,9 @@ sub has_num_tags {
 	subtest $expl => sub {
 		plan tests => 2;
 		is(num_start_tags($text, $tag), $num,
-			"exactly $num opening $tag element"); 
+			"exactly $num opening $tag element");
 		is(num_end_tags($text, $tag), $num,
-			"exactly $num closing $tag element"); 
+			"exactly $num closing $tag element");
 	}
 }
 

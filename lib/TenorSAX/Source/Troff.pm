@@ -627,7 +627,7 @@ sub _lookup_prefix {
 	my $uri;
 
 	$prefix = "" unless $attribute || defined $prefix;
-	
+
 	if (defined $prefix) {
 		$uri = $self->_ch->prefixes->{$prefix} //
 			die "Prefix $prefix is not defined";
@@ -649,7 +649,7 @@ sub _do_parse {
 	foreach my $prefix (keys %prefixes) {
 		$self->_ch->start_prefix_mapping(
 			{
-				Prefix=>$prefix, 
+				Prefix=>$prefix,
 				NamespaceURI=>$prefixes{$prefix},
 			}
 		);
@@ -683,7 +683,7 @@ sub _do_parse {
 	foreach my $prefix (keys %prefixes) {
 		$self->_ch->end_prefix_mapping(
 			{
-				Prefix=>$prefix, 
+				Prefix=>$prefix,
 				NamespaceURI=>$prefixes{$prefix},
 			}
 		);

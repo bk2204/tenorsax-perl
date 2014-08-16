@@ -95,11 +95,11 @@ sub id {
 	$self->_init_key;
 
 	my $rand_val = Digest::SHA::hmac_sha256_base64(join("", map {
-				$self->_hash_value($_) 
+				$self->_hash_value($_)
 			} ($attrs{text}, $self->counter)), $self->key);
 	$rand_val =~ tr{+/}{_.};
 	$self->counter($self->counter + 1);
-	
+
 	return $self->prefix . substr($rand_val, 0, $self->length);
 }
 

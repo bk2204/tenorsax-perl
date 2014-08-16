@@ -69,7 +69,7 @@ sub _node {
 	my $uri;
 
 	$prefix = "" unless $attribute || defined $prefix;
-	
+
 	if (defined $prefix) {
 		$uri = $self->prefixes->{$prefix} //
 			die "Prefix $prefix is not defined";
