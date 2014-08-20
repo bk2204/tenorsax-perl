@@ -543,7 +543,7 @@ sub _parse_line_compat {
 		$self->_do_text_line($line, $opts);
 	}
 	elsif ($line =~ s/^([$controls])(\X{0,2}?)([ \t]+|$)//u ||
-		$line =~ s/^([$controls])(\X{2}?)(\X+|$)//u) {
+		$line =~ s/^([$controls])(\X{2})(\X+|$)//u) {
 		my $request = $self->_lookup_request($2);
 		$opts->{can_break} = $1 eq $self->_env->cc;
 		$opts->{compat} = 0 if $request->disable_compat;
