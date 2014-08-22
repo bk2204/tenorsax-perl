@@ -1,5 +1,7 @@
 #!perl -T
 
+use strict;
+use warnings;
 use Test::More tests => 60;
 use TenorSAX::Source::Troff;
 use TenorSAX::Output::Text;

@@ -26,6 +26,7 @@ sub test_resolution {
 	my $app = TenorSAX::App->new(%params);
 	isa_ok($app, "TenorSAX::App");
 	is($app->resolution, $val, "resolution is as expected ($val)");
+	return;
 }
 
 done_testing;

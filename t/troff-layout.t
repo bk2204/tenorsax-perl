@@ -1,5 +1,7 @@
 #!perl -T
 
+use strict;
+use warnings;
 use Test::More tests => 28;
 use Test::Exception;
 use TenorSAX::Source::Troff;
