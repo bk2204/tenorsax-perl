@@ -19,11 +19,6 @@ sub run {
 	return $text;
 }
 
-$SIG{ALRM} = sub {
-	require Carp;
-	Carp::confess("alarm");
-};
-
 is(run(".ex\nmessage"), '', 'ex - no further code is executed');
 
 my @tests = (
@@ -160,7 +155,13 @@ EOM
 
 is(run($test5), "2", "bug - parsing .if with multiple parentheses");
 
-my $ee = <<'EOM';
+{
+	local $SIG{ALRM} = sub {
+		require Carp;
+		Carp::confess("alarm");
+	};
+
+	my $ee = <<'EOM';
 .de EE
 .if \\n(.f<10 \
 .ds _F \\n(.f
@@ -171,6 +172,7 @@ my $ee = <<'EOM';
 ..
 .BB A B
 EOM
-alarm(10);
-is(run($ee), "AB", "bug - parsing joined lines");
-alarm(0);
+	alarm(10);
+	is(run($ee), "AB", "bug - parsing joined lines");
+	alarm(0);
+}
