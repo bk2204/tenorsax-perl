@@ -22,6 +22,7 @@ EOM
 	$parser->parse_string($code);
 	$text =~ s/\n\z//;
 	is($text, "implemented", "request $request is implemented");
+	return;
 }
 
 my @implemented = qw/

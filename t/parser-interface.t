@@ -92,6 +92,7 @@ sub check_output {
 	my ($exception, $output, $desc) = @_;
 	is($@, "", "no exception occurred for $desc");
 	like($output, qr/\N{U+00a9}/, "output was as expected for $desc");
+	return;
 }
 
 sub new_chain {

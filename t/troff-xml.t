@@ -45,7 +45,8 @@ sub has_num_tags {
 			"exactly $num opening $tag element");
 		is(num_end_tags($text, $tag), $num,
 			"exactly $num closing $tag element");
-	}
+	};
+	return;
 }
 
 sub is_troff_xml {
@@ -57,7 +58,8 @@ sub is_troff_xml {
 		like($text, qr/\A<\Q$tag\E\s+/, "first open element is $tag");
 		like($text, qr{</\Q$tag\E>\z}, "last closed element is $tag");
 		has_num_tags($text, $tag, 1, "exactly one $tag element");
-	}
+	};
+	return;
 }
 
 # This checks whether the data is well-formed only.
@@ -68,7 +70,8 @@ sub is_ok_xml {
 		plan tests => 1;
 		ok(defined eval { XML::LibXML->load_xml(string => $text) },
 			"data is well-formed") or note $@;
-	}
+	};
+	return;
 }
 
 my $escapes = run("\\fI\\n(.f\\fP \\n(.f\n");
