@@ -7,8 +7,8 @@ use TenorSAX::Source::Troff;
 use TenorSAX::Output::Text;
 
 sub run {
-	my $input = shift;
-	my $text = "";
+	my $input  = shift;
+	my $text   = "";
 	my $output = TenorSAX::Output::Text->new(Output => \$text);
 	my $parser = TenorSAX::Source::Troff->new(Handler => $output);
 
@@ -28,11 +28,11 @@ my @tests = (
 	['dNO', 0, 0],
 	['dNO', 1, 0],
 	['rNO', 0, 0],
-	['rNO', 0, 1, '.nr NO 2'],
-	['rNO', 1, 0],
-	['rNO', 1, 1, '.nr NO 2'],
-	['"a"a"', 0, 1],
-	['"a"a"', 1, 1],
+	['rNO',    0, 1, '.nr NO 2'],
+	['rNO',    1, 0],
+	['rNO',    1, 1, '.nr NO 2'],
+	['"a"a"',  0, 1],
+	['"a"a"',  1, 1],
 	['"ab"a"', 0, 0],
 	['"ab"a"', 1, 0],
 );
@@ -42,47 +42,67 @@ foreach my $test (@tests) {
 	$prefix = defined $prefix ? "$prefix\n" : '';
 
 	if ($multiline) {
-		is(run("$prefix.if $condition \\{\nmessage\n.\\}\n"),
+		is(
+			run("$prefix.if $condition \\{\nmessage\n.\\}\n"),
 			$result ? 'message' : '',
 			"if - multiline - condition '$condition' should be " .
-			($result ? "true" : "false"));
-		is(run("$prefix.if !$condition \\{\nmessage\n.\\}\n"),
+				($result ? "true" : "false")
+		);
+		is(
+			run("$prefix.if !$condition \\{\nmessage\n.\\}\n"),
 			$result ? '' : 'message',
 			"if - multiline - condition '!$condition' should be " .
-			($result ? "false" : "true"));
-		is(run("$prefix.ie $condition \\{\nmessage\n.\\}\n" .
-				".el \\{\nsomething else\n.\\}"),
+				($result ? "false" : "true")
+		);
+		is(
+			run(
+				"$prefix.ie $condition \\{\nmessage\n.\\}\n" .
+					".el \\{\nsomething else\n.\\}"
+			),
 			$result ? 'message' : 'something else',
 			"ie - multiline - condition '$condition' should be " .
-			($result ? "true" : "false"));
-		is(run("$prefix.ie !$condition \\{\nmessage\n.\\}\n" .
-				".el \\{\nsomething else\n.\\}"),
+				($result ? "true" : "false")
+		);
+		is(
+			run(
+				"$prefix.ie !$condition \\{\nmessage\n.\\}\n" .
+					".el \\{\nsomething else\n.\\}"
+			),
 			$result ? 'something else' : 'message',
 			"ie - multiline - condition '$condition' should be " .
-			($result ? "false" : "true"));
+				($result ? "false" : "true")
+		);
 	}
 	else {
-		is(run("$prefix.if $condition message\n"),
+		is(
+			run("$prefix.if $condition message\n"),
 			$result ? 'message' : '',
 			"if - simple - condition '$condition' should be " .
-			($result ? "true" : "false"));
-		is(run("$prefix.if !$condition message\n"),
+				($result ? "true" : "false")
+		);
+		is(
+			run("$prefix.if !$condition message\n"),
 			$result ? '' : 'message',
 			"if - simple - condition '!$condition' should be " .
-			($result ? "false" : "true"));
-		is(run("$prefix.ie $condition message\n.el something else"),
+				($result ? "false" : "true")
+		);
+		is(
+			run("$prefix.ie $condition message\n.el something else"),
 			$result ? 'message' : 'something else',
 			"ie - simple - condition '$condition' should be " .
-			($result ? "true" : "false"));
-		is(run("$prefix.ie !$condition message\n.el something else"),
+				($result ? "true" : "false")
+		);
+		is(
+			run("$prefix.ie !$condition message\n.el something else"),
 			$result ? 'something else' : 'message',
 			"ie - simple - condition '$condition' should be " .
-			($result ? "false" : "true"));
+				($result ? "false" : "true")
+		);
 	}
 }
 
-is(run(".nr pa 1\n.if \\n(pa message\n"), 'message',
-	"if - line is parsed correctly");
+is(run(".nr pa 1\n.if \\n(pa message\n"),
+	'message', "if - line is parsed correctly");
 
 my $test1 = <<EOM;
 .cp 0
@@ -104,12 +124,15 @@ Text.
 More text.
 EOM
 
-is(run($test1), "R:start\nText.\nR:end\nR:start\nMore text.",
-	"bug - parsing if correctly");
-is(run(".if d AA Text.\n"), "", "bug - false d conditionals");
-is(run(".if r AA Text.\n"), "", "bug - false r conditionals");
+is(
+	run($test1),
+	"R:start\nText.\nR:end\nR:start\nMore text.",
+	"bug - parsing if correctly"
+);
+is(run(".if d AA Text.\n"),              "",      "bug - false d conditionals");
+is(run(".if r AA Text.\n"),              "",      "bug - false r conditionals");
 is(run(".ds AA text\n.if d AA Text.\n"), "Text.", "bug - true d conditionals");
-is(run(".nr AA 2\n.if r AA Text.\n"), "Text.", "bug - true r conditionals");
+is(run(".nr AA 2\n.if r AA Text.\n"),    "Text.", "bug - true r conditionals");
 
 # This code is from groff's e.tmac.
 my $test2 = <<EOM;
@@ -127,7 +150,6 @@ my $test3 = <<EOM;
 .ds .] ]
 .\\}
 EOM
-
 
 is(run($test2), "", "bug - parsing .if \{ correctly");
 $test2 =~ s/^\.if/.ie/;

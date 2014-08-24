@@ -11,12 +11,12 @@ use File::Temp;
 use XML::SAX::Writer;
 use Encode;
 
-my $dir = File::Temp->newdir;
+my $dir      = File::Temp->newdir;
 my $tempfile = "$dir/test";
 
-my $text = "\N{U+00a9}\n";
+my $text  = "\N{U+00a9}\n";
 my $bytes = Encode::encode("UTF-8", $text);
-my $uri = "file://$tempfile";
+my $uri   = "file://$tempfile";
 
 open(my $testfh, ">", $tempfile);
 binmode $testfh;
@@ -31,24 +31,24 @@ foreach my $source (@sources) {
 
 	my $output = "";
 	my $parser = new_chain($module, \$output);
-	eval { $parser->parse({Source => { SystemId => $uri }}); };
+	eval { $parser->parse({Source => {SystemId => $uri}}); };
 	check_output($@, $output, "SystemId for $source");
 
 	$output = "";
 	$parser = new_chain($module, \$output);
-	eval { $parser->parse({Source => { String => $text }}); };
+	eval { $parser->parse({Source => {String => $text}}); };
 	check_output($@, $output, "Unicode String for $source");
 
 	$output = "";
 	$parser = new_chain($module, \$output);
-	eval { $parser->parse({Source => { String => $bytes }}); };
+	eval { $parser->parse({Source => {String => $bytes}}); };
 	check_output($@, $output, "Byte String for $source");
 
 	$output = "";
 	$parser = new_chain($module, \$output);
 	open(my $fh, "<", $tempfile);
 	binmode $fh;
-	eval { $parser->parse({Source => { ByteStream => $fh }}); };
+	eval { $parser->parse({Source => {ByteStream => $fh}}); };
 	check_output($@, $output, "ByteStream for $source");
 	close $fh;
 
@@ -57,8 +57,9 @@ foreach my $source (@sources) {
 	open($fh, "<", $tempfile);
 	binmode $fh, ":encoding(UTF-8)";
 	warnings_like {
-		eval { $parser->parse({Source => { CharacterStream => $fh }}); };
-	} qr/parse charstream/, "bizarre and needless warning from XML::SAX::Base";
+		eval { $parser->parse({Source => {CharacterStream => $fh}}); };
+	}
+	qr/parse charstream/, "bizarre and needless warning from XML::SAX::Base";
 	check_output($@, $output, "CharacterStream for $source");
 	close $fh;
 

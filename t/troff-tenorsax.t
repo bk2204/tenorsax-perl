@@ -8,8 +8,8 @@ use TenorSAX::Source::Troff;
 use TenorSAX::Output::Text;
 
 sub run {
-	my $input = shift;
-	my $text = "";
+	my $input  = shift;
+	my $text   = "";
 	my $output = TenorSAX::Output::Text->new(Output => \$text);
 	my $parser = TenorSAX::Source::Troff->new(Handler => $output);
 
@@ -19,7 +19,6 @@ sub run {
 	$text =~ s/\n\z//;
 	return $text;
 }
-
 
 my $test1 = <<'EOM';
 .cp 0

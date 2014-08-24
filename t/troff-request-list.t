@@ -8,9 +8,9 @@ use TenorSAX::Output::Text;
 
 sub run_test {
 	my $request = shift;
-	my $text = "";
-	my $output = TenorSAX::Output::Text->new(Output => \$text);
-	my $parser = TenorSAX::Source::Troff->new(Handler => $output);
+	my $text    = "";
+	my $output  = TenorSAX::Output::Text->new(Output => \$text);
+	my $parser  = TenorSAX::Source::Troff->new(Handler => $output);
 
 	my $code = <<EOM;
 .if ddo \\{
@@ -26,222 +26,222 @@ EOM
 }
 
 my @implemented = qw/
-ad
-als
-br
-ce
-cp
-de
-do
-ds
-ec
-el
-end
-eo
-ex
-fi
-ft
-ie
-if
-ig
-ll
-mso
-na
-namespace
-nf
-nop
-nr
-papersize
-pl
-po
-ps
-sp
-rm
-rn
-so
-start
-tenorsax
-vs
-/;
+	ad
+	als
+	br
+	ce
+	cp
+	de
+	do
+	ds
+	ec
+	el
+	end
+	eo
+	ex
+	fi
+	ft
+	ie
+	if
+	ig
+	ll
+	mso
+	na
+	namespace
+	nf
+	nop
+	nr
+	papersize
+	pl
+	po
+	ps
+	sp
+	rm
+	rn
+	so
+	start
+	tenorsax
+	vs
+	/;
 my @unimplemented = qw/
-xflag
+	xflag
 
-lc_ctype
-fzoom
-ss
-cs
-bd
-fp
-fps
-feature
-fallback
-hidechar
-spacewidth
-fspacewidth
+	lc_ctype
+	fzoom
+	ss
+	cs
+	bd
+	fp
+	fps
+	feature
+	fallback
+	hidechar
+	spacewidth
+	fspacewidth
 
-mediasize
-cropat
-trimat
-bleedat
-bp
-pn
-ne
-mk
-rt
+	mediasize
+	cropat
+	trimat
+	bleedat
+	bp
+	pn
+	ne
+	mk
+	rt
 
-brp
-padj
-rj
-brnl
-brpnl
-minss
-letadj
-sentchar
-transchar
-track
-kern
-fkern
-kernpair
-kernafter
-kernbefore
-lhang
-rhang
+	brp
+	padj
+	rj
+	brnl
+	brpnl
+	minss
+	letadj
+	sentchar
+	transchar
+	track
+	kern
+	fkern
+	kernpair
+	kernafter
+	kernbefore
+	lhang
+	rhang
 
-ls
-sv
-os
-ns
-rs
+	ls
+	sv
+	os
+	ns
+	rs
 
-in
-ti
-pshape
+	in
+	ti
+	pshape
 
-am
-as
-lds
-substring
-length
-index
-chop
-di
-da
-box
-boxa
-unformat
-asciify
-wh
-ch
-dwh
-dch
-dt
-vpt
-it
-itc
-return
-shift
-blm
-em
-recursionlimit
+	am
+	as
+	lds
+	substring
+	length
+	index
+	chop
+	di
+	da
+	box
+	boxa
+	unformat
+	asciify
+	wh
+	ch
+	dwh
+	dch
+	dt
+	vpt
+	it
+	itc
+	return
+	shift
+	blm
+	em
+	recursionlimit
 
-nrf
-lnr
-lnrf
-af
-rr
-rnn
-aln
+	nrf
+	lnr
+	lnrf
+	af
+	rr
+	rnn
+	aln
 
-ta
-tc
-lc
-fc
+	ta
+	tc
+	lc
+	fc
 
-ecs
-ecr
-lg
-flig
-fdeferlig
-ul
-cu
-uf
-cc
-c2
-tr
-trin
-trnt
-ftr
-char
-fchar
-rchar
-output
+	ecs
+	ecr
+	lg
+	flig
+	fdeferlig
+	ul
+	cu
+	uf
+	cc
+	c2
+	tr
+	trin
+	trnt
+	ftr
+	char
+	fchar
+	rchar
+	output
 
-nh
-hy
-hylang
-shc
-hcode
-hylen
-hlm
-hypp
-breakchar
-nhychar
-hc
-hw
+	nh
+	hy
+	hylang
+	shc
+	hcode
+	hylen
+	hlm
+	hypp
+	breakchar
+	nhychar
+	hc
+	hw
 
-tl
-pc
-lt
+	tl
+	pc
+	lt
 
-nm
-nn
+	nm
+	nn
 
-while
-break
-continue
+	while
+	break
+	continue
 
-ev
-evc
+	ev
+	evc
 
-rd
+	rd
 
-pso
-nx
-sy
-pi
-cf
-open
-opena
-write
-writec
-writem
-close
+	pso
+	nx
+	sy
+	pi
+	cf
+	open
+	opena
+	write
+	writec
+	writem
+	close
 
-mc
-lpfx
-tm
-tmc
-ab
-lf
-pm
-fl
+	mc
+	lpfx
+	tm
+	tmc
+	ab
+	lf
+	pm
+	fl
 
-warn
-spreadwarn
-errprint
-watch
-unwatch
-watchlength
-watchn
-unwatchn
+	warn
+	spreadwarn
+	errprint
+	watch
+	unwatch
+	watchlength
+	watchn
+	unwatchn
 
-CL
+	CL
 
-psbb
-BP
-EP
-PI
-/;
+	psbb
+	BP
+	EP
+	PI
+	/;
 
 foreach my $request (@implemented) {
 	run_test($request);

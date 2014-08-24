@@ -20,11 +20,7 @@ extends "TenorSAX::App";
 
 has '+options' => (
 	default => sub {
-		[
-			'device|T=s',
-			'format|r=s',
-			'output|o=s',
-		],
+		['device|T=s', 'format|r=s', 'output|o=s',],;
 	},
 );
 
@@ -32,10 +28,10 @@ exit run(@ARGV) unless caller;
 
 sub run {
 	my @args = @_;
-	my $app = __PACKAGE__->new;
+	my $app  = __PACKAGE__->new;
 	$app->parse_options(\@args);
 	my $parser = $app->handle_input_format;
-	my $data = $app->load_data(@args);
+	my $data   = $app->load_data(@args);
 	$parser->parse_string($data);
 	return 0;
 }

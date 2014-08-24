@@ -8,8 +8,8 @@ use TenorSAX::Source::Troff;
 use TenorSAX::Output::Text;
 
 sub run {
-	my $input = shift;
-	my $text = "";
+	my $input  = shift;
+	my $text   = "";
 	my $output = TenorSAX::Output::Text->new(Output => \$text);
 	my $parser = TenorSAX::Source::Troff->new(Handler => $output);
 
@@ -20,7 +20,7 @@ sub run {
 	return $text;
 }
 
-foreach my $char (map { chr(0x102200 + $_) } (0..15)) {
+foreach my $char (map { chr(0x102200 + $_) } (0 .. 15)) {
 	my $val = sprintf "%X", ord($char);
 	throws_ok { run($char); } qr/forbidden private-use/,
 		"misc - character U+$val is forbidden";

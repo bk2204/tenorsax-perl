@@ -14,8 +14,8 @@ use XML::LibXML;
 use XML::Filter::XSLT;
 
 sub run {
-	my $input = shift;
-	my $text = "";
+	my $input      = shift;
+	my $text       = "";
 	my @init_files = map { File::Path::Expand::expand_filename($_) }
 		@{$TenorSAX::Config->{troff}->{init_tmac}};
 	my $data = "";
@@ -51,16 +51,16 @@ sub run {
 }
 
 sub num_start_tags {
-	my $text = shift;
-	my $tag = shift;
+	my $text    = shift;
+	my $tag     = shift;
 	my @matches = $text =~ /<\Q$tag\E\s*(?:\s|>)/g;
 
 	return scalar @matches;
 }
 
 sub num_end_tags {
-	my $text = shift;
-	my $tag = shift;
+	my $text    = shift;
+	my $tag     = shift;
 	my @matches = $text =~ /<\/\Q$tag\E>/g;
 
 	return scalar @matches;
@@ -68,29 +68,32 @@ sub num_end_tags {
 
 sub has_num_tags {
 	my $text = shift;
-	my $tag = shift;
-	my $num = shift;
+	my $tag  = shift;
+	my $num  = shift;
 	my $expl = shift;
 	subtest $expl => sub {
 		plan tests => 2;
-		is(num_start_tags($text, $tag), $num,
-			"exactly $num opening $tag element");
+		is(num_start_tags($text, $tag),
+			$num, "exactly $num opening $tag element");
 		is(num_end_tags($text, $tag), $num,
 			"exactly $num closing $tag element");
-	}
+		}
 }
 
 sub is_article {
 	my $text = shift;
 	my $expl = shift;
-	my $tag = "d:article";
+	my $tag  = "d:article";
 	subtest $expl => sub {
 		plan tests => 3;
-		like($text, qr/\A(?:<\?xml.*?\?>)?\s*<\Q$tag\E\s+/,
-			"first open element is $tag");
+		like(
+			$text,
+			qr/\A(?:<\?xml.*?\?>)?\s*<\Q$tag\E\s+/,
+			"first open element is $tag"
+		);
 		like($text, qr{</\Q$tag\E>\z}, "last closed element is $tag");
 		has_num_tags($text, $tag, 1, "exactly one $tag element");
-	}
+		}
 }
 
 # This checks whether the data is well-formed only.
@@ -100,8 +103,9 @@ sub is_ok_xml {
 	subtest $expl => sub {
 		plan tests => 1;
 		ok(defined eval { XML::LibXML->load_xml(string => $text) },
-			"data is well-formed") or note $@;
-	}
+			"data is well-formed") or
+			note $@;
+		}
 }
 
 {
@@ -120,5 +124,5 @@ EOM
 		has_num_tags($poem, "d:$element", 1, "XML has one $element");
 	}
 	has_num_tags($poem, "_t:inline", 0, "XML has no inlines");
-	has_num_tags($poem, "_t:block", 0, "XML has no blocks");
+	has_num_tags($poem, "_t:block",  0, "XML has no blocks");
 }

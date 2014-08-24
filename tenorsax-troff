@@ -24,23 +24,18 @@ extends "TenorSAX::App";
 
 has '+options' => (
 	default => sub {
-		[
-			'device|T=s',
-			'macro|m=s@',
-			'macrodir|M=s@',
-			'output|o=s',
-		]
+		['device|T=s', 'macro|m=s@', 'macrodir|M=s@', 'output|o=s',];
 	},
 );
 # macro names
 has 'macro' => (
-	is => 'rw',
-	isa => 'ArrayRef',
+	is      => 'rw',
+	isa     => 'ArrayRef',
 	default => sub { [] },
 );
 has 'macrodir' => (
-	is => 'rw',
-	isa => 'ArrayRef',
+	is      => 'rw',
+	isa     => 'ArrayRef',
 	default => sub { [] },
 );
 
@@ -51,7 +46,7 @@ sub run {
 	my $app = __PACKAGE__->new(InputDevice => "troff");
 	$app->parse_options(\@args);
 	my $parser = $app->handle_input_format;
-	my $data = $app->load_data(@args);
+	my $data   = $app->load_data(@args);
 	$parser->parse_string($data);
 
 	return 0;
@@ -59,14 +54,17 @@ sub run {
 
 sub handle_input_format {
 	my $self = shift;
-	my $logger = sub {};
+	my $logger = sub { };
 	if ($ENV{TENORSAX_DEBUG}) {
 		$logger = sub { say STDERR @_ };
 	}
 
 	my $chain = $self->generate_output_chain([qw/le xml/], "xml");
-	my $parser = TenorSAX::Source::Troff->new(Handler => $chain,
-		Resolution => $self->resolution, Logger => $logger);
+	my $parser = TenorSAX::Source::Troff->new(
+		Handler    => $chain,
+		Resolution => $self->resolution,
+		Logger     => $logger
+	);
 	return $parser;
 }
 

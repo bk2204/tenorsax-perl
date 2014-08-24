@@ -27,8 +27,8 @@ plan tests => (2 * scalar @roots) + 1;
 foreach my $root (@roots) {
 	my $output = "";
 	my $writer = XML::SAX::Writer->new(Output => \$output);
-	my $processor = TenorSAX::Filter::PodSAXToTextMarkup->new(Handler =>
-		$writer);
+	my $processor =
+		TenorSAX::Filter::PodSAXToTextMarkup->new(Handler => $writer);
 	my $parser = Pod::SAX->new(Handler => $processor);
 	open(my $ifh, "<", "$testdir/$root.pod") or die "Can't open $root.pod: $!";
 	$parser->parse_file($ifh);
