@@ -97,6 +97,26 @@ use experimental qw/smartmatch autoderef/;
 
 extends 'TenorSAX::Source::Troff::Argument';
 
+my $dispatch = {
+	'+' => sub { $_[0] + $_[1] },
+	'-' => sub { $_[0] - $_[1] },
+	'*' => sub { $_[0] * $_[1] },
+	'/' => sub { $_[0] / $_[1] },
+	'%' => sub { $_[0] % $_[1] },
+	'<' => sub { $_[0] < $_[1] },
+	'>' => sub { $_[0] > $_[1] },
+	'<=' => sub { $_[0] <= $_[1] },
+	'>=' => sub { $_[0] >= $_[1] },
+	'=' => sub { $_[0] == $_[1] },
+	'==' => sub { $_[0] == $_[1] },
+	'!=' => sub { $_[0] != $_[1] },
+	'<>' => sub { $_[0] != $_[1] },
+	'&' => sub { ($_[0] && $_[1]) ? 1 : 0 },
+	':' => sub { ($_[0] || $_[1]) ? 1 : 0 },
+	'>?' => sub { ($_[0] > $_[1]) ? $_[0] : $_[1] },
+	'<?' => sub { ($_[0] < $_[1]) ? $_[0] : $_[1] },
+};
+
 sub _parse_unparenthesized {
 	my ($class, $arg, $lineref) = @_;
 
@@ -220,14 +240,14 @@ sub _evaluate {
 				when ($_ eq ")") {
 					$level--;
 				}
-				when (/^([-+*\/%])/) {
+				when (/^([-+*\/%&:])/) {
 					my $op = $1;
 					push @ops, $1;
 				}
 				when (/^([<>=])/) {
 					my $op = $1;
 					if ($op eq "<" && $$ref =~ s/^>//) {
-						$op = "!=";
+						$op = "<>";
 					}
 					elsif ($$ref =~ s/^([=?])//) {
 						$op .= $1;
@@ -236,12 +256,6 @@ sub _evaluate {
 						$op = "==";
 					}
 					push @ops, $op;
-				}
-				when (/^&/) {
-					push @ops, '&&';
-				}
-				when (/^:/) {
-					push @ops, '||';
 				}
 			}
 		}
@@ -253,18 +267,7 @@ sub _evaluate {
 
 		last unless defined $op;
 
-		if ($op eq "<?") {
-			$value = $second if $second < $value;
-		}
-		elsif ($op eq ">?") {
-			$value = $second if $second > $value;
-		}
-		elsif ($op =~ m/(&&|\|\|)/) {
-			$value = eval "!!\$value $op !!\$second";
-		}
-		else {
-			$value = eval "\$value $op \$second";
-		}
+		$value = $dispatch->{$op}->($value, $second);
 	}
 
 	return $value || 0;
