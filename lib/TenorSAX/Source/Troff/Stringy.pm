@@ -68,7 +68,7 @@ sub modify {
 	my $method = $self->substitute;
 
 	return unless defined $method;
-	return $_[0] = $self->$method($state, $args);
+	return $self->$method($state, $args);
 }
 
 =head1 SYNOPSIS

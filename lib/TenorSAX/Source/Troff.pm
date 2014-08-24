@@ -431,7 +431,8 @@ sub _do_request {
 		$arg = $self->_expand_escapes($arg, $opts, {n => 1})
 			if $argtype->expand_ok;
 		push @$args, $argtype->evaluate($request, $state, $arg);
-		$request->modify($state, $args);
+		my $res = $request->modify($state, $args);
+		$request = $res if $res;
 	}
 
 	my $text = $request->perform($state, $args);
