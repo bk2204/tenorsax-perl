@@ -95,6 +95,7 @@ sub end_document {
 sub characters {
 	my ($self, $hr) = @_;
 
+	return unless defined $hr->{Data};
 	return $self->SUPER::characters($hr) if $self->_state == 0;
 	return if $self->_state == 2;
 	# state == 1
