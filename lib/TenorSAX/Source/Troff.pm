@@ -517,7 +517,10 @@ sub _do_line_traps {
 	foreach my $key (keys $self->_linenos) {
 		my $lineno = $self->_linenos->{$key};
 		if (exists $self->_traps->{$key}{$lineno}) {
-			foreach my $trap (values $self->_traps->{$key}{$lineno}) {
+			# Make a copy of the traps so we don't modify the value being
+			# iterated over.
+			my @traps = values $self->_traps->{$key}{$lineno};
+			foreach my $trap (@traps) {
 				my $text = $trap->($state);
 				$self->_expand_escapes($text, {}) if defined $text;
 			}
