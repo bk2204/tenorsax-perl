@@ -36,8 +36,6 @@ Perhaps a little code snippet.
 
 =cut
 
-our $TROFF_NS = $TenorSAX::Output::LayoutEngine::TROFF_NS;
-
 sub _columns {
 	return $ENV{COLUMNS} || 80;
 }
@@ -115,8 +113,13 @@ sub _do_line {
 sub end_element {
 	my ($self, $element) = @_;
 
+	my $ns = do {
+		no warnings 'once';
+		$TenorSAX::Output::LayoutEngine::TROFF_NS;
+	}
+
 	$self->SUPER::end_element($element);
-	if ($element->{NamespaceURI} eq $TROFF_NS &&
+	if ($element->{NamespaceURI} eq $ns &&
 		$element->{LocalName} eq "block") {
 
 		$self->_print("\n");

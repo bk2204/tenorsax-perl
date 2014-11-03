@@ -64,8 +64,6 @@ Perhaps a little code snippet.
 
 =cut
 
-our $TROFF_NS = $TenorSAX::Output::LayoutEngine::TROFF_NS;
-
 sub _lookup_font {
 	my ($self, $name, $chunk) = @_;
 	my $cache = $self->_font_cache;
