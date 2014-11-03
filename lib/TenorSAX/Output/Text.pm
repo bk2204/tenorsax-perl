@@ -11,6 +11,8 @@ use feature qw/unicode_strings/;
 use Moose;
 use Scalar::Util;
 
+use experimental qw/smartmatch autoderef/;
+
 has '_output' => (
 	is => 'rw',
 	default => sub { \*STDOUT },
