@@ -116,7 +116,7 @@ sub end_element {
 	my $ns = do {
 		no warnings 'once';
 		$TenorSAX::Output::LayoutEngine::TROFF_NS;
-	}
+	};
 
 	$self->SUPER::end_element($element);
 	if ($element->{NamespaceURI} eq $ns &&
