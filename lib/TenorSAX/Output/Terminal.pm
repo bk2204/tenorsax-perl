@@ -77,7 +77,7 @@ sub _adjust_line {
 	# Split out spaces into their own chunks.
 	@chunks = map {
 		my $item = $_;
-		map { {%$item, text => $_} } split m/([.?!]? +)/, $item->{text};
+		map { +{%$item, text => $_} } split m/([.?!]? +)/, $item->{text};
 	} @chunks;
 
 	# Insert spaces after punctuation.
