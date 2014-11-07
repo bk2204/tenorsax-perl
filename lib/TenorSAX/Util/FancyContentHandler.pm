@@ -204,7 +204,7 @@ sub end_element {
 			last;
 		}
 		elsif ($item->{type} eq 'prefix') {
-			$self->handler->end_prefix_mapping($self, $item->{value});
+			$self->handler->end_prefix_mapping($item->{value});
 		}
 		elsif ($item->{type} eq 'characters') {
 			$self->handler->characters($item->{value})
@@ -225,7 +225,7 @@ sub end_prefix_mapping {
 			last;
 		}
 		elsif ($item->{type} eq 'prefix') {
-			$self->handler->end_prefix_mapping($self, $item->{value});
+			$self->handler->end_prefix_mapping($item->{value});
 		}
 	}
 	return;
