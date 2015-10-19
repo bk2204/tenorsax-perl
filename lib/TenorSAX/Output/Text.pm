@@ -11,7 +11,7 @@ use feature qw/unicode_strings/;
 use Moose;
 use Scalar::Util;
 
-use experimental qw/smartmatch autoderef/;
+use experimental qw/smartmatch/;
 
 has '_output' => (
 	is => 'rw',
@@ -132,7 +132,7 @@ sub _do_output_fh {
 sub _do_output_push {
 	my ($self, $text) = @_;
 
-	push $self->_output, $text;
+	push @{$self->_output}, $text;
 	return 1;
 }
 

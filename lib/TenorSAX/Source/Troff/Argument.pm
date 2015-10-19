@@ -10,7 +10,7 @@ use feature qw/unicode_strings/;
 use re '/u';
 
 use Moose;
-use experimental qw/smartmatch autoderef/;
+use experimental qw/smartmatch/;
 
 sub parse {
 	my ($class, undef, $lineref) = @_;

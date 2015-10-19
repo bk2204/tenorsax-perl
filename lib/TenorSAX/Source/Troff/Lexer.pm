@@ -11,7 +11,7 @@ use re '/u';
 
 use Moose;
 use namespace::autoclean;
-use experimental qw/smartmatch autoderef/;
+use experimental qw/smartmatch/;
 
 # Escape character.
 has 'ec' => (
@@ -130,8 +130,8 @@ sub preprocess_line {
 	# Temporarily save doubled backslashes.
 	$text =~ s/\Q$ec$ec\E/\x{102204}/g;
 
-	1 while $text =~ s{\Q$ec\E$}{shift $self->parser->_data}ge;
-	$text =~ s{\Q$ec\E#.*$}{shift $self->parser->_data}ge;
+	1 while $text =~ s{\Q$ec\E$}{shift @{$self->parser->_data}}ge;
+	$text =~ s{\Q$ec\E#.*$}{shift @{$self->parser->_data}}ge;
 	$text =~ s{\Q$ec\E".*$}{}g;
 
 	return $text;

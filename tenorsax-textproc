@@ -14,7 +14,7 @@ use FindBin;
 use lib "$FindBin::RealBin/lib";
 
 use Moose;
-use experimental qw/smartmatch autoderef/;
+use experimental qw/smartmatch/;
 
 extends "TenorSAX::App";
 

@@ -12,7 +12,7 @@ use TenorSAX::Util::NodeGenerator;
 use Moose;
 use MooseX::NonMoose;
 use namespace::autoclean;
-use experimental qw/smartmatch autoderef/;
+use experimental qw/smartmatch/;
 
 extends 'XML::SAX::Base';
 
@@ -64,7 +64,7 @@ sub _get_prefixes {
 
 	return map {
 		{ Prefix => $_, NamespaceURI => $prefixes->{$_} }
-	} sort keys $prefixes;
+	} sort keys %$prefixes;
 }
 
 sub start_document {

@@ -11,7 +11,7 @@ use re '/u';
 
 use Moose;
 use namespace::autoclean;
-use experimental qw/smartmatch autoderef/;
+use experimental qw/smartmatch/;
 
 use TenorSAX::Source::Troff::Argument;
 use TenorSAX::Source::Troff::Environment;
@@ -228,7 +228,7 @@ sub _extract_attributes {
 			my $name = $attr->name;
 			my $values = $attr->serialize($obj, $state);
 
-			foreach my $key (keys $values) {
+			foreach my $key (keys %$values) {
 				my $value = $values->{$key};
 				$key =~ tr/_/-/;
 				$hr{"_t:$key"} = $value;
@@ -514,12 +514,12 @@ sub _do_line_traps {
 	my $state = {parser => $self, environment => $self->_env, opts => {},
 		state => $self->_state};
 
-	foreach my $key (keys $self->_linenos) {
+	foreach my $key (keys %{$self->_linenos}) {
 		my $lineno = $self->_linenos->{$key};
 		if (exists $self->_traps->{$key}{$lineno}) {
 			# Make a copy of the traps so we don't modify the value being
 			# iterated over.
-			my @traps = values $self->_traps->{$key}{$lineno};
+			my @traps = values %{$self->_traps->{$key}{$lineno}};
 			foreach my $trap (@traps) {
 				my $text = $trap->($state);
 				$self->_expand_escapes($text, {}) if defined $text;
@@ -647,7 +647,7 @@ sub _do_parse {
 	my $self = shift;
 	my %prefixes = map { $_ => $self->_ch->prefixes->{$_} }
 		keys %{$self->_ch->prefixes};
-	my $prefix_count = scalar keys $self->_ch->prefixes;
+	my $prefix_count = scalar keys %{$self->_ch->prefixes};
 
 	$self->_ch->start_document({});
 	foreach my $prefix (keys %prefixes) {

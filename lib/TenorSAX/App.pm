@@ -12,7 +12,7 @@ use namespace::autoclean;
 use Getopt::Long;
 use TenorSAX;
 use TenorSAX::Util::HandlerGenerator;
-use experimental qw/smartmatch autoderef/;
+use experimental qw/smartmatch/;
 
 has 'input_device' => (
 	is => 'rw',
@@ -94,7 +94,7 @@ sub parse_options {
 		format => 'input_device',
 	};
 
-	foreach my $opt (keys $options) {
+	foreach my $opt (keys %$options) {
 		my $value = $options->{$opt};
 		$opt = $map->{$opt} if exists $map->{$opt};
 		my $method = $self->can($opt);
@@ -169,7 +169,7 @@ sub insert_filters {
 			return;
 		}
 		when ("le") {
-			unshift $chain, {
+			unshift @$chain, {
 				name => "TenorSAX::Filter::TextMarkupToLayoutEngine",
 				attributes => {
 					Resolution => $self->resolution,
@@ -180,7 +180,7 @@ sub insert_filters {
 		}
 		when ("tm") {
 			if ("xml-Pod::SAX" ~~ @$provided_inputs) {
-				unshift $chain, {
+				unshift @$chain, {
 					name => "TenorSAX::Filter::PodSAXToTextMarkup",
 				};
 				$takes = "xml-Pod::SAX";

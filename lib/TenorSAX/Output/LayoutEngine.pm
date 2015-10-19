@@ -11,7 +11,7 @@ use feature qw/unicode_strings/;
 use Moose;
 use Scalar::Util;
 
-use experimental qw/smartmatch autoderef/;
+use experimental qw/smartmatch/;
 
 has '_output' => (
 	is => 'rw',
@@ -209,8 +209,8 @@ sub start_element {
 				$element->{Attributes}{$_}{LocalName} :
 				$element->{Attributes}{$_}{Name}) =>
 			$element->{Attributes}{$_}{Value}
-		} keys $element->{Attributes};
-		push $self->_attrs, {%{$self->_attrs->[-1]}, %attrs};
+		} keys %{$element->{Attributes}};
+		push @{$self->_attrs}, {%{$self->_attrs->[-1]}, %attrs};
 	}
 	return;
 }
@@ -226,10 +226,10 @@ sub end_element {
 	return unless $element->{NamespaceURI} eq $TROFF_NS;
 	if ($element->{LocalName} eq "block") {
 		$self->_format_block();
-		pop $self->_attrs;
+		pop @{$self->_attrs};
 	}
 	elsif ($element->{LocalName} eq "inline") {
-		pop $self->_attrs;
+		pop @{$self->_attrs};
 	}
 	return;
 }
@@ -246,7 +246,7 @@ sub characters {
 	my $space = $attrs{'xml:space'} // '';
 
 	$text =~ s/\R/ /g if $space ne "preserve";
-	push $self->_text, {%attrs, text => $text};
+	push @{$self->_text}, {%attrs, text => $text};
 	return;
 }
 
@@ -312,7 +312,7 @@ sub _do_output_fh {
 sub _do_output_push {
 	my ($self, $text) = @_;
 
-	push $self->_output, $text;
+	push @{$self->_output}, $text;
 	return 1;
 }
 

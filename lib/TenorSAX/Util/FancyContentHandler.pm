@@ -10,7 +10,7 @@ use feature qw/unicode_strings/;
 
 use Moose;
 use MooseX::NonMoose;
-use experimental qw/smartmatch autoderef/;
+use experimental qw/smartmatch/;
 
 extends 'XML::SAX::Base';
 
@@ -121,7 +121,7 @@ sub in_element {
 	ITEM: foreach my $item (@{$self->_stack}) {
 		next unless $item->{type} eq 'element';
 		my $value = $item->{value};
-		foreach my $key (keys $args) {
+		foreach my $key (keys %$args) {
 			next ITEM unless exists $value->{$key} &&
 				$value->{$key} eq $args->{$key};
 		}

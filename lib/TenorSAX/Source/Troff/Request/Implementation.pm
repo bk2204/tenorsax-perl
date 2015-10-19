@@ -15,7 +15,7 @@ use TenorSAX::Source::Troff::Number;
 use TenorSAX::Source::Troff::Request;
 use TenorSAX::Source::Troff::String;
 use TenorSAX::Source::Troff::Util;
-use experimental qw/smartmatch autoderef/;
+use experimental qw/smartmatch/;
 
 
 *cs = \&TenorSAX::Source::Troff::Util::command_string;
@@ -360,7 +360,7 @@ my $requests = [
 				my $s = $state->{state};
 				if (exists $ffamily->variants->{$font}) {
 					# Look up the font number for this font.
-					foreach my $idx (keys $s->font_number) {
+					foreach my $idx (keys @{$s->font_number}) {
 						next unless ref $s->font_number->[$idx] eq 'ARRAY';
 						my @curpair = @{$s->font_number->[$idx]};
 
@@ -371,7 +371,7 @@ my $requests = [
 					}
 				}
 				else {
-					foreach my $idx (keys $s->font_number) {
+					foreach my $idx (keys %{$s->font_number}) {
 						if (ref $s->font_number->[$idx] eq 'ARRAY' &&
 							join('', @{$s->font_number->[$idx]}) eq $font) {
 
@@ -721,7 +721,7 @@ my $requests = [
 					$state->{parser}->_compat($arg ? 0 : 1);
 				}
 				when (/^macrodir$/) {
-					push $state->{parser}->_macrodirs, $arg;
+					push @{$state->{parser}->_macrodirs}, $arg;
 				}
 				when (/^get-version$/) {
 					my $version = $TenorSAX::VERSION;
